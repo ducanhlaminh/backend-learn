@@ -42,7 +42,7 @@ const articlesService = {
                                         },
                                 });
                                 console.log(cate.map((item) => item.id));
-                                const articlesCate =
+                                const articlesByCate =
                                         await db.new_articles_category.findAll({
                                                 where: {
                                                         category_id: cate.map(
@@ -53,13 +53,12 @@ const articlesService = {
                                                 include: [
                                                         {
                                                                 model: db.new_article,
-                                                                as: "data",
                                                         },
                                                 ],
                                         });
 
                                 resolve({
-                                        articlesCate,
+                                        articlesByCate,
                                         status: 0,
                                 });
                         } catch (error) {
