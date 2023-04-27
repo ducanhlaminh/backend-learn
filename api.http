@@ -1,0 +1,16 @@
+POST http://localhost:5000/api/v1/articles/cate
+content-type: application/json
+
+{
+   "id":5
+}
+
+# POST http://localhost:5000/api/v1/articles/title
+# content-type: application/json
+# {
+#     "title": "Ha noi 24h1",
+# }
+
+# GET http://localhost:5000/api/v1/articles/
+# content-type: application/json
+
