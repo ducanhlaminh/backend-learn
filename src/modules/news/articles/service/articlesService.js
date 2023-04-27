@@ -36,8 +36,8 @@ const articlesService = {
                                 const cate = await db.new_category.findAll({
                                         where: {
                                                 [Op.or]: [
-                                                        { id: 5 },
-                                                        { parent_id: 5 },
+                                                        { id },
+                                                        { parent_id: id },
                                                 ],
                                         },
                                 });
@@ -52,7 +52,8 @@ const articlesService = {
                                                 },
                                                 include: [
                                                         {
-                                                                model: db.new_articles,
+                                                                model: db.new_article,
+                                                                as: "data",
                                                         },
                                                 ],
                                         });
@@ -82,16 +83,16 @@ const articlesService = {
                                                 await db.new_article.create({
                                                         ...data,
                                                 });
-                                        const res =
-                                                await db.new_articles_category.create(
-                                                        {
-                                                                articles_id:
-                                                                        response.id,
-                                                                category_id:
-                                                                        data.category_id,
-                                                        }
-                                                );
-                                        console.log(res);
+                                        // const res =
+                                        //         await db.new_articles_category.create(
+                                        //                 {
+                                        //                         articles_id:
+                                        //                                 response.id,
+                                        //                         category_id:
+                                        //                                 data.category_id,
+                                        //                 }
+                                        //         );
+                                        // console.log(res);
                                         resolve({
                                                 status: 0,
                                                 message: "Đã thêm bài viết thành công",

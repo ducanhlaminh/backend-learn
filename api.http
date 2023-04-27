@@ -2,7 +2,7 @@ POST http://localhost:5000/api/v1/articles/cate
 content-type: application/json
 
 {
-   "id":5
+   "id":6
 }
 
 # POST http://localhost:5000/api/v1/articles/title

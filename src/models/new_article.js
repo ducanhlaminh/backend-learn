@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
                                 foreignKey: "articles_id",
                                 as: "data_history_edit",
                         });
+
                         // define association here
                 }
         }

@@ -30,10 +30,10 @@ module.exports = {
                         status: {
                                 type: Sequelize.INTEGER,
                         },
-                        create_user_id: {
+                        created_user_id: {
                                 type: Sequelize.INTEGER,
                         },
-                        update_user_id: {
+                        updated_user_id: {
                                 type: Sequelize.INTEGER,
                         },
                         createdAt: {
