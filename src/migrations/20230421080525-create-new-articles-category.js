@@ -4,11 +4,12 @@ module.exports = {
         async up(queryInterface, Sequelize) {
                 await queryInterface.createTable("new_articles_categories", {
                         id: {
+                                allowNull: false,
+                                autoIncrement: true,
+                                primaryKey: true,
                                 type: Sequelize.INTEGER,
                         },
                         article_id: {
-                                allowNull: false,
-                                primaryKey: true,
                                 type: Sequelize.INTEGER,
                         },
                         category_id: {
