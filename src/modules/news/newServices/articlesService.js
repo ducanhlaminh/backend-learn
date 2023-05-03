@@ -4,26 +4,39 @@ const articlesService = {
       getAllService: (req, res) => {
             return new Promise(async (resolve, reject) => {
                   try {
-                        const articles = await db.new_article.findAll({
+                        const articlesCate = await db.new_category.findAll({
+                              attributes: ["name", "id", "slug"],
                               include: [
                                     {
                                           model: db.new_articles_category,
-                                          as: "article_category",
-                                          attributes: [
-                                                "category_id",
-                                                "article_id",
-                                          ],
-
                                           include: [
                                                 {
-                                                      model: db.new_category,
-                                                      as: "dataCategory",
+                                                      model: db.new_article,
+                                                      attributes: [
+                                                            "id",
+                                                            "title",
+                                                            "slug",
+                                                            "sapo",
+                                                      ],
                                                 },
                                           ],
                                     },
                               ],
                         });
+                        const categories = await db.new_category.findAll({
+                              where: [
+                                    {
+                                          parent_id: null,
+                                    },
+                              ],
+                              attributes: ["name", "id", "slug"],
+                        });
+                        const articles = await db.new_article.findAll({
+                              attributes: ["id", "title", "slug", "sapo"],
+                        });
                         resolve({
+                              articlesCate,
+                              categories,
                               articles,
                               status: 0,
                         });
@@ -51,51 +64,48 @@ const articlesService = {
       getByCateService: (id) => {
             return new Promise(async (resolve, reject) => {
                   try {
-                        let Cates = await db.new_category.findOne({
-                              where: [
-                                    {
-                                          id,
-                                    },
-                              ],
-                              include: [
-                                    {
-                                          model: db.new_category,
-                                          as: "childCategories",
-                                    },
-                              ],
-                        });
-                        let listCates = Cates.childCategories.map(
-                              (item) => item.id
-                        );
-                        const articles = await db.new_article.findAll({
-                              attributes: ["title", "slug", "avatar", "sapo"],
+                        const articlesCate = await db.new_category.findOne({
+                              attributes: ["name", "id", "slug"],
                               include: [
                                     {
                                           model: db.new_articles_category,
-                                          as: "article_category",
-                                          attributes: [
-                                                "category_id",
-                                                "article_id",
-                                          ],
-                                          where: [
+                                          include: [
                                                 {
-                                                      category_id: [
-                                                            parseInt(id),
-                                                            ...listCates,
+                                                      model: db.new_article,
+                                                      attributes: [
+                                                            "id",
+                                                            "title",
+                                                            "slug",
+                                                            "sapo",
                                                       ],
                                                 },
                                           ],
+                                    },
+                                    {
+                                          model: db.new_category,
+                                          as: "childCategories",
                                           include: [
                                                 {
-                                                      model: db.new_category,
-                                                      as: "dataCategory",
+                                                      model: db.new_articles_category,
+                                                      include: [
+                                                            {
+                                                                  model: db.new_article,
+                                                                  attributes: [
+                                                                        "id",
+                                                                        "title",
+                                                                        "slug",
+                                                                        "sapo",
+                                                                  ],
+                                                            },
+                                                      ],
                                                 },
                                           ],
                                     },
                               ],
                         });
+
                         resolve({
-                              articles,
+                              articlesCate,
                               status: 0,
                         });
                   } catch (error) {
