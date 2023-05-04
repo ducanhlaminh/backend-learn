@@ -1,5 +1,6 @@
 const db = require("../../../config/newModels");
 const { Op } = require("sequelize");
+const crc32 = require("crc/crc32");
 const articlesService = {
       getAllService: (req, res) => {
             return new Promise(async (resolve, reject) => {
@@ -65,6 +66,7 @@ const articlesService = {
             return new Promise(async (resolve, reject) => {
                   try {
                         const articlesCate = await db.new_category.findOne({
+                              where: [{ id }],
                               attributes: ["name", "id", "slug"],
                               include: [
                                     {
@@ -116,6 +118,7 @@ const articlesService = {
 
       createArticleService: (data) => {
             return new Promise(async (resolve, reject) => {
+                  const slug_src = crc32(data.slug);
                   try {
                         const check = await db.new_article.findOne({
                               where: { title: data.title },
@@ -128,6 +131,7 @@ const articlesService = {
                         } else {
                               const response = await db.new_article.create({
                                     ...data,
+                                    slug_src,
                               });
                               const res = await db.new_articles_category.create(
                                     {
@@ -143,6 +147,33 @@ const articlesService = {
                         }
                   } catch (error) {
                         reject(error);
+                  }
+            });
+      },
+      getDetailService: (slug, slug_crc) => {
+            return new Promise(async (resolve, reject) => {
+                  const checkslugsrc = await db.new_article.findOne({
+                        where: [
+                              {
+                                    slug_crc,
+                              },
+                        ],
+                  });
+                  if (checkslugsrc !== null) {
+                        const checkslug = await db.new_article.findOne({
+                              where: [
+                                    {
+                                          slug: slug,
+                                    },
+                              ],
+                        });
+                        if (checkslug !== null) {
+                              resolve(checkslug);
+                        } else {
+                              resolve({ message: "Khong tim thay bai viet" });
+                        }
+                  } else {
+                        resolve({ message: "Khong tim thay bai viet" });
                   }
             });
       },

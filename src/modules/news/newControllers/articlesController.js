@@ -22,5 +22,12 @@ const articlesController = {
             );
             res.status(200).json(response);
       },
+      getDetailControllers: async (req, res) => {
+            const response = await articlesService.getDetailService(
+                  req.params.slug,
+                  req.params.slug_crc
+            );
+            res.status(200).json(response);
+      },
 };
 module.exports = articlesController;

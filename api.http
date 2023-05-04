@@ -4,7 +4,7 @@
 #    "id":5
 # }
 
-POST http://localhost:5000/api/v1/articles/6
+GET http://localhost:4000/api/v1/articles/cate/9
 content-type: application/json
 
 
