@@ -18,6 +18,8 @@ const articlesController = {
       },
       getByCateControllers: async (req, res) => {
             const response = await articlesService.getByCateService(
+                  req.params.slug,
+                  req.params.slug_crc,
                   req.params.id
             );
             res.status(200).json(response);

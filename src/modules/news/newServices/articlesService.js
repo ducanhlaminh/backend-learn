@@ -62,54 +62,77 @@ const articlesService = {
                   }
             });
       },
-      getByCateService: (id) => {
+      getByCateService: (slug, slug_src, id) => {
             return new Promise(async (resolve, reject) => {
                   try {
-                        const articlesCate = await db.new_category.findOne({
-                              where: [{ id }],
-                              attributes: ["name", "id", "slug"],
-                              include: [
-                                    {
-                                          model: db.new_articles_category,
-                                          include: [
-                                                {
-                                                      model: db.new_article,
-                                                      attributes: [
-                                                            "id",
-                                                            "title",
-                                                            "slug",
-                                                            "sapo",
-                                                      ],
-                                                },
-                                          ],
-                                    },
-                                    {
-                                          model: db.new_category,
-                                          as: "childCategories",
-                                          include: [
-                                                {
-                                                      model: db.new_articles_category,
-                                                      include: [
-                                                            {
-                                                                  model: db.new_article,
-                                                                  attributes: [
-                                                                        "id",
-                                                                        "title",
-                                                                        "slug",
-                                                                        "sapo",
-                                                                  ],
-                                                            },
-                                                      ],
-                                                },
-                                          ],
-                                    },
-                              ],
+                        const checksrc = await db.new_category.findOne({
+                              where: [{ slug_src: slug_src }],
                         });
+                        if (checksrc) {
+                              const checkSlug = await db.new_category.findOne({
+                                    where: [
+                                          {
+                                                slug: slug,
+                                          },
+                                    ],
+                              });
+                              if (checkSlug) {
+                                    const articlesCate =
+                                          await db.new_category.findOne({
+                                                where: [{ id }],
+                                                attributes: [
+                                                      "name",
+                                                      "id",
+                                                      "slug",
+                                                ],
+                                                include: [
+                                                      {
+                                                            model: db.new_articles_category,
+                                                            include: [
+                                                                  {
+                                                                        model: db.new_article,
+                                                                        attributes:
+                                                                              [
+                                                                                    "id",
+                                                                                    "title",
+                                                                                    "slug",
+                                                                                    "sapo",
+                                                                              ],
+                                                                  },
+                                                            ],
+                                                      },
+                                                      {
+                                                            model: db.new_category,
+                                                            as: "childCategories",
+                                                            include: [
+                                                                  {
+                                                                        model: db.new_articles_category,
+                                                                        include: [
+                                                                              {
+                                                                                    model: db.new_article,
+                                                                                    attributes:
+                                                                                          [
+                                                                                                "id",
+                                                                                                "title",
+                                                                                                "slug",
+                                                                                                "sapo",
+                                                                                          ],
+                                                                              },
+                                                                        ],
+                                                                  },
+                                                            ],
+                                                      },
+                                                ],
+                                          });
 
-                        resolve({
-                              articlesCate,
-                              status: 0,
-                        });
+                                    resolve({
+                                          articlesCate,
+                                          status: 0,
+                                    });
+                              }
+                        } else {
+                              resolve({ message: "Khong tim thay danh muc" });
+                        }
                   } catch (error) {
                         reject(error);
                   }
@@ -160,15 +183,40 @@ const articlesService = {
                         ],
                   });
                   if (checkslugsrc !== null) {
-                        const checkslug = await db.new_article.findOne({
+                        const article = await db.new_article.findOne({
                               where: [
                                     {
                                           slug: slug,
                                     },
                               ],
                         });
-                        if (checkslug !== null) {
-                              resolve(checkslug);
+                        if (article !== null) {
+                              const res =
+                                    await db.new_articles_category.findOne({
+                                          where: [
+                                                {
+                                                      article_id: article.id,
+                                                },
+                                          ],
+                                    });
+                              const category = await db.new_category.findOne({
+                                    where: [
+                                          {
+                                                id: res.category_id,
+                                          },
+                                    ],
+                                    attributes: ["name", "id", "slug"],
+                              });
+                              const cateChild = await db.new_category.findOne({
+                                    where: [
+                                          {
+                                                parent_id: res.category_id,
+                                          },
+                                    ],
+                                    attributes: ["name", "id", "slug"],
+                              });
+                              console.log(res);
+                              resolve({ article, category, cateChild });
                         } else {
                               resolve({ message: "Khong tim thay bai viet" });
                         }
