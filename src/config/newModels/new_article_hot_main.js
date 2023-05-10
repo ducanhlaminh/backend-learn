@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
              * The `models/index` file will call this method automatically.
              */
             static associate(models) {
+                  new_articles_hot_main.belongsTo(models.new_article, {
+                        foreignKey: "article_id",
+                  });
                   // define association here
             }
       }

@@ -23,8 +23,6 @@ module.exports = (sequelize, DataTypes) => {
             {
                   article_id: DataTypes.NUMBER,
                   category_id: DataTypes.NUMBER,
-                  hot_main: DataTypes.NUMBER,
-                  hot_category: DataTypes.NUMBER,
             },
             {
                   sequelize,

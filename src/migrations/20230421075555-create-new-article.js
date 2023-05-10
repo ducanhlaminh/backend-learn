@@ -33,6 +33,10 @@ module.exports = {
                   created_user_id: {
                         type: Sequelize.INTEGER,
                   },
+                  views: {
+                        type: Sequelize.INTEGER,
+                        defaultValue: 0,
+                  },
                   updated_user_id: {
                         type: Sequelize.INTEGER,
                   },

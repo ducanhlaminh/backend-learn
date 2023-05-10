@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
                   new_category.hasMany(models.new_articles_category, {
                         foreignKey: "category_id",
                   });
+                  new_category.hasMany(models.new_articles_hot_category, {
+                        foreignKey: "category_id",
+                  });
                   // define association here
             }
       }

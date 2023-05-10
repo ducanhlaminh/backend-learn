@@ -5,7 +5,50 @@ const articlesService = {
       getAllService: (req, res) => {
             return new Promise(async (resolve, reject) => {
                   try {
+                        const hotNewsMain =
+                              await db.new_articles_hot_main.findAll({
+                                    limit: 20,
+                                    order: [["position", "ASC"]],
+                                    attributes: ["article_id", "position"],
+                                    include: [
+                                          {
+                                                model: db.new_article,
+                                                attributes: [
+                                                      "avatar",
+                                                      "title",
+                                                      "sapo",
+                                                ],
+                                          },
+                                    ],
+                              });
+                        const hotNewCates = await db.new_category.findAll({
+                              attributes: ["name", "slug", "slug_crc"],
+                              include: [
+                                    {
+                                          model: db.new_articles_hot_category,
+                                          attributes: [
+                                                "article_id",
+                                                "position",
+                                          ],
+                                          limit: 3,
+                                          order: [["position", "ASC"]],
+                                          include: [
+                                                {
+                                                      model: db.new_article,
+                                                      attributes: [
+                                                            "avatar",
+                                                            "title",
+                                                            "sapo",
+                                                      ],
+                                                },
+                                          ],
+                                    },
+                              ],
+                        });
+
                         resolve({
+                              hotNewsMain,
+                              hotNewCates,
                               status: 0,
                         });
                   } catch (error) {
@@ -139,9 +182,15 @@ const articlesService = {
                                     ...data,
                                     slug_crc,
                               });
+                              const article = await db.new_article.findOne({
+                                    where: {
+                                          slug_crc,
+                                    },
+                              });
+
                               const res = await db.new_articles_category.create(
                                     {
-                                          article_id: response.id,
+                                          article_id: article.id,
                                           category_id: data.category_id,
                                     }
                               );
@@ -149,6 +198,7 @@ const articlesService = {
                               resolve({
                                     status: 0,
                                     message: "Đã thêm bài viết thành công",
+                                    response,
                               });
                         }
                   } catch (error) {
@@ -173,23 +223,34 @@ const articlesService = {
                                     },
                               ],
                         });
+                        console.log(article.id);
                         if (article !== null) {
+                              const view = await db.new_article.update(
+                                    {
+                                          views: article.views + 1,
+                                    },
+                                    {
+                                          where: [{ id: article.id }],
+                                    }
+                              );
                               const res =
                                     await db.new_articles_category.findOne({
                                           where: [
                                                 {
-                                                      article_id: article.id,
+                                                      article_id:
+                                                            article.id || 0,
                                                 },
                                           ],
                                     });
-                              const category = await db.new_category.findOne({
-                                    where: [
-                                          {
-                                                id: res.category_id,
-                                          },
-                                    ],
-                                    attributes: ["name", "id", "slug"],
-                              });
+                              console.log(res);
+                              // const category = await db.new_category.findOne({
+                              //       where: [
+                              //             {
+                              //                   id: res?.category_id,
+                              //             },
+                              //       ],
+                              //       attributes: ["name", "id", "slug"],
+                              // });
                               const cateChild = await db.new_category.findOne({
                                     where: [
                                           {
@@ -261,7 +322,7 @@ const articlesService = {
                               resolve({
                                     article,
                                     articlesCate,
-                                    category,
+
                                     cateChild,
                               });
                         } else {
@@ -301,10 +362,21 @@ const articlesService = {
                   }
             });
       },
-      setHotNews: (data) => {
+      setHotNewsMain: (data) => {
             return new Promise(async (resolve, reject) => {
                   console.log(db.new_articles_hot_main);
-                  const response = await db.new_articles_hot_category.findAll();
+                  const response = await db.new_articles_hot_main.create({
+                        ...data,
+                  });
+                  resolve(response);
+            });
+      },
+      setHotNewsCate: (data) => {
+            return new Promise(async (resolve, reject) => {
+                  console.log(db.new_articles_hot_main);
+                  const response = await db.new_articles_hot_category.create({
+                        ...data,
+                  });
                   resolve(response);
             });
       },

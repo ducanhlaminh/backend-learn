@@ -12,5 +12,6 @@ articlesRoutes.post("/title", articlesController.getByTitleControllers);
 articlesRoutes.post("/", articlesController.createArticleControllers);
 articlesRoutes.post("/hot-main", articlesController.setHotNewsMainController);
 articlesRoutes.put("/:id", articlesController.publishController);
+articlesRoutes.post("/hot-cate", articlesController.setHotNewsCateController);
 
 module.exports = articlesRoutes;

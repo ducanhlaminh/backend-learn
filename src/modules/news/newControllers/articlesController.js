@@ -37,7 +37,11 @@ const articlesController = {
             res.status(200).json(response);
       },
       setHotNewsMainController: async (req, res) => {
-            const response = await articlesService.setHotNews(req.body);
+            const response = await articlesService.setHotNewsMain(req.body);
+            res.status(200).json(response);
+      },
+      setHotNewsCateController: async (req, res) => {
+            const response = await articlesService.setHotNewsCate(req.body);
             res.status(200).json(response);
       },
 };

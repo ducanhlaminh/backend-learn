@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
                   content: DataTypes.STRING,
                   sapo: DataTypes.STRING,
                   avatar: DataTypes.STRING,
+                  views: DataTypes.NUMBER,
                   status: DataTypes.NUMBER,
                   created_user_id: DataTypes.NUMBER,
                   publishAt: DataTypes.DATE,
