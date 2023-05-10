@@ -1,4 +1,6 @@
 const db = require("../../../config/userModels");
+const bcrypt = require("bcrypt");
+require("dotenv").config();
 const { internalServerError } = require("../../../helper/handle_error");
 const authServices = {
       registerService: (data) => {
@@ -11,16 +13,26 @@ const authServices = {
                                     },
                               ],
                         });
+
                         if (!res) {
-                              const response = await db.User.create({
-                                    email: data.email,
-                                    password: data.password,
-                              });
-                              if (response) {
-                                    resolve(response);
+                              bcrypt.hash(
+                                    data.password,
+                                    process.env.SALTROUNDS,
+                                    function (err, hash) {
+                                          console.log(hash);
+                                    }
+                              );
+                              // const response = await db.User.create({
+                              //       email: data.email,
+                              //       password: data.password,
+                              // });
+                              if (1) {
+                                    resolve({ message: "ok" });
                               }
+                              resolve(res);
+                        } else {
+                              resolve({ message: "Da ton tai tai khoan!" });
                         }
-                        resolve(res);
                   } catch (error) {
                         reject(error);
                   }

@@ -19,8 +19,7 @@ const articlesController = {
       getByCateControllers: async (req, res) => {
             const response = await articlesService.getByCateService(
                   req.params.slug,
-                  req.params.slug_crc,
-                  req.params.id
+                  req.params.slug_crc
             );
             res.status(200).json(response);
       },
@@ -29,6 +28,16 @@ const articlesController = {
                   req.params.slug,
                   req.params.slug_crc
             );
+            res.status(200).json(response);
+      },
+      publishController: async (req, res) => {
+            const response = await articlesService.publishService(
+                  req.params.id
+            );
+            res.status(200).json(response);
+      },
+      setHotNewsMainController: async (req, res) => {
+            const response = await articlesService.setHotNews(req.body);
             res.status(200).json(response);
       },
 };
