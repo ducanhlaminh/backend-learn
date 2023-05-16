@@ -2,12 +2,11 @@ const db = require("../../../config/newModels");
 const { Op } = require("sequelize");
 const crc32 = require("crc/crc32");
 const articlesService = {
-      getAllService: (req, res) => {
+      getHotService: (req, res) => {
             return new Promise(async (resolve, reject) => {
                   try {
-                        const hotNewsMain =
-                              await db.new_articles_hot_main.findAll({
-                                    limit: 20,
+                        const hot_main = await db.new_articles_hot_main.findAll(
+                              {
                                     order: [["position", "ASC"]],
                                     attributes: ["article_id", "position"],
                                     include: [
@@ -20,8 +19,9 @@ const articlesService = {
                                                 ],
                                           },
                                     ],
-                              });
-                        const hotNewCates = await db.new_category.findAll({
+                              }
+                        );
+                        const hot_categories = await db.new_category.findAll({
                               attributes: ["name", "slug", "slug_crc"],
                               include: [
                                     {
@@ -38,18 +38,15 @@ const articlesService = {
                                                       attributes: [
                                                             "avatar",
                                                             "title",
-                                                            "sapo",
                                                       ],
                                                 },
                                           ],
                                     },
                               ],
                         });
-
                         resolve({
-                              hotNewsMain,
-                              hotNewCates,
-                              status: 0,
+                              hot_main,
+                              hot_categories,
                         });
                   } catch (error) {
                         reject(error);
@@ -88,7 +85,7 @@ const articlesService = {
                                     ],
                               });
                               if (checkSlug) {
-                                    const articlesCate =
+                                    const articles_category =
                                           await db.new_category.findOne({
                                                 where: [{ slug }],
                                                 attributes: [
@@ -102,17 +99,15 @@ const articlesService = {
                                                             model: db.new_articles_category,
                                                             attributes: [
                                                                   "article_id",
-                                                                  "category_id",
                                                             ],
                                                             include: [
                                                                   {
                                                                         model: db.new_article,
                                                                         attributes:
                                                                               [
-                                                                                    "id",
                                                                                     "title",
                                                                                     "slug",
-                                                                                    "sapo",
+                                                                                    "slug_crc",
                                                                               ],
                                                                   },
                                                             ],
@@ -131,17 +126,15 @@ const articlesService = {
                                                                         attributes:
                                                                               [
                                                                                     "article_id",
-                                                                                    "category_id",
                                                                               ],
                                                                         include: [
                                                                               {
                                                                                     model: db.new_article,
                                                                                     attributes:
                                                                                           [
-                                                                                                "id",
                                                                                                 "title",
                                                                                                 "slug",
-                                                                                                "sapo",
+                                                                                                "slug_crc",
                                                                                           ],
                                                                               },
                                                                         ],
@@ -150,9 +143,47 @@ const articlesService = {
                                                       },
                                                 ],
                                           });
-
+                                    const hotNewCates =
+                                          await db.new_category.findAll({
+                                                where: {
+                                                      slug,
+                                                },
+                                                attributes: [
+                                                      "name",
+                                                      "slug",
+                                                      "slug_crc",
+                                                ],
+                                                include: [
+                                                      {
+                                                            model: db.new_articles_hot_category,
+                                                            attributes: [
+                                                                  "article_id",
+                                                                  "position",
+                                                            ],
+                                                            limit: 4,
+                                                            order: [
+                                                                  [
+                                                                        "position",
+                                                                        "ASC",
+                                                                  ],
+                                                            ],
+                                                            include: [
+                                                                  {
+                                                                        model: db.new_article,
+                                                                        attributes:
+                                                                              [
+                                                                                    "avatar",
+                                                                                    "title",
+                                                                                    "sapo",
+                                                                              ],
+                                                                  },
+                                                            ],
+                                                      },
+                                                ],
+                                          });
                                     resolve({
-                                          articlesCate,
+                                          articles_category,
+                                          hotNewCates,
                                           status: 0,
                                     });
                               }
@@ -164,7 +195,6 @@ const articlesService = {
                   }
             });
       },
-
       createArticleService: (data) => {
             return new Promise(async (resolve, reject) => {
                   const slug_crc = crc32(data.slug);
@@ -187,7 +217,7 @@ const articlesService = {
                                           slug_crc,
                                     },
                               });
-
+                              console.log(article);
                               const res = await db.new_articles_category.create(
                                     {
                                           article_id: article.id,
@@ -223,7 +253,7 @@ const articlesService = {
                                     },
                               ],
                         });
-                        console.log(article.id);
+
                         if (article !== null) {
                               const view = await db.new_article.update(
                                     {
@@ -242,15 +272,15 @@ const articlesService = {
                                                 },
                                           ],
                                     });
-                              console.log(res);
-                              // const category = await db.new_category.findOne({
-                              //       where: [
-                              //             {
-                              //                   id: res?.category_id,
-                              //             },
-                              //       ],
-                              //       attributes: ["name", "id", "slug"],
-                              // });
+
+                              const category = await db.new_category.findOne({
+                                    where: [
+                                          {
+                                                id: res?.category_id,
+                                          },
+                                    ],
+                                    attributes: ["name", "id", "slug"],
+                              });
                               const cateChild = await db.new_category.findOne({
                                     where: [
                                           {
@@ -337,47 +367,191 @@ const articlesService = {
             return new Promise(async (resolve, reject) => {
                   try {
                         const now = new Date();
-
-                        const response = await db.new_article.update(
-                              {
-                                    publishAt: now,
-                              },
-                              {
-                                    where: [{ id }],
-                              }
-                        );
-                        if (response[0]) {
-                              resolve({
-                                    message: "Xuat ban thanh cong",
+                        const check = await db.new_article.findOne({
+                              where: {
+                                    id,
                                     status: 0,
-                              });
-                        } else {
-                              resolve({
-                                    message: "Xuat ban khong thanh cong",
-                                    status: 1,
-                              });
+                              },
+                        });
+                        if (check) {
+                              const response = await db.new_article.update(
+                                    {
+                                          publishAt: now,
+                                          status: 1,
+                                    },
+                                    {
+                                          where: [{ id }],
+                                    }
+                              );
+                              if (response[0]) {
+                                    resolve({
+                                          message: "Xuat ban thanh cong",
+                                          status: 0,
+                                    });
+                              }
                         }
+                        resolve({
+                              message: "Xuat ban khong thanh cong",
+                              status: 1,
+                        });
                   } catch (error) {
                         reject(error);
                   }
             });
       },
-      setHotNewsMain: (data) => {
+      createHotMain: (data) => {
             return new Promise(async (resolve, reject) => {
-                  console.log(db.new_articles_hot_main);
-                  const response = await db.new_articles_hot_main.create({
-                        ...data,
+                  // check position invalid
+                  if (data.position < 1 && data.position > 8) {
+                        resolve({
+                              message: "Vi tri set bai hot phai nho hon 8",
+                        });
+                  }
+                  // Check tại vị trí đó còn trống không
+                  const checkPosition = await db.new_articles_hot_main.findOne({
+                        where: { position: data.position },
                   });
-                  resolve(response);
+                  // Check id bài viết đó đã được set tin hot
+                  const checkArticle = await db.new_articles_hot_main.findOne({
+                        where: { article_id: data.article_id },
+                  });
+                  if (checkPosition === null) {
+                        if (checkArticle === null) {
+                              const response =
+                                    await db.new_articles_hot_main.create({
+                                          ...data,
+                                    });
+                              resolve(response);
+                        }
+                        resolve({
+                              message: "Bàn viết này đã được set trong tin nổi bật",
+                        });
+                  } else {
+                        resolve({ message: "Vị trí đã có bài viết" });
+                  }
             });
       },
-      setHotNewsCate: (data) => {
+      createHotCate: (data) => {
             return new Promise(async (resolve, reject) => {
-                  console.log(db.new_articles_hot_main);
-                  const response = await db.new_articles_hot_category.create({
-                        ...data,
+                  const checkArticle = await db.new_article.findOne({
+                        where: [
+                              {
+                                    id: data.article_id,
+                              },
+                        ],
                   });
-                  resolve(response);
+                  if (checkArticle === null) {
+                        const checkArticle =
+                              await db.new_articles_hot_main.findOne({
+                                    where: { article_id: data.article_id },
+                              });
+                        if (checkArticle === null) {
+                              const categoryNew = await db.new_category.findOne(
+                                    {
+                                          where: {
+                                                article_id: data.article_id,
+                                          },
+                                    }
+                              );
+                              const response =
+                                    await db.new_articles_hot_category.create({
+                                          ...data,
+                                          category_id: categoryNew.category_id,
+                                    });
+                              resolve(response);
+                        }
+                        resolve({
+                              message: "Bàn viết này đã được set trong tin nổi bật",
+                        });
+                  } else {
+                        resolve({ message: "Failed to create" });
+                  }
+            });
+      },
+      updateHotMain: (data) => {
+            return new Promise(async (resolve, reject) => {
+                  const response = await db.new_articles_hot_main.update(
+                        {
+                              position: data.position,
+                        },
+                        { where: { article_id: data.article_id } }
+                  );
+                  if (response !== null) {
+                        resolve({ message: "Cập nhật vị trí thành công" });
+                  }
+
+                  resolve({ message: "Cập nhật vị trí không thành công" });
+            });
+      },
+      getByView: () => {
+            return new Promise(async (resolve, reject) => {
+                  const res = await db.new_article.findAll({
+                        order: [["views", "DESC"]],
+                        attributes: [
+                              "title",
+                              "avatar",
+                              "slug",
+                              "slug_crc",
+                              "views",
+                        ],
+                        limit: 5,
+                        include: [
+                              {
+                                    model: db.new_articles_category,
+                                    as: "article_category",
+                                    attributes: ["category_id"],
+                                    include: [
+                                          {
+                                                model: db.new_category,
+                                                as: "dataCategory",
+                                                attributes: [
+                                                      "name",
+                                                      "slug",
+                                                      "slug_crc",
+                                                ],
+                                          },
+                                    ],
+                              },
+                        ],
+                  });
+                  resolve(res);
+            });
+      },
+      getByPublishAt: () => {
+            try {
+                  return new Promise(async (resolve, reject) => {
+                        const res = await db.new_article.findAll({
+                              order: [["publishAt", "DESC"]],
+                              attributes: [
+                                    "title",
+                                    "avatar",
+                                    "slug",
+                                    "slug_crc",
+                                    "sapo",
+                                    "publishAt",
+                              ],
+                              limit: 20,
+                        });
+
+                        resolve(res);
+                  });
+            } catch (error) {
+                  reject(error);
+            }
+      },
+      getByViewCategory: (id) => {
+            return new Promise(async (resolve, reject) => {
+                  const res = await db.new_category.findAll({
+                        where: {
+                              id,
+                        },
+                        include: {
+                              model: db.new_category,
+                              as: "childCategories",
+                        },
+                  });
+
+                  resolve(res);
             });
       },
 };

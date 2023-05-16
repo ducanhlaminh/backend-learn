@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       new_articles_hot_main.init(
             {
                   article_id: DataTypes.NUMBER,
+                  position: DataTypes.NUMBER,
                   updatedAt: DataTypes.DATE,
                   createdAt: DataTypes.DATE,
             },

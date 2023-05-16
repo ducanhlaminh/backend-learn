@@ -29,6 +29,7 @@ module.exports = {
                   },
                   status: {
                         type: Sequelize.INTEGER,
+                        defaultValue: 0,
                   },
                   created_user_id: {
                         type: Sequelize.INTEGER,

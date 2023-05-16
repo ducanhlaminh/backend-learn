@@ -1,8 +1,10 @@
 const articlesService = require("../newServices/articlesService");
 const articlesController = {
-      getAllControllers: async (req, res) => {
-            const response = await articlesService.getAllService();
-            res.status(200).json(response);
+      getHotControllers: async (req, res) => {
+            const hot_news = await articlesService.getHotService();
+            const views_news = await articlesService.getByView();
+            const news = await articlesService.getByPublishAt();
+            res.status(200).json({ hot_news, views_news, news });
       },
       createArticleControllers: async (req, res) => {
             const response = await articlesService.createArticleService(
@@ -21,7 +23,10 @@ const articlesController = {
                   req.params.slug,
                   req.params.slug_crc
             );
-            res.status(200).json(response);
+            const response2 = await articlesService.getByViewCategory(
+                  response.articles_category.id
+            );
+            res.status(200).json({ response, response2 });
       },
       getDetailControllers: async (req, res) => {
             const response = await articlesService.getDetailService(
@@ -36,12 +41,16 @@ const articlesController = {
             );
             res.status(200).json(response);
       },
-      setHotNewsMainController: async (req, res) => {
-            const response = await articlesService.setHotNewsMain(req.body);
+      createHotMainController: async (req, res) => {
+            const response = await articlesService.createHotMain(req.body);
             res.status(200).json(response);
       },
-      setHotNewsCateController: async (req, res) => {
-            const response = await articlesService.setHotNewsCate(req.body);
+      createHotCateController: async (req, res) => {
+            const response = await articlesService.createHotCate(req.body);
+            res.status(200).json(response);
+      },
+      updateHotMainController: async (req, res) => {
+            const response = await articlesService.updateHotMain(req.body);
             res.status(200).json(response);
       },
 };
