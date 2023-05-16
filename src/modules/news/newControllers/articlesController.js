@@ -2,9 +2,16 @@ const articlesService = require("../newServices/articlesService");
 const articlesController = {
       getHotControllers: async (req, res) => {
             const hot_news = await articlesService.getHotService();
+
+            res.status(200).json({ hot_news });
+      },
+      getByViewsController: async (req, res) => {
             const views_news = await articlesService.getByView();
+            res.status(200).json(views_news);
+      },
+      getByPublishAtController: async (req, res) => {
             const news = await articlesService.getByPublishAt();
-            res.status(200).json({ hot_news, views_news, news });
+            res.status(200).json(news);
       },
       createArticleControllers: async (req, res) => {
             const response = await articlesService.createArticleService(

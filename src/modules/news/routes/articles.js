@@ -8,6 +8,9 @@ articlesRoutes.get(
       articlesController.getByCateControllers
 );
 articlesRoutes.get("/:slug/:slug_crc", articlesController.getDetailControllers);
+articlesRoutes.get("/publish_at", articlesController.getByPublishAtController);
+articlesRoutes.get("/views", articlesController.getByViewsController);
+
 articlesRoutes.post("/title", articlesController.getByTitleControllers);
 articlesRoutes.post("/", articlesController.createArticleControllers);
 articlesRoutes.post("/hot-main", articlesController.createHotMainController);
