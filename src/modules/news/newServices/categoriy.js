@@ -3,11 +3,11 @@ const crc32 = require("crc/crc32");
 const categoryService = {
       create: (data) => {
             return new Promise((resolve, reject) => {
-                  const slug_src = crc32(data.slug);
+                  const slug_crc = crc32(data.slug);
                   try {
                         const response = db.new_category.create({
                               ...data,
-                              slug_src,
+                              slug_crc,
                         });
                         resolve(response);
                   } catch (error) {

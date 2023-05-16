@@ -469,13 +469,13 @@ const articlesService = {
                   }
             });
       },
-      updateHotMain: (data) => {
+      updateHotMain: (data, id) => {
             return new Promise(async (resolve, reject) => {
                   const response = await db.new_articles_hot_main.update(
                         {
                               position: data.position,
                         },
-                        { where: { article_id: data.article_id } }
+                        { where: { article_id: id } }
                   );
                   if (response !== null) {
                         resolve({ message: "Cập nhật vị trí thành công" });

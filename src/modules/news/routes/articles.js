@@ -14,8 +14,9 @@ articlesRoutes.get("/views", articlesController.getByViewsController);
 articlesRoutes.post("/title", articlesController.getByTitleControllers);
 articlesRoutes.post("/", articlesController.createArticleControllers);
 articlesRoutes.post("/hot-main", articlesController.createHotMainController);
-articlesRoutes.put("/hot-main", articlesController.updateHotMainController);
-articlesRoutes.put("/:id", articlesController.publishController);
 articlesRoutes.post("/hot-cate", articlesController.createHotCateController);
+
+articlesRoutes.put("/hot-main/:id", articlesController.updateHotMainController);
+articlesRoutes.put("/:id", articlesController.publishController);
 
 module.exports = articlesRoutes;

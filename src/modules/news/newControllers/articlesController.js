@@ -57,7 +57,10 @@ const articlesController = {
             res.status(200).json(response);
       },
       updateHotMainController: async (req, res) => {
-            const response = await articlesService.updateHotMain(req.body);
+            const response = await articlesService.updateHotMain(
+                  req.body,
+                  req.params.id
+            );
             res.status(200).json(response);
       },
 };
