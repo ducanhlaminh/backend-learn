@@ -10,7 +10,7 @@ const articlesController = {
             res.status(200).json(views_news);
       },
       getByPublishAtController: async (req, res) => {
-            const news = await articlesService.getByPublishAt();
+            const news = await articlesService.getByPublishAt(req.query.slug);
             res.status(200).json(news);
       },
       createArticleControllers: async (req, res) => {
@@ -30,10 +30,7 @@ const articlesController = {
                   req.params.slug,
                   req.params.slug_crc
             );
-            const response2 = await articlesService.getByViewCategory(
-                  response.articles_category.id
-            );
-            res.status(200).json({ response, response2 });
+            res.status(200).json(response);
       },
       getDetailControllers: async (req, res) => {
             const response = await articlesService.getDetailService(
@@ -44,6 +41,12 @@ const articlesController = {
       },
       publishController: async (req, res) => {
             const response = await articlesService.publishService(
+                  req.params.id
+            );
+            res.status(200).json(response);
+      },
+      publishBookController: async (req, res) => {
+            const response = await articlesService.publishBookService(
                   req.params.id
             );
             res.status(200).json(response);
@@ -63,5 +66,20 @@ const articlesController = {
             );
             res.status(200).json(response);
       },
+      getBooksController: async (req, res) => {
+            const response = await articlesService.getBookService();
+            res.status(200).json(response);
+      },
+      createBookControllers: async (req, res) => {
+            const response = await articlesService.createBookService(req.body);
+            res.status(200).json(response);
+      },
+      getHotCategoryController: async (req, res) => {
+            const response = await articlesService.getHotCategoryService(
+                  req.params.slug
+            );
+            res.status(200).json(response);
+      },
 };
+
 module.exports = articlesController;

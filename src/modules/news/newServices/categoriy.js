@@ -37,7 +37,7 @@ const categoryService = {
             return new Promise(async (resolve, reject) => {
                   try {
                         const response = await db.new_category.findAll({
-                              attributes: ["name", "id", "slug"],
+                              attributes: ["name", "id", "slug", "slug_crc"],
                               where: [
                                     {
                                           parent_id: null,

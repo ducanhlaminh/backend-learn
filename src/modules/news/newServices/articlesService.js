@@ -53,7 +53,25 @@ const articlesService = {
                   }
             });
       },
-
+      getBookService: () => {
+            return new Promise(async (resolve, reject) => {
+                  try {
+                        const books = await db.new_book.findAll({
+                              order: [["publishat", "DESC"]],
+                              where: [
+                                    {
+                                          status: 1,
+                                    },
+                              ],
+                        });
+                        resolve({
+                              books,
+                        });
+                  } catch (error) {
+                        reject(error);
+                  }
+            });
+      },
       getByTitleService: (title) => {
             return new Promise(async (resolve, reject) => {
                   try {
@@ -209,26 +227,77 @@ const articlesService = {
                                     message: "Đã tồn tại bài viết với title này ",
                               });
                         } else {
-                              const response = await db.new_article.create({
+                              const newArticle = await db.new_article.create({
                                     ...data,
                                     slug_crc,
                               });
-                              const article = await db.new_article.findOne({
+                              const response = await db.new_category.findOne({
                                     where: {
-                                          slug_crc,
+                                          id: data.category_id,
                                     },
+                                    attributes: ["name", "id", "slug"],
+                                    include: [
+                                          {
+                                                model: db.new_category,
+                                                as: "childCategories",
+                                                attributes: [
+                                                      "name",
+                                                      "id",
+                                                      "slug",
+                                                ],
+                                          },
+                                    ],
                               });
-                              console.log(article);
-                              const res = await db.new_articles_category.create(
+                              let list = [
                                     {
-                                          article_id: article.id,
+                                          article_id: newArticle.id,
                                           category_id: data.category_id,
-                                    }
+                                    },
+                              ];
+                              response.childCategories.map((item) =>
+                                    list.push({
+                                          article_id: newArticle.id,
+                                          category_id: item.id,
+                                    })
                               );
+
+                              const res =
+                                    await db.new_articles_category.bulkCreate(
+                                          list
+                                    );
 
                               resolve({
                                     status: 0,
                                     message: "Đã thêm bài viết thành công",
+                                    response,
+                                    res,
+                              });
+                        }
+                  } catch (error) {
+                        reject(error);
+                  }
+            });
+      },
+      createBookService: (data) => {
+            return new Promise(async (resolve, reject) => {
+                  const slug_crc = crc32(data.slug);
+                  try {
+                        const check = await db.new_book.findOne({
+                              where: { title: data.title },
+                        });
+                        if (check) {
+                              resolve({
+                                    status: 0,
+                                    message: "Đã tồn tại sách với title này ",
+                              });
+                        } else {
+                              const response = await db.new_book.create({
+                                    ...data,
+                                    slug_crc,
+                              });
+                              resolve({
+                                    status: 0,
+                                    message: "Đã thêm sách thành công",
                                     response,
                               });
                         }
@@ -353,7 +422,6 @@ const articlesService = {
                               resolve({
                                     article,
                                     articlesCate,
-
                                     cateChild,
                               });
                         } else {
@@ -400,35 +468,86 @@ const articlesService = {
                   }
             });
       },
-      createHotMain: (data) => {
+      publishBookService: (id) => {
             return new Promise(async (resolve, reject) => {
-                  // check position invalid
-                  if (data.position < 1 && data.position > 8) {
-                        resolve({
-                              message: "Vi tri set bai hot phai nho hon 8",
+                  try {
+                        const now = new Date();
+                        const check = await db.new_book.findOne({
+                              where: {
+                                    id,
+                                    status: 0,
+                              },
                         });
-                  }
-                  // Check tại vị trí đó còn trống không
-                  const checkPosition = await db.new_articles_hot_main.findOne({
-                        where: { position: data.position },
-                  });
-                  // Check id bài viết đó đã được set tin hot
-                  const checkArticle = await db.new_articles_hot_main.findOne({
-                        where: { article_id: data.article_id },
-                  });
-                  if (checkPosition === null) {
-                        if (checkArticle === null) {
-                              const response =
-                                    await db.new_articles_hot_main.create({
-                                          ...data,
+                        if (check) {
+                              const response = await db.new_book.update(
+                                    {
+                                          publishAt: now,
+                                          status: 1,
+                                    },
+                                    {
+                                          where: [{ id }],
+                                    }
+                              );
+                              if (response[0]) {
+                                    resolve({
+                                          message: "Xuat ban thanh cong",
+                                          status: 0,
                                     });
-                              resolve(response);
+                              }
                         }
                         resolve({
-                              message: "Bàn viết này đã được set trong tin nổi bật",
+                              message: "Xuat ban khong thanh cong",
+                              status: 1,
                         });
+                  } catch (error) {
+                        reject(error);
+                  }
+            });
+      },
+      createHotMain: (data) => {
+            return new Promise(async (resolve, reject) => {
+                  const checkPublished = await db.new_article.findOne({
+                        where: { id: data.article_id },
+                  });
+                  if (checkPublished.status === 1) {
+                        // check position invalid
+                        if (data.position < 1 && data.position > 8) {
+                              resolve({
+                                    message: "Vi tri set bai hot phai nho hon 8",
+                              });
+                        }
+                        // Check tại vị trí đó còn trống không
+                        const checkPosition =
+                              await db.new_articles_hot_main.findOne({
+                                    where: { position: data.position },
+                              });
+                        // Check id bài viết đó đã được set tin hot
+                        const checkArticle =
+                              await db.new_articles_hot_main.findOne({
+                                    where: { article_id: data.article_id },
+                              });
+                        if (checkPosition === null) {
+                              if (checkArticle === null) {
+                                    const response =
+                                          await db.new_articles_hot_main.create(
+                                                {
+                                                      ...data,
+                                                }
+                                          );
+                                    resolve(response);
+                              }
+                              resolve({
+                                    message: "Bàn viết này đã được set trong tin nổi bật",
+                              });
+                        } else {
+                              resolve({
+                                    message: "Set vị trí nổi bật không thành công",
+                              });
+                        }
                   } else {
-                        resolve({ message: "Vị trí đã có bài viết" });
+                        resolve({
+                              message: "Bài viết chưa được xuất bản",
+                        });
                   }
             });
       },
@@ -499,7 +618,7 @@ const articlesService = {
                         include: [
                               {
                                     model: db.new_articles_category,
-                                    as: "article_category",
+
                                     attributes: ["category_id"],
                                     include: [
                                           {
@@ -518,20 +637,32 @@ const articlesService = {
                   resolve(res);
             });
       },
-      getByPublishAt: () => {
+      getByPublishAt: (slug) => {
             try {
                   return new Promise(async (resolve, reject) => {
-                        const res = await db.new_article.findAll({
-                              order: [["publishAt", "DESC"]],
-                              attributes: [
-                                    "title",
-                                    "avatar",
-                                    "slug",
-                                    "slug_crc",
-                                    "sapo",
-                                    "publishAt",
-                              ],
-                              limit: 20,
+                        const idBook = await db.new_category.findOne({
+                              where: {
+                                    slug: "sach",
+                              },
+                        });
+                        // if (slug !== "") {
+                        //       idCateFilter = await db.new_category.findOne({
+                        //             where: {
+                        //                   slug,
+                        //             },
+                        //       });
+                        // }
+                        const res = await db.new_articles_category.findAll({
+                              where: {
+                                    [Op.not]: {
+                                          category_id: idBook,
+                                    },
+                              },
+                              include: {
+                                    model: db.new_article,
+                                    order: [["publishAt", "DESC"]],
+                              },
+                              attributes: ["article_id"],
                         });
 
                         resolve(res);
@@ -540,18 +671,28 @@ const articlesService = {
                   reject(error);
             }
       },
-      getByViewCategory: (id) => {
+      getHotCategoryService: (slug) => {
             return new Promise(async (resolve, reject) => {
                   const res = await db.new_category.findAll({
-                        where: {
-                              id,
-                        },
-                        include: {
-                              model: db.new_category,
-                              as: "childCategories",
-                        },
+                        attributes: ["name", "slug", "slug_crc"],
+                        include: [
+                              {
+                                    model: db.new_articles_hot_category,
+                                    attributes: ["article_id", "position"],
+                                    include: [
+                                          {
+                                                model: db.new_article,
+                                                attributes: [
+                                                      "avatar",
+                                                      "slug",
+                                                      "slug_crc",
+                                                      "title",
+                                                ],
+                                          },
+                                    ],
+                              },
+                        ],
                   });
-
                   resolve(res);
             });
       },
