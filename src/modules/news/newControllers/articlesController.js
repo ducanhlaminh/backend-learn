@@ -2,7 +2,6 @@ const articlesService = require("../newServices/articlesService");
 const articlesController = {
       getHotControllers: async (req, res) => {
             const hot_news = await articlesService.getHotService();
-
             res.status(200).json({ hot_news });
       },
       getByViewsController: async (req, res) => {
@@ -64,14 +63,6 @@ const articlesController = {
                   req.body,
                   req.params.id
             );
-            res.status(200).json(response);
-      },
-      getBooksController: async (req, res) => {
-            const response = await articlesService.getBookService();
-            res.status(200).json(response);
-      },
-      createBookControllers: async (req, res) => {
-            const response = await articlesService.createBookService(req.body);
             res.status(200).json(response);
       },
       getHotCategoryController: async (req, res) => {

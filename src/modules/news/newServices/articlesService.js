@@ -218,8 +218,14 @@ const articlesService = {
             return new Promise(async (resolve, reject) => {
                   const slug_crc = crc32(data.slug);
                   try {
+                        // Check article some title or some slug_crc
                         const check = await db.new_article.findOne({
-                              where: { title: data.title },
+                              where: {
+                                    [Op.or]: {
+                                          title: data.title,
+                                          slug_crc: slug_crc,
+                                    },
+                              },
                         });
                         if (check) {
                               resolve({
@@ -254,27 +260,29 @@ const articlesService = {
                                           category_id: data.category_id,
                                     },
                               ];
-                              response.childCategories.map((item) =>
-                                    list.push({
-                                          article_id: newArticle.id,
-                                          category_id: item.id,
-                                    })
-                              );
+                              // if (response.childCategories !== null) {
+                              //       response.childCategories.map((item) =>
+                              //             list.push({
+                              //                   article_id: newArticle.id,
+                              //                   category_id: item.id,
+                              //             })
+                              //       );
+                              // }
 
-                              const res =
-                                    await db.new_articles_category.bulkCreate(
-                                          list
-                                    );
+                              // const res =
+                              //       await db.new_articles_category.bulkCreate(
+                              //             list
+                              //       );
 
                               resolve({
                                     status: 0,
                                     message: "Đã thêm bài viết thành công",
-                                    response,
-                                    res,
+                                    newArticle: response,
+                                    // res,
                               });
                         }
                   } catch (error) {
-                        reject(error);
+                        console.log(error);
                   }
             });
       },

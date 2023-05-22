@@ -14,13 +14,11 @@ articlesRoutes.get(
 articlesRoutes.get("/publish_at", articlesController.getByPublishAtController);
 articlesRoutes.get("/:slug/:slug_crc", articlesController.getDetailControllers);
 articlesRoutes.get("/views", articlesController.getByViewsController);
-articlesRoutes.get("/books", articlesController.getBooksController);
 
 articlesRoutes.post("/title", articlesController.getByTitleControllers);
 articlesRoutes.post("/", articlesController.createArticleControllers);
 articlesRoutes.post("/hot-main", articlesController.createHotMainController);
 articlesRoutes.post("/hot-cate", articlesController.createHotCateController);
-articlesRoutes.post("/books", articlesController.createBookControllers);
 
 articlesRoutes.put("/hot-main/:id", articlesController.updateHotMainController);
 articlesRoutes.put("/:id", articlesController.publishController);

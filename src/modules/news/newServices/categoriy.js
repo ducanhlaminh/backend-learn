@@ -2,16 +2,17 @@ const db = require("../../../config/newModels");
 const crc32 = require("crc/crc32");
 const categoryService = {
       create: (data) => {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                   const slug_crc = crc32(data.slug);
+                  console.log("slug_crc", slug_crc);
                   try {
-                        const response = db.new_category.create({
+                        const response = await db.new_category.create({
                               ...data,
                               slug_crc,
                         });
                         resolve(response);
                   } catch (error) {
-                        reject(error);
+                        console.log(error);
                   }
             });
       },

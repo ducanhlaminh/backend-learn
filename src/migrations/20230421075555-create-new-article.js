@@ -41,9 +41,6 @@ module.exports = {
                   updated_user_id: {
                         type: Sequelize.INTEGER,
                   },
-                  publishAt: {
-                        type: "TIMESTAMP",
-                  },
                   createdAt: {
                         allowNull: false,
                         type: "TIMESTAMP",
