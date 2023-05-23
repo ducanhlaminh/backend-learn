@@ -53,25 +53,6 @@ const articlesService = {
                   }
             });
       },
-      getBookService: () => {
-            return new Promise(async (resolve, reject) => {
-                  try {
-                        const books = await db.new_book.findAll({
-                              order: [["publishat", "DESC"]],
-                              where: [
-                                    {
-                                          status: 1,
-                                    },
-                              ],
-                        });
-                        resolve({
-                              books,
-                        });
-                  } catch (error) {
-                        reject(error);
-                  }
-            });
-      },
       getByTitleService: (title) => {
             return new Promise(async (resolve, reject) => {
                   try {
@@ -118,7 +99,9 @@ const articlesService = {
                                                             model: db.new_articles_category,
                                                             attributes: [
                                                                   "article_id",
+                                                                  "publishAt",
                                                             ],
+
                                                             include: [
                                                                   {
                                                                         model: db.new_article,
@@ -127,82 +110,27 @@ const articlesService = {
                                                                                     "title",
                                                                                     "slug",
                                                                                     "slug_crc",
+                                                                                    "sapo",
+                                                                                    "avatar",
                                                                               ],
                                                                   },
                                                             ],
                                                       },
                                                       {
                                                             model: db.new_category,
-                                                            as: "childCategories",
+
                                                             attributes: [
                                                                   "name",
+                                                                  "id",
                                                                   "slug",
                                                                   "slug_crc",
                                                             ],
-                                                            include: [
-                                                                  {
-                                                                        model: db.new_articles_category,
-                                                                        attributes:
-                                                                              [
-                                                                                    "article_id",
-                                                                              ],
-                                                                        include: [
-                                                                              {
-                                                                                    model: db.new_article,
-                                                                                    attributes:
-                                                                                          [
-                                                                                                "title",
-                                                                                                "slug",
-                                                                                                "slug_crc",
-                                                                                          ],
-                                                                              },
-                                                                        ],
-                                                                  },
-                                                            ],
                                                       },
                                                 ],
                                           });
-                                    const hotNewCates =
-                                          await db.new_category.findAll({
-                                                where: {
-                                                      slug,
-                                                },
-                                                attributes: [
-                                                      "name",
-                                                      "slug",
-                                                      "slug_crc",
-                                                ],
-                                                include: [
-                                                      {
-                                                            model: db.new_articles_hot_category,
-                                                            attributes: [
-                                                                  "article_id",
-                                                                  "position",
-                                                            ],
-                                                            limit: 4,
-                                                            order: [
-                                                                  [
-                                                                        "position",
-                                                                        "ASC",
-                                                                  ],
-                                                            ],
-                                                            include: [
-                                                                  {
-                                                                        model: db.new_article,
-                                                                        attributes:
-                                                                              [
-                                                                                    "avatar",
-                                                                                    "title",
-                                                                                    "sapo",
-                                                                              ],
-                                                                  },
-                                                            ],
-                                                      },
-                                                ],
-                                          });
+
                                     resolve({
                                           articles_category,
-                                          hotNewCates,
                                           status: 0,
                                     });
                               }
@@ -239,78 +167,38 @@ const articlesService = {
                               });
                               const response = await db.new_category.findOne({
                                     where: {
-                                          id: data.category_id,
+                                          [Op.or]: {
+                                                id: data.category_id,
+                                                parent_id: data.category_id,
+                                          },
                                     },
                                     attributes: ["name", "id", "slug"],
-                                    include: [
-                                          {
-                                                model: db.new_category,
-                                                as: "childCategories",
-                                                attributes: [
-                                                      "name",
-                                                      "id",
-                                                      "slug",
-                                                ],
-                                          },
-                                    ],
                               });
-                              let list = [
+                              const res = await db.new_articles_category.create(
                                     {
-                                          article_id: newArticle.id,
                                           category_id: data.category_id,
-                                    },
-                              ];
-                              // if (response.childCategories !== null) {
-                              //       response.childCategories.map((item) =>
-                              //             list.push({
-                              //                   article_id: newArticle.id,
-                              //                   category_id: item.id,
-                              //             })
-                              //       );
-                              // }
-
-                              // const res =
-                              //       await db.new_articles_category.bulkCreate(
-                              //             list
-                              //       );
+                                          article_id: newArticle.id,
+                                    }
+                              );
+                              if (response.parent_id) {
+                                    const parent =
+                                          await db.new_articles_category.create(
+                                                {
+                                                      category_id:
+                                                            response.parent_id,
+                                                      article_id: newArticle.id,
+                                                }
+                                          );
+                              }
 
                               resolve({
                                     status: 0,
                                     message: "Đã thêm bài viết thành công",
-                                    newArticle: response,
-                                    // res,
+                                    newArticle,
                               });
                         }
                   } catch (error) {
                         console.log(error);
-                  }
-            });
-      },
-      createBookService: (data) => {
-            return new Promise(async (resolve, reject) => {
-                  const slug_crc = crc32(data.slug);
-                  try {
-                        const check = await db.new_book.findOne({
-                              where: { title: data.title },
-                        });
-                        if (check) {
-                              resolve({
-                                    status: 0,
-                                    message: "Đã tồn tại sách với title này ",
-                              });
-                        } else {
-                              const response = await db.new_book.create({
-                                    ...data,
-                                    slug_crc,
-                              });
-                              resolve({
-                                    status: 0,
-                                    message: "Đã thêm sách thành công",
-                                    response,
-                              });
-                        }
-                  } catch (error) {
-                        reject(error);
                   }
             });
       },
@@ -378,7 +266,7 @@ const articlesService = {
                                           include: [
                                                 {
                                                       model: db.new_category,
-                                                      as: "childCategories",
+
                                                       attributes: [
                                                             "name",
                                                             "id",
@@ -440,72 +328,23 @@ const articlesService = {
                   }
             });
       },
-      publishService: (id) => {
+      publishService: (article_id) => {
             return new Promise(async (resolve, reject) => {
                   try {
                         const now = new Date();
-                        const check = await db.new_article.findOne({
-                              where: {
-                                    id,
-                                    status: 0,
+                        const check = await db.new_articles_category.update(
+                              {
+                                    publishAt: now,
                               },
-                        });
-                        if (check) {
-                              const response = await db.new_article.update(
-                                    {
-                                          publishAt: now,
-                                          status: 1,
+                              {
+                                    where: {
+                                          article_id,
                                     },
-                                    {
-                                          where: [{ id }],
-                                    }
-                              );
-                              if (response[0]) {
-                                    resolve({
-                                          message: "Xuat ban thanh cong",
-                                          status: 0,
-                                    });
                               }
-                        }
+                        );
                         resolve({
-                              message: "Xuat ban khong thanh cong",
-                              status: 1,
-                        });
-                  } catch (error) {
-                        reject(error);
-                  }
-            });
-      },
-      publishBookService: (id) => {
-            return new Promise(async (resolve, reject) => {
-                  try {
-                        const now = new Date();
-                        const check = await db.new_book.findOne({
-                              where: {
-                                    id,
-                                    status: 0,
-                              },
-                        });
-                        if (check) {
-                              const response = await db.new_book.update(
-                                    {
-                                          publishAt: now,
-                                          status: 1,
-                                    },
-                                    {
-                                          where: [{ id }],
-                                    }
-                              );
-                              if (response[0]) {
-                                    resolve({
-                                          message: "Xuat ban thanh cong",
-                                          status: 0,
-                                    });
-                              }
-                        }
-                        resolve({
-                              message: "Xuat ban khong thanh cong",
-                              status: 1,
+                              message: "Xuat ban thanh cong",
+                              status: 0,
                         });
                   } catch (error) {
                         reject(error);
@@ -514,14 +353,14 @@ const articlesService = {
       },
       createHotMain: (data) => {
             return new Promise(async (resolve, reject) => {
-                  const checkPublished = await db.new_article.findOne({
-                        where: { id: data.article_id },
+                  const check = await db.new_articles_hot_main.findOne({
+                        where: { article_id: data.article_id },
                   });
-                  if (checkPublished.status === 1) {
+                  if (!check) {
                         // check position invalid
-                        if (data.position < 1 && data.position > 8) {
+                        if (data.position < 1) {
                               resolve({
-                                    message: "Vi tri set bai hot phai nho hon 8",
+                                    message: "Vi tri khong hop le",
                               });
                         }
                         // Check tại vị trí đó còn trống không
@@ -529,21 +368,12 @@ const articlesService = {
                               await db.new_articles_hot_main.findOne({
                                     where: { position: data.position },
                               });
-                        // Check id bài viết đó đã được set tin hot
-                        const checkArticle =
-                              await db.new_articles_hot_main.findOne({
-                                    where: { article_id: data.article_id },
-                              });
                         if (checkPosition === null) {
-                              if (checkArticle === null) {
-                                    const response =
-                                          await db.new_articles_hot_main.create(
-                                                {
-                                                      ...data,
-                                                }
-                                          );
-                                    resolve(response);
-                              }
+                              const response =
+                                    await db.new_articles_hot_main.create({
+                                          ...data,
+                                    });
+                              resolve(response);
                               resolve({
                                     message: "Bàn viết này đã được set trong tin nổi bật",
                               });
@@ -568,12 +398,11 @@ const articlesService = {
                               },
                         ],
                   });
-                  if (checkArticle === null) {
-                        const checkArticle =
-                              await db.new_articles_hot_main.findOne({
-                                    where: { article_id: data.article_id },
-                              });
-                        if (checkArticle === null) {
+                  if (checkArticle) {
+                        const res = await db.new_articles_hot_category.findOne({
+                              where: { article_id: data.article_id },
+                        });
+                        if (res === null) {
                               const categoryNew = await db.new_category.findOne(
                                     {
                                           where: {
@@ -614,24 +443,21 @@ const articlesService = {
       getByView: () => {
             return new Promise(async (resolve, reject) => {
                   const res = await db.new_article.findAll({
-                        order: [["views", "DESC"]],
-                        attributes: [
-                              "title",
-                              "avatar",
-                              "slug",
-                              "slug_crc",
-                              "views",
+                        where: [
+                              {
+                                    status: 0,
+                              },
                         ],
+                        attributes: ["avatar", "slug", "slug_crc", "title"],
+                        order: [["views", "DESC"]],
                         limit: 5,
                         include: [
                               {
                                     model: db.new_articles_category,
-
                                     attributes: ["category_id"],
                                     include: [
                                           {
                                                 model: db.new_category,
-                                                as: "dataCategory",
                                                 attributes: [
                                                       "name",
                                                       "slug",
@@ -653,22 +479,16 @@ const articlesService = {
                                     slug: "sach",
                               },
                         });
-                        // if (slug !== "") {
-                        //       idCateFilter = await db.new_category.findOne({
-                        //             where: {
-                        //                   slug,
-                        //             },
-                        //       });
-                        // }
                         const res = await db.new_articles_category.findAll({
                               where: {
                                     [Op.not]: {
                                           category_id: idBook,
+                                          publishAt: null,
                                     },
                               },
+                              order: [["publishAt", "DESC"]],
                               include: {
                                     model: db.new_article,
-                                    order: [["publishAt", "DESC"]],
                               },
                               attributes: ["article_id"],
                         });
@@ -687,6 +507,8 @@ const articlesService = {
                               {
                                     model: db.new_articles_hot_category,
                                     attributes: ["article_id", "position"],
+                                    order: [["position", "DESC"]],
+                                    limit: 3,
                                     include: [
                                           {
                                                 model: db.new_article,

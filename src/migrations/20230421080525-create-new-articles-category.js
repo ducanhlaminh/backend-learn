@@ -16,7 +16,9 @@ module.exports = {
                         type: Sequelize.INTEGER,
                   },
                   publishAt: {
-                        type: "TIMESTAMP",
+                        type: Sequelize.DATE,
+                        allowNull: true, // Allow null values
+                        defaultValue: null, // Set default value to null
                   },
                   createdAt: {
                         allowNull: false,

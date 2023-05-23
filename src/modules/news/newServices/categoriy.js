@@ -4,7 +4,6 @@ const categoryService = {
       create: (data) => {
             return new Promise(async (resolve, reject) => {
                   const slug_crc = crc32(data.slug);
-                  console.log("slug_crc", slug_crc);
                   try {
                         const response = await db.new_category.create({
                               ...data,
@@ -25,7 +24,6 @@ const categoryService = {
                               },
                               include: {
                                     model: db.new_category,
-                                    as: "childCategories",
                               },
                         });
                         resolve({ data: response });
@@ -39,6 +37,7 @@ const categoryService = {
                   try {
                         const response = await db.new_category.findAll({
                               attributes: ["name", "id", "slug", "slug_crc"],
+
                               where: [
                                     {
                                           parent_id: null,
@@ -46,7 +45,6 @@ const categoryService = {
                               ],
                               include: {
                                     model: db.new_category,
-                                    as: "childCategories",
                                     attributes: ["name", "id", "slug"],
                               },
                         });

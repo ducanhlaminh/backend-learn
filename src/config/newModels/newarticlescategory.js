@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
                   });
                   new_articles_category.belongsTo(models.new_category, {
                         foreignKey: "category_id",
-                        as: "dataCategory",
                   });
 
                   // define association here
