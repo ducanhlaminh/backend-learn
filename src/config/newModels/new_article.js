@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
                   });
                   new_article.hasMany(models.NewHistoryEdit, {
                         foreignKey: "articles_id",
-                        as: "data_history_edit",
                   });
 
                   // define association here
@@ -28,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
                   sapo: DataTypes.STRING,
                   avatar: DataTypes.STRING,
                   views: DataTypes.NUMBER,
+                  publishAt: DataTypes.DATE,
                   status: DataTypes.NUMBER,
                   created_user_id: DataTypes.NUMBER,
                   updatedAt: DataTypes.DATE,

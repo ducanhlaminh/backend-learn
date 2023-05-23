@@ -5,7 +5,7 @@ const articlesController = {
             res.status(200).json({ hot_news });
       },
       getByViewsController: async (req, res) => {
-            const views_news = await articlesService.getByView();
+            const views_news = await articlesService.getByMostView();
             res.status(200).json(views_news);
       },
       getByPublishAtController: async (req, res) => {

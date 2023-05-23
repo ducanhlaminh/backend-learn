@@ -22,7 +22,6 @@ module.exports = (sequelize, DataTypes) => {
             {
                   article_id: DataTypes.NUMBER,
                   category_id: DataTypes.NUMBER,
-                  publishAt: DataTypes.DATE,
             },
             {
                   sequelize,

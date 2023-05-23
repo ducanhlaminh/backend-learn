@@ -38,6 +38,11 @@ module.exports = {
                         type: Sequelize.INTEGER,
                         defaultValue: 0,
                   },
+                  publishAt: {
+                        type: Sequelize.DATE,
+                        allowNull: true, // Allow null values
+                        defaultValue: null, // Set default value to null
+                  },
                   updated_user_id: {
                         type: Sequelize.INTEGER,
                   },

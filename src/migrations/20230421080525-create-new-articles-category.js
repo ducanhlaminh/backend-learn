@@ -15,11 +15,7 @@ module.exports = {
                   category_id: {
                         type: Sequelize.INTEGER,
                   },
-                  publishAt: {
-                        type: Sequelize.DATE,
-                        allowNull: true, // Allow null values
-                        defaultValue: null, // Set default value to null
-                  },
+
                   createdAt: {
                         allowNull: false,
                         type: "TIMESTAMP",
