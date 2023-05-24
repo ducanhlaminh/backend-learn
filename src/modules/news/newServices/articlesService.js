@@ -16,6 +16,8 @@ const articlesService = {
                                                       "avatar",
                                                       "title",
                                                       "sapo",
+                                                      "slug",
+                                                      "slug_crc",
                                                 ],
                                           },
                                     ],
@@ -30,7 +32,7 @@ const articlesService = {
                                                 "article_id",
                                                 "position",
                                           ],
-                                          limit: 3,
+
                                           order: [["position", "ASC"]],
                                           include: [
                                                 {
@@ -402,13 +404,12 @@ const articlesService = {
                               where: { article_id: data.article_id },
                         });
                         if (res === null) {
-                              const categoryNew = await db.new_category.findOne(
-                                    {
+                              const categoryNew =
+                                    await db.new_articles_category.findOne({
                                           where: {
                                                 article_id: data.article_id,
                                           },
-                                    }
-                              );
+                                    });
                               const response =
                                     await db.new_articles_hot_category.create({
                                           ...data,
@@ -521,8 +522,7 @@ const articlesService = {
                               {
                                     model: db.new_articles_hot_category,
                                     attributes: ["article_id", "position"],
-                                    order: [["position", "DESC"]],
-                                    limit: 3,
+                                    order: [["position", "ASC"]],
                                     include: [
                                           {
                                                 model: db.new_article,
