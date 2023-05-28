@@ -1,27 +1,54 @@
 const express = require("express");
+const { update_articles } = require("../newControllers/articlesController");
 const articlesRoutes = express.Router();
 const articlesController = require("../newControllers/articlesController");
 
-articlesRoutes.get("/hot-main", articlesController.getHotControllers);
 articlesRoutes.get(
-      "/cate/:slug/:slug_crc",
-      articlesController.getByCateControllers
+        "/hot-main",
+        articlesController.get_articles.getHotControllers
 );
 articlesRoutes.get(
-      "/hot-cate/:slug",
-      articlesController.getHotCategoryController
+        "/cate/:slug/:slug_crc",
+        articlesController.get_articles.getByCateControllers
 );
-articlesRoutes.get("/publish_at", articlesController.getByPublishAtController);
-articlesRoutes.get("/:slug/:slug_crc", articlesController.getDetailControllers);
-articlesRoutes.get("/views", articlesController.getByViewsController);
+articlesRoutes.get(
+        "/hot-cate/",
+        articlesController.get_articles.getHotCategoryController
+);
+articlesRoutes.get(
+        "/publish_at",
+        articlesController.get_articles.getByPublishAtController
+);
+articlesRoutes.get(
+        "/:slug/:slug_crc",
+        articlesController.get_articles.getDetailControllers
+);
+articlesRoutes.get(
+        "/views",
+        articlesController.get_articles.getByViewsController
+);
 
-articlesRoutes.post("/title", articlesController.getByTitleControllers);
-articlesRoutes.post("/", articlesController.createArticleControllers);
-articlesRoutes.post("/hot-main", articlesController.createHotMainController);
-articlesRoutes.post("/hot-cate", articlesController.createHotCateController);
+articlesRoutes.post(
+        "/title",
+        articlesController.get_articles.getByTitleControllers
+);
+articlesRoutes.post(
+        "/",
+        articlesController.create_articles.createArticleControllers
+);
+articlesRoutes.post(
+        "/hot-main",
+        articlesController.create_articles.createHotMainController
+);
+articlesRoutes.post(
+        "/hot-cate",
+        articlesController.create_articles.createHotCateController
+);
 
-articlesRoutes.put("/hot-main/:id", articlesController.updateHotMainController);
-articlesRoutes.put("/:id", articlesController.publishController);
-articlesRoutes.put("/books/:id", articlesController.publishBookController);
+articlesRoutes.put(
+        "/hot-main/:id",
+        articlesController.update_articles.updateHotMainController
+);
+articlesRoutes.put("/:id", update_articles.publishController);
 
 module.exports = articlesRoutes;

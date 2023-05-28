@@ -2,27 +2,28 @@ const articles = [
         {
                 title: "Phố Wall chao đảo",
                 sapo: "Sáng 24/5, Phố Wall chìm trong sắc đỏ khi Chủ tịch Hạ viện Kevin McCarthy cho biết các cuộc đàm phán về trần nợ công với Nhà Trắng vẫn bế tắc.",
-                imgSrc: "https://znews-photo.zingcdn.me/w1000/Uploaded/asfzyreslz2/2023_03_18/1200x_1.jpg",
+                avatar: "https://znews-photo.zingcdn.me/w1000/Uploaded/asfzyreslz2/2023_03_18/1200x_1.jpg",
                 slug: "pho-wall-chao-dao",
         },
         {
                 title: "Lý do ông DeSantis tuyên bố tranh cử giữa lúc trò chuyện với Elon Musk",
                 sapo: "Việc Thống đốc Ron DeSantis tuyên bố tranh cử tổng thống trên Twitter Spaces được cho giúp ông tiếp cận lượng khán giả lớn, nhưng nhiều người cũng coi đây là một bước đi sai lầm.",
-                imgSrc: "https://znews-photo.zingcdn.me/w210/Uploaded/afsiy/2023_05_25/2JEUPK5LFFOTTPCAQRBX5LTOFM.jpg",
+                avatar: "https://znews-photo.zingcdn.me/w210/Uploaded/afsiy/2023_05_25/2JEUPK5LFFOTTPCAQRBX5LTOFM.jpg",
                 slug: "ly-do-ong-desantis-tuyen-bo-tranh-cu-giua-luc-tro-chuyen-voi-elon-musk",
         },
         {
                 title: " Dàn mỹ nhân 'Fast X'",
                 sapo: "Dự án mới nhất của nhà Universal Pictures quy tụ dàn diễn viên tài năng, quyến rũ. Họ đều là những ngôi sao tiếng tăm tại kinh đô điện ảnh.",
-                imgSrc: "https://znews-photo.zingcdn.me/w1000/Uploaded/rohunaa/2023_05_23/30_Insanely_Sexy_Gal_Gadot_Photo.jpg",
+                avatar: "https://znews-photo.zingcdn.me/w1000/Uploaded/rohunaa/2023_05_23/30_Insanely_Sexy_Gal_Gadot_Photo.jpg",
                 slug: "dan-my-nhan-fast-x",
         },
         {
                 title: "Học ngành Bất động sản là 'lùa gà'?",
                 sapo: "Không giống với định kiến học lùa gà, ngành Bất động sản ở bậc đại học sẽ đào tạo sinh viên các kiến thức chuyên môn để giúp thị trường phát triển bền vững, ổn định.",
-                imgSrc: "https://znews-photo.zingcdn.me/w480/Uploaded/xpivvpib/2023_05_18/Thumbnail.jpg",
+                avatar: "https://znews-photo.zingcdn.me/w480/Uploaded/xpivvpib/2023_05_18/Thumbnail.jpg",
                 slug: "hoc-nganh-bat-dong-san-la-lua-ga",
         },
+
         {
                 title: "Sự tàn độc đáng ngờ của mẹ Alexander Đại đế",
                 sapo: "Các động thái của Olympias trước và sau vụ ám sát càng củng cố cho giả thuyết bà có liên quan đến cái chết của Vua Philip.",
