@@ -556,41 +556,88 @@ const articlesService = {
                         resolve(res);
                 });
         },
-        getByPublishAt: (slug) => {
+        getByPublishAt: (slug_crc) => {
                 try {
                         return new Promise(async (resolve, reject) => {
-                                const idBook = await db.new_category.findOne({
-                                        where: [{ slug: "sach" }],
-                                        attributes: [
-                                                "id",
-                                                "slug",
-                                                "slug_crc",
-                                                "parent_id",
-                                                "name",
-                                        ],
-                                });
-                                const list_article_new =
-                                        await db.new_articles_category.findAll({
-                                                where: {
-                                                        [Op.not]: {
-                                                                category_id:
-                                                                        idBook.id,
-                                                        },
-                                                },
-                                                include: [
-                                                        {
-                                                                model: db.new_article,
-                                                                required: true,
-                                                        },
-                                                ],
-                                                order: [
-                                                        [
-                                                                db.new_article,
-                                                                "publishAt",
-                                                                "DESC",
+                                let list_article_new;
+                                if (!slug_crc) {
+                                        const idBook =
+                                                await db.new_category.findOne({
+                                                        where: [
+                                                                {
+                                                                        slug: "sach",
+                                                                },
                                                         ],
-                                                ],
-                                        });
+                                                        attributes: [
+                                                                "id",
+                                                                "slug",
+                                                                "slug_crc",
+                                                                "parent_id",
+                                                                "name",
+                                                        ],
+                                                });
+                                        console.log(idBook);
+                                        list_article_new =
+                                                await db.new_articles_category.findAll(
+                                                        {
+                                                                where: {
+                                                                        [Op.not]:
+                                                                                {
+                                                                                        category_id:
+                                                                                                idBook.id,
+                                                                                },
+                                                                },
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_article,
+                                                                                required: true,
+                                                                        },
+                                                                ],
+                                                                order: [
+                                                                        [
+                                                                                db.new_article,
+                                                                                "publishAt",
+                                                                                "DESC",
+                                                                        ],
+                                                                ],
+                                                        }
+                                                );
+                                } else {
+                                        console.log(slug_crc);
+                                        const idCate =
+                                                await db.new_category.findOne({
+                                                        where: [{ slug_crc }],
+                                                        attributes: [
+                                                                "id",
+                                                                "slug",
+                                                                "slug_crc",
+                                                                "parent_id",
+                                                                "name",
+                                                        ],
+                                                });
+                                        list_article_new =
+                                                await db.new_articles_category.findAll(
+                                                        {
+                                                                where: {
+                                                                        category_id:
+                                                                                idCate.id,
+                                                                },
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_article,
+                                                                                required: true,
+                                                                        },
+                                                                ],
+                                                                order: [
+                                                                        [
+                                                                                db.new_article,
+                                                                                "publishAt",
+                                                                                "DESC",
+                                                                        ],
+                                                                ],
+                                                        }
+                                                );
+                                }
 
                                 resolve(list_article_new);
                         });
@@ -600,7 +647,7 @@ const articlesService = {
         },
         getHotCategoryService: (slug_crc) => {
                 return new Promise(async (resolve, reject) => {
-                        const res = await db.new_category.findAll({
+                        const res = await db.new_category.findOne({
                                 where: {
                                         slug_crc,
                                 },
@@ -621,6 +668,7 @@ const articlesService = {
                                                                         "slug",
                                                                         "slug_crc",
                                                                         "title",
+                                                                        "sapo",
                                                                 ],
                                                         },
                                                 ],
@@ -628,6 +676,46 @@ const articlesService = {
                                 ],
                         });
                         resolve(res);
+                });
+        },
+        getHotBoxSubCategoryService: (slug_crc) => {
+                return new Promise(async (resolve, reject) => {
+                        const res = await db.new_category.findOne({
+                                where: {
+                                        slug_crc,
+                                },
+                                attributes: ["name", "slug", "slug_crc", "id"],
+                        });
+                        const child = await db.new_category.findAll({
+                                where: {
+                                        parent_id: res.id,
+                                },
+                                attributes: ["name", "slug", "slug_crc", "id"],
+                                include: [
+                                        {
+                                                model: db.new_articles_hot_category,
+                                                attributes: [
+                                                        "article_id",
+                                                        "position",
+                                                ],
+                                                order: [["position", "ASC"]],
+                                                include: [
+                                                        {
+                                                                model: db.new_article,
+                                                                attributes: [
+                                                                        "avatar",
+                                                                        "slug",
+                                                                        "slug_crc",
+                                                                        "title",
+                                                                        "sapo",
+                                                                ],
+                                                        },
+                                                ],
+                                        },
+                                ],
+                        });
+
+                        resolve(child);
                 });
         },
 };

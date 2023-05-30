@@ -15,23 +15,25 @@ const categoryService = {
                         }
                 });
         },
-        getById: (id) => {
+        getSubCateService: (slug_crc) => {
                 return new Promise(async (resolve, reject) => {
                         try {
+                                console.log(slug_crc);
                                 const response = await db.new_category.findOne({
                                         where: {
-                                                id,
+                                                slug_crc,
                                         },
                                         include: {
                                                 model: db.new_category,
                                         },
                                 });
-                                resolve({ data: response });
+                                resolve(response);
                         } catch (error) {
                                 reject(error);
                         }
                 });
         },
+
         getAll: () => {
                 return new Promise(async (resolve, reject) => {
                         try {

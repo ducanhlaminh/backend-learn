@@ -2,11 +2,22 @@ const articlesService = require("../newServices/articlesService");
 const articlesController = {
         get_articles: {
                 getHotCategoryController: async (req, res) => {
-                        const response =
+                        const hotArticlesCate =
                                 await articlesService.getHotCategoryService(
                                         req.query.slug_crc
                                 );
-                        res.status(200).json(response);
+                        const boxSubCate =
+                                await articlesService.getHotBoxSubCategoryService(
+                                        req.query.slug_crc
+                                );
+                        res.status(200).json({ hotArticlesCate, boxSubCate });
+                },
+                getHotSubCategoryController: async (req, res) => {
+                        const box =
+                                await articlesService.getHotBoxSubCategoryService(
+                                        req.query.slug_crc
+                                );
+                        res.status(200).json({ box });
                 },
                 getHotControllers: async (req, res) => {
                         const hot_news = await articlesService.getHotService();
@@ -42,7 +53,7 @@ const articlesController = {
                         const news = await articlesService.getByPublishAt(
                                 req.query.slug
                         );
-                        res.status(200).json(news);
+                        res.status(200).json({ newArticleCate: news });
                 },
         },
         update_articles: {
