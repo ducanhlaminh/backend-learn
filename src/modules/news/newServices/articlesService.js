@@ -519,41 +519,104 @@ const articlesService = {
                         });
                 });
         },
-        getByMostView: () => {
+        getByMostView: (slug_crc) => {
                 return new Promise(async (resolve, reject) => {
-                        const res = await db.new_article.findAll({
-                                where: [
-                                        {
-                                                status: 1,
-                                        },
-                                ],
-                                attributes: [
-                                        "avatar",
-                                        "slug",
-                                        "slug_crc",
-                                        "title",
-                                        "views",
-                                ],
-                                order: [["views", "DESC"]],
-                                limit: 5,
-                                include: [
-                                        {
-                                                model: db.new_articles_category,
-                                                attributes: ["category_id"],
+                        var list_article_most_views;
+                        if (slug_crc) {
+                                const idCate = await db.new_category.findOne({
+                                        where: [{ slug_crc }],
+                                        attributes: [
+                                                "id",
+                                                "slug",
+                                                "slug_crc",
+                                                "parent_id",
+                                                "name",
+                                        ],
+                                });
+                                list_article_most_views =
+                                        await db.new_articles_category.findAll({
+                                                where: {
+                                                        category_id: idCate.id,
+                                                },
+                                                limit: 5,
                                                 include: [
                                                         {
-                                                                model: db.new_category,
+                                                                model: db.new_article,
+                                                                required: true,
                                                                 attributes: [
-                                                                        "name",
+                                                                        "avatar",
                                                                         "slug",
                                                                         "slug_crc",
+                                                                        "title",
+                                                                        "views",
+                                                                ],
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_articles_category,
+                                                                                attributes: [
+                                                                                        "category_id",
+                                                                                ],
+                                                                                include: [
+                                                                                        {
+                                                                                                model: db.new_category,
+                                                                                                attributes: [
+                                                                                                        "name",
+                                                                                                        "slug",
+                                                                                                        "slug_crc",
+                                                                                                ],
+                                                                                        },
+                                                                                ],
+                                                                        },
                                                                 ],
                                                         },
                                                 ],
-                                        },
-                                ],
-                        });
-                        resolve(res);
+                                                order: [
+                                                        [
+                                                                db.new_article,
+                                                                "views",
+                                                                "DESC",
+                                                        ],
+                                                ],
+                                        });
+                        } else {
+                                list_article_most_views =
+                                        await db.new_article.findAll({
+                                                // where: [
+                                                //         {
+                                                //                 status: 1,
+                                                //         },
+                                                // ],
+                                                limit: 5,
+                                                attributes: [
+                                                        "avatar",
+                                                        "slug",
+                                                        "slug_crc",
+                                                        "title",
+                                                        "views",
+                                                ],
+                                                order: [["views", "DESC"]],
+
+                                                include: [
+                                                        {
+                                                                model: db.new_articles_category,
+                                                                attributes: [
+                                                                        "category_id",
+                                                                ],
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_category,
+                                                                                attributes: [
+                                                                                        "name",
+                                                                                        "slug",
+                                                                                        "slug_crc",
+                                                                                ],
+                                                                        },
+                                                                ],
+                                                        },
+                                                ],
+                                        });
+                        }
+                        resolve(list_article_most_views);
                 });
         },
         getByPublishAt: (slug_crc) => {

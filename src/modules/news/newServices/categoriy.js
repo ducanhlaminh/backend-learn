@@ -1,13 +1,15 @@
+const { Sequelize } = require("sequelize");
 const db = require("../../../config/newModels");
 const crc32 = require("crc/crc32");
 const categoryService = {
         create: (data) => {
                 return new Promise(async (resolve, reject) => {
-                        const slug_crc = crc32(data.slug);
+                        const query = `SELECT CRC32('${data.slug}') AS crcValue;`;
+                        const result = await db.sequelize.query(query);
                         try {
                                 const response = await db.new_category.create({
                                         ...data,
-                                        slug_crc,
+                                        slug_crc: result[0][0].crcValue,
                                 });
                                 resolve(response);
                         } catch (error) {

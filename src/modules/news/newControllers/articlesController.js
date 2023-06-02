@@ -45,8 +45,9 @@ const articlesController = {
                         res.status(200).json(response);
                 },
                 getByViewsController: async (req, res) => {
-                        const views_news =
-                                await articlesService.getByMostView();
+                        const views_news = await articlesService.getByMostView(
+                                req.query.slug_crc
+                        );
                         res.status(200).json(views_news);
                 },
                 getByPublishAtController: async (req, res) => {
