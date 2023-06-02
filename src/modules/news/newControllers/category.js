@@ -1,4 +1,5 @@
 const categoryService = require("../newServices/categoriy");
+const { cates } = require("../../../untils/dataDemo");
 
 const categoryControllers = {
         createCategoryControllers: async (req, res) => {
@@ -14,6 +15,10 @@ const categoryControllers = {
                 const response = await categoryService.getSubCateService(
                         req.params.slug_crc
                 );
+                res.status(200).json(response);
+        },
+        insertData: async (req, res) => {
+                const response = await categoryService.insertDataService(cates);
                 res.status(200).json(response);
         },
 };

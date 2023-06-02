@@ -396,6 +396,7 @@ const articlesService = {
                                         await db.new_article.update(
                                                 {
                                                         publishAt: now,
+                                                        status: 1,
                                                 },
                                                 {
                                                         where: {
@@ -628,7 +629,7 @@ const articlesService = {
                                                 await db.new_category.findOne({
                                                         where: [
                                                                 {
-                                                                        slug: "sach",
+                                                                        slug: "Xuất bản",
                                                                 },
                                                         ],
                                                         attributes: [
@@ -639,17 +640,16 @@ const articlesService = {
                                                                 "name",
                                                         ],
                                                 });
-                                        console.log(idBook);
                                         list_article_new =
                                                 await db.new_articles_category.findAll(
                                                         {
-                                                                where: {
-                                                                        [Op.not]:
-                                                                                {
-                                                                                        category_id:
-                                                                                                idBook.id,
-                                                                                },
-                                                                },
+                                                                // where: {
+                                                                //         [Op.not]:
+                                                                //                 {
+                                                                //                         category_id:
+                                                                //                                 idBook?.id,
+                                                                //                 },
+                                                                // },
                                                                 include: [
                                                                         {
                                                                                 model: db.new_article,
@@ -663,6 +663,7 @@ const articlesService = {
                                                                                 "DESC",
                                                                         ],
                                                                 ],
+                                                                limit: 20,
                                                         }
                                                 );
                                 } else {
@@ -779,6 +780,115 @@ const articlesService = {
                         });
 
                         resolve(child);
+                });
+        },
+        insertDataService: (data) => {
+                return new Promise(async (resolve, reject) => {
+                        for (let articels of data) {
+                                const subCate = await db.new_category.findOne({
+                                        where: {
+                                                slug: articels.slug,
+                                        },
+                                        attributes: ["slug", "id"],
+                                        include: [
+                                                {
+                                                        model: db.new_category,
+                                                        attributes: [
+                                                                "slug",
+                                                                "id",
+                                                        ],
+                                                },
+                                        ],
+                                });
+                                for (
+                                        let i = 0;
+                                        i < articels.article.length;
+                                        i++
+                                ) {
+                                        const slug_crc = crc32(
+                                                articels.article[i].slug
+                                        );
+                                        const newArticle =
+                                                await db.new_article.create({
+                                                        ...articels.article[i],
+                                                        slug_crc,
+                                                });
+                                        if (i < 5) {
+                                                const res =
+                                                        await db.new_articles_category.create(
+                                                                {
+                                                                        category_id:
+                                                                                subCate.id,
+
+                                                                        article_id: newArticle.id,
+                                                                }
+                                                        );
+                                        } else if (
+                                                subCate.new_categories.length >=
+                                                Math.floor(i / 5)
+                                        ) {
+                                                const res =
+                                                        await db.new_articles_category.create(
+                                                                {
+                                                                        category_id:
+                                                                                subCate
+                                                                                        .new_categories[
+                                                                                        Math.floor(
+                                                                                                i /
+                                                                                                        5
+                                                                                        ) -
+                                                                                                1
+                                                                                ]
+                                                                                        .id,
+                                                                        article_id: newArticle.id,
+                                                                }
+                                                        );
+
+                                                const parent =
+                                                        await db.new_articles_category.create(
+                                                                {
+                                                                        category_id:
+                                                                                subCate.id,
+
+                                                                        article_id: newArticle.id,
+                                                                }
+                                                        );
+                                        }
+                                }
+                        }
+                        resolve({ message: "okkkk" });
+                });
+        },
+        pushlishedAllService: () => {
+                return new Promise(async (resolve, reject) => {
+                        const articels = await db.new_article.findAll({
+                                attributes: ["id"],
+                        });
+                        for (let article of articels) {
+                                return new Promise(async (resolve, reject) => {
+                                        try {
+                                                const now = new Date();
+                                                const infor_article =
+                                                        await db.new_article.update(
+                                                                {
+                                                                        publishAt: now,
+                                                                },
+                                                                {
+                                                                        where: {
+                                                                                id: article.id,
+                                                                        },
+                                                                }
+                                                        );
+                                                resolve({
+                                                        message: "Xuat ban thanh cong",
+                                                        infor_article,
+                                                        status: 0,
+                                                });
+                                        } catch (error) {
+                                                reject(error);
+                                        }
+                                });
+                        }
                 });
         },
 };

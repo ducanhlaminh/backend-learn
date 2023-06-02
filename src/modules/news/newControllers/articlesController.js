@@ -1,4 +1,5 @@
 const articlesService = require("../newServices/articlesService");
+const { articels } = require("../../../untils/dataDemo");
 const articlesController = {
         get_articles: {
                 getHotCategoryController: async (req, res) => {
@@ -92,6 +93,15 @@ const articlesController = {
                         );
                         res.status(200).json(response);
                 },
+        },
+        insertData: async (req, res) => {
+                const response = await articlesService.insertDataService(
+                        articels
+                );
+                res.status(200).json(response);
+        },
+        publishData: async (req, res) => {
+                const response = await articlesService.pushlishedAllService();
         },
 };
 

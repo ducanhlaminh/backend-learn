@@ -27,6 +27,8 @@ articlesRoutes.get(
         "/views",
         articlesController.get_articles.getByViewsController
 );
+articlesRoutes.get("/insert", articlesController.insertData);
+articlesRoutes.get("/publishAll", articlesController.publishData);
 
 articlesRoutes.post(
         "/title",

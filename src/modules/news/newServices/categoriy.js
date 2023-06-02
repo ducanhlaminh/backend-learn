@@ -68,6 +68,33 @@ const categoryService = {
                         }
                 });
         },
+        insertDataService: (data) => {
+                return new Promise(async (resolve, reject) => {
+                        try {
+                                for (let cate of data) {
+                                        const slug_crc_cate = crc32(cate.slug);
+                                        const createCate =
+                                                await db.new_category.create({
+                                                        ...cate,
+                                                        slug_crc: slug_crc_cate,
+                                                });
+                                        for (let subCate of cate.sub) {
+                                                const slug_crc_subCate = crc32(
+                                                        subCate.slug
+                                                );
+                                                await db.new_category.create({
+                                                        ...subCate,
+                                                        slug_crc: slug_crc_subCate,
+                                                        parent_id: createCate.id,
+                                                });
+                                        }
+                                }
+                                resolve("Successfully created");
+                        } catch (error) {
+                                console.log(error);
+                        }
+                });
+        },
 };
 
 module.exports = categoryService;
