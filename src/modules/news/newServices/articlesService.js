@@ -667,7 +667,6 @@ const articlesService = {
                                                         }
                                                 );
                                 } else {
-                                        console.log(slug_crc);
                                         const idCate =
                                                 await db.new_category.findOne({
                                                         where: [{ slug_crc }],
@@ -813,7 +812,7 @@ const articlesService = {
                                                         ...articels.article[i],
                                                         slug_crc,
                                                 });
-                                        if (i < 5) {
+                                        if (i < 9) {
                                                 const res =
                                                         await db.new_articles_category.create(
                                                                 {
@@ -825,7 +824,7 @@ const articlesService = {
                                                         );
                                         } else if (
                                                 subCate.new_categories.length >=
-                                                Math.floor(i / 5)
+                                                Math.floor(i / 9)
                                         ) {
                                                 const res =
                                                         await db.new_articles_category.create(
@@ -835,7 +834,7 @@ const articlesService = {
                                                                                         .new_categories[
                                                                                         Math.floor(
                                                                                                 i /
-                                                                                                        5
+                                                                                                        9
                                                                                         ) -
                                                                                                 1
                                                                                 ]
@@ -864,30 +863,51 @@ const articlesService = {
                         const articels = await db.new_article.findAll({
                                 attributes: ["id"],
                         });
+                        let position = 1;
+                        let categoryNew;
+                        let lengthCate = await db.new_category.findAll();
                         for (let article of articels) {
-                                return new Promise(async (resolve, reject) => {
-                                        try {
-                                                const now = new Date();
-                                                const infor_article =
-                                                        await db.new_article.update(
-                                                                {
-                                                                        publishAt: now,
+                                if (lengthCate < 0) {
+                                        break;
+                                }
+                                lengthCate--;
+                                if (position > 9) {
+                                        position = 1;
+                                }
+                                if (position === 1) {
+                                        categoryNew =
+                                                await db.new_articles_category.findOne(
+                                                        {
+                                                                where: {
+                                                                        article_id: article.id,
                                                                 },
-                                                                {
-                                                                        where: {
-                                                                                id: article.id,
-                                                                        },
-                                                                }
-                                                        );
-                                                resolve({
-                                                        message: "Xuat ban thanh cong",
-                                                        infor_article,
-                                                        status: 0,
-                                                });
-                                        } catch (error) {
-                                                reject(error);
-                                        }
-                                });
+                                                        }
+                                                );
+                                }
+                                const now = new Date();
+                                const infor_article =
+                                        await db.new_article.update(
+                                                {
+                                                        publishAt: now,
+                                                        status: 1,
+                                                },
+                                                {
+                                                        where: {
+                                                                id: article.id,
+                                                        },
+                                                }
+                                        );
+
+                                const response =
+                                        await db.new_articles_hot_category.create(
+                                                {
+                                                        article_id: article.id,
+                                                        position,
+                                                        category_id:
+                                                                categoryNew.category_id,
+                                                }
+                                        );
+                                position = position + 1;
                         }
                 });
         },

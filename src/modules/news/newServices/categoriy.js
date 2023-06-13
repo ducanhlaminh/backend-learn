@@ -20,7 +20,6 @@ const categoryService = {
         getSubCateService: (slug_crc) => {
                 return new Promise(async (resolve, reject) => {
                         try {
-                                console.log(slug_crc);
                                 const response = await db.new_category.findOne({
                                         where: {
                                                 slug_crc,

@@ -53,7 +53,8 @@ const articlesController = {
                 },
                 getByPublishAtController: async (req, res) => {
                         const news = await articlesService.getByPublishAt(
-                                req.query.slug
+                                req.query.slug,
+                                req.query.text
                         );
                         res.status(200).json({ newArticleCate: news });
                 },
@@ -102,6 +103,7 @@ const articlesController = {
         },
         publishData: async (req, res) => {
                 const response = await articlesService.pushlishedAllService();
+                res.status(200).json(response);
         },
 };
 
