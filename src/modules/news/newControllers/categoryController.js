@@ -1,4 +1,4 @@
-const categoryService = require("../newServices/categoriy");
+const categoryService = require("../newServices/categoryService");
 const { cates } = require("../../../untils/dataDemo");
 
 const categoryControllers = {

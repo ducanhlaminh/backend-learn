@@ -2,8 +2,8 @@ const db = require("../../../config/newModels");
 const { Op } = require("sequelize");
 const crc32 = require("crc/crc32");
 const articlesService = {
-        getHotService: (req, res) => {
-                return new Promise(async (resolve, reject) => {
+        get: {
+                getHotService: async (req, res) => {
                         try {
                                 const hot_main =
                                         await db.new_articles_hot_main.findAll({
@@ -58,17 +58,15 @@ const articlesService = {
                                                         },
                                                 ],
                                         });
-                                resolve({
+                                return {
                                         hot_main,
                                         hot_categories,
-                                });
+                                };
                         } catch (error) {
-                                reject(error);
+                                return error;
                         }
-                });
-        },
-        getByTitleService: (title) => {
-                return new Promise(async (resolve, reject) => {
+                },
+                getByTitleService: async (title) => {
                         try {
                                 const articles = await db.new_article.findAll({
                                         attributes: [
@@ -83,17 +81,15 @@ const articlesService = {
                                                 },
                                         },
                                 });
-                                resolve({
+                                return {
                                         data: articles,
                                         status: 0,
-                                });
+                                };
                         } catch (error) {
-                                reject(error);
+                                return error;
                         }
-                });
-        },
-        getByCateService: (slug, slug_crc) => {
-                return new Promise(async (resolve, reject) => {
+                },
+                getByCateService: async (slug, slug_crc) => {
                         try {
                                 // const checkcrc = await db.new_category.findOne({
                                 //       where: [{ slug_crc }],
@@ -151,94 +147,264 @@ const articlesService = {
                                                                         ],
                                                                 }
                                                         );
-                                                resolve({
+                                                return {
                                                         articles_category,
                                                         list_article_new,
                                                         status: 0,
-                                                });
+                                                };
                                         }
                                 } else {
-                                        resolve({
+                                        return {
                                                 message: "Khong tim thay danh muc",
-                                        });
+                                        };
                                 }
                         } catch (error) {
-                                reject(error);
+                                return error;
                         }
-                });
-        },
-        createArticleService: (data) => {
-                return new Promise(async (resolve, reject) => {
-                        const slug_crc = crc32(data.slug);
-                        try {
-                                // Check article some title or some slug_crc
-                                const check = await db.new_article.findOne({
-                                        where: {
-                                                [Op.or]: {
-                                                        title: data.title,
-                                                        slug_crc: slug_crc,
-                                                },
-                                        },
+                },
+                getByMostView: async (slug_crc) => {
+                        var list_article_most_views;
+                        if (slug_crc) {
+                                const idCate = await db.new_category.findOne({
+                                        where: [{ slug_crc }],
+                                        attributes: [
+                                                "id",
+                                                "slug",
+                                                "slug_crc",
+                                                "parent_id",
+                                                "name",
+                                        ],
                                 });
-                                if (check) {
-                                        resolve({
-                                                status: 0,
-                                                message: "Đã tồn tại bài viết với title này ",
-                                        });
-                                } else {
-                                        const newArticle =
-                                                await db.new_article.create({
-                                                        ...data,
-                                                        slug_crc,
-                                                });
-                                        const response =
-                                                await db.new_category.findOne({
-                                                        where: {
-                                                                [Op.or]: {
-                                                                        id: data.category_id,
-                                                                        parent_id: data.category_id,
-                                                                },
-                                                        },
-                                                        attributes: [
-                                                                "name",
-                                                                "id",
-                                                                "slug",
-                                                                "parent_id",
-                                                        ],
-                                                });
-                                        const res =
-                                                await db.new_articles_category.create(
+                                list_article_most_views =
+                                        await db.new_articles_category.findAll({
+                                                where: {
+                                                        category_id: idCate.id,
+                                                },
+                                                limit: 5,
+                                                include: [
                                                         {
-                                                                category_id:
-                                                                        data.category_id,
-                                                                article_id: newArticle.id,
-                                                        }
-                                                );
-
-                                        if (response.parent_id) {
-                                                const parent =
-                                                        await db.new_articles_category.create(
-                                                                {
-                                                                        category_id:
-                                                                                response.parent_id,
-                                                                        article_id: newArticle.id,
-                                                                }
-                                                        );
-                                        }
-
-                                        resolve({
-                                                status: 0,
-                                                message: "Đã thêm bài viết thành công",
-                                                newArticle,
+                                                                model: db.new_article,
+                                                                required: true,
+                                                                attributes: [
+                                                                        "avatar",
+                                                                        "slug",
+                                                                        "slug_crc",
+                                                                        "title",
+                                                                        "views",
+                                                                ],
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_articles_category,
+                                                                                attributes: [
+                                                                                        "category_id",
+                                                                                ],
+                                                                                include: [
+                                                                                        {
+                                                                                                model: db.new_category,
+                                                                                                attributes: [
+                                                                                                        "name",
+                                                                                                        "slug",
+                                                                                                        "slug_crc",
+                                                                                                ],
+                                                                                        },
+                                                                                ],
+                                                                        },
+                                                                ],
+                                                        },
+                                                ],
+                                                order: [
+                                                        [
+                                                                db.new_article,
+                                                                "views",
+                                                                "DESC",
+                                                        ],
+                                                ],
                                         });
-                                }
-                        } catch (error) {
-                                console.log(error);
+                        } else {
+                                list_article_most_views =
+                                        await db.new_article.findAll({
+                                                // where: [
+                                                //         {
+                                                //                 status: 1,
+                                                //         },
+                                                // ],
+                                                limit: 5,
+                                                attributes: [
+                                                        "avatar",
+                                                        "slug",
+                                                        "slug_crc",
+                                                        "title",
+                                                        "views",
+                                                ],
+                                                order: [["views", "DESC"]],
+
+                                                include: [
+                                                        {
+                                                                model: db.new_articles_category,
+                                                                attributes: [
+                                                                        "category_id",
+                                                                ],
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_category,
+                                                                                attributes: [
+                                                                                        "name",
+                                                                                        "slug",
+                                                                                        "slug_crc",
+                                                                                ],
+                                                                        },
+                                                                ],
+                                                        },
+                                                ],
+                                        });
                         }
-                });
-        },
-        getDetailService: (slug, slug_crc) => {
-                return new Promise(async (resolve, reject) => {
+                        return list_article_most_views;
+                },
+                getByPublishAt: async (slug_crc) => {
+                        let list_article_new;
+                        if (!slug_crc) {
+                                const idBook = await db.new_category.findOne({
+                                        where: [
+                                                {
+                                                        slug: "Xuất bản",
+                                                },
+                                        ],
+                                        attributes: [
+                                                "id",
+                                                "slug",
+                                                "slug_crc",
+                                                "parent_id",
+                                                "name",
+                                        ],
+                                });
+                                list_article_new =
+                                        await db.new_articles_category.findAll({
+                                                // where: {
+                                                //         [Op.not]:
+                                                //                 {
+                                                //                         category_id:
+                                                //                                 idBook?.id,
+                                                //                 },
+                                                // },
+                                                include: [
+                                                        {
+                                                                model: db.new_article,
+                                                                required: true,
+                                                        },
+                                                ],
+                                                order: [
+                                                        [
+                                                                db.new_article,
+                                                                "publishAt",
+                                                                "DESC",
+                                                        ],
+                                                ],
+                                                limit: 20,
+                                        });
+                        } else {
+                                const idCate = await db.new_category.findOne({
+                                        where: [{ slug_crc }],
+                                        attributes: [
+                                                "id",
+                                                "slug",
+                                                "slug_crc",
+                                                "parent_id",
+                                                "name",
+                                        ],
+                                });
+                                list_article_new =
+                                        await db.new_articles_category.findAll({
+                                                where: {
+                                                        category_id: idCate.id,
+                                                },
+                                                include: [
+                                                        {
+                                                                model: db.new_article,
+                                                                required: true,
+                                                        },
+                                                ],
+                                                order: [
+                                                        [
+                                                                db.new_article,
+                                                                "publishAt",
+                                                                "DESC",
+                                                        ],
+                                                ],
+                                        });
+                        }
+
+                        return list_article_new;
+                },
+                getHotCategoryService: async (slug_crc) => {
+                        const res = await db.new_category.findOne({
+                                where: {
+                                        slug_crc,
+                                },
+                                attributes: ["name", "slug", "slug_crc"],
+                                include: [
+                                        {
+                                                model: db.new_articles_hot_category,
+                                                attributes: [
+                                                        "article_id",
+                                                        "position",
+                                                ],
+                                                order: [["position", "ASC"]],
+                                                include: [
+                                                        {
+                                                                model: db.new_article,
+                                                                attributes: [
+                                                                        "avatar",
+                                                                        "slug",
+                                                                        "slug_crc",
+                                                                        "title",
+                                                                        "sapo",
+                                                                ],
+                                                        },
+                                                ],
+                                        },
+                                ],
+                        });
+                        return res;
+                },
+                getHotBoxSubCategoryService: async (slug_crc) => {
+                        const res = await db.new_category.findOne({
+                                where: {
+                                        slug_crc,
+                                },
+                                attributes: ["name", "slug", "slug_crc", "id"],
+                        });
+                        const child = await db.new_category.findAll({
+                                where: {
+                                        parent_id: res.id,
+                                },
+                                attributes: ["name", "slug", "slug_crc", "id"],
+                                include: [
+                                        {
+                                                model: db.new_articles_hot_category,
+                                                attributes: [
+                                                        "article_id",
+                                                        "position",
+                                                ],
+                                                order: [["position", "ASC"]],
+                                                include: [
+                                                        {
+                                                                model: db.new_article,
+                                                                attributes: [
+                                                                        "avatar",
+                                                                        "slug",
+                                                                        "slug_crc",
+                                                                        "title",
+                                                                        "sapo",
+                                                                ],
+                                                        },
+                                                ],
+                                        },
+                                ],
+                        });
+
+                        return child;
+                },
+                getDetailService: async (slug, slug_crc) => {
                         const checkslugsrc = await db.new_article.findOne({
                                 where: [
                                         {
@@ -373,23 +539,40 @@ const articlesService = {
                                                         ],
                                                 });
 
-                                        resolve({
+                                        return {
                                                 article,
                                                 articlesCate,
                                                 cateChild,
-                                        });
+                                        };
                                 } else {
-                                        resolve({
+                                        return {
                                                 message: "Khong tim thay bai viet",
-                                        });
+                                        };
                                 }
                         } else {
-                                resolve({ message: "Khong tim thay bai viet" });
+                                return { message: "Khong tim thay bai viet" };
                         }
-                });
+                },
         },
-        publishService: (article_id) => {
-                return new Promise(async (resolve, reject) => {
+        update: {
+                updateHotMain: async (data, id) => {
+                        const response = await db.new_articles_hot_main.update(
+                                {
+                                        position: data.position,
+                                },
+                                { where: { article_id: id } }
+                        );
+                        if (response !== null) {
+                                return {
+                                        message: "Cập nhật vị trí thành công",
+                                };
+                        }
+
+                        return {
+                                message: "Cập nhật vị trí không thành công",
+                        };
+                },
+                publishService: async (article_id) => {
                         try {
                                 const now = new Date();
                                 const infor_article =
@@ -404,27 +587,27 @@ const articlesService = {
                                                         },
                                                 }
                                         );
-                                resolve({
+                                return {
                                         message: "Xuat ban thanh cong",
                                         infor_article,
                                         status: 0,
-                                });
+                                };
                         } catch (error) {
-                                reject(error);
+                                return error;
                         }
-                });
+                },
         },
-        createHotMain: (data) => {
-                return new Promise(async (resolve, reject) => {
+        create: {
+                createHotMain: async (data) => {
                         const check = await db.new_articles_hot_main.findOne({
                                 where: { article_id: data.article_id },
                         });
                         if (!check) {
                                 // check position invalid
                                 if (data.position < 1) {
-                                        resolve({
+                                        return {
                                                 message: "Vi tri khong hop le",
-                                        });
+                                        };
                                 }
                                 // Check tại vị trí đó còn trống không
                                 const checkPosition =
@@ -440,24 +623,22 @@ const articlesService = {
                                                                 ...data,
                                                         }
                                                 );
-                                        resolve(response);
-                                        resolve({
+                                        return response;
+                                        return {
                                                 message: "Bàn viết này đã được set trong tin nổi bật",
-                                        });
+                                        };
                                 } else {
-                                        resolve({
+                                        return {
                                                 message: "Set vị trí nổi bật không thành công",
-                                        });
+                                        };
                                 }
                         } else {
-                                resolve({
+                                return {
                                         message: "Bài viết chưa được xuất bản",
-                                });
+                                };
                         }
-                });
-        },
-        createHotCate: (data) => {
-                return new Promise(async (resolve, reject) => {
+                },
+                createHotCate: async (data) => {
                         const checkArticle = await db.new_article.findOne({
                                 where: [
                                         {
@@ -491,298 +672,86 @@ const articlesService = {
                                                                         categoryNew.category_id,
                                                         }
                                                 );
-                                        resolve(response);
+                                        return response;
                                 }
-                                resolve({
+                                return {
                                         message: "Bàn viết này đã được set trong tin nổi bật",
-                                });
+                                };
                         } else {
-                                resolve({ message: "Failed to create" });
+                                return { message: "Failed to create" };
                         }
-                });
-        },
-        updateHotMain: (data, id) => {
-                return new Promise(async (resolve, reject) => {
-                        const response = await db.new_articles_hot_main.update(
-                                {
-                                        position: data.position,
-                                },
-                                { where: { article_id: id } }
-                        );
-                        if (response !== null) {
-                                resolve({
-                                        message: "Cập nhật vị trí thành công",
-                                });
-                        }
-
-                        resolve({
-                                message: "Cập nhật vị trí không thành công",
-                        });
-                });
-        },
-        getByMostView: (slug_crc) => {
-                return new Promise(async (resolve, reject) => {
-                        var list_article_most_views;
-                        if (slug_crc) {
-                                const idCate = await db.new_category.findOne({
-                                        where: [{ slug_crc }],
-                                        attributes: [
-                                                "id",
-                                                "slug",
-                                                "slug_crc",
-                                                "parent_id",
-                                                "name",
-                                        ],
-                                });
-                                list_article_most_views =
-                                        await db.new_articles_category.findAll({
-                                                where: {
-                                                        category_id: idCate.id,
+                },
+                createArticleService: async (data) => {
+                        const slug_crc = crc32(data.slug);
+                        try {
+                                // Check article some title or some slug_crc
+                                const check = await db.new_article.findOne({
+                                        where: {
+                                                [Op.or]: {
+                                                        title: data.title,
+                                                        slug_crc: slug_crc,
                                                 },
-                                                limit: 5,
-                                                include: [
-                                                        {
-                                                                model: db.new_article,
-                                                                required: true,
-                                                                attributes: [
-                                                                        "avatar",
-                                                                        "slug",
-                                                                        "slug_crc",
-                                                                        "title",
-                                                                        "views",
-                                                                ],
-                                                                include: [
-                                                                        {
-                                                                                model: db.new_articles_category,
-                                                                                attributes: [
-                                                                                        "category_id",
-                                                                                ],
-                                                                                include: [
-                                                                                        {
-                                                                                                model: db.new_category,
-                                                                                                attributes: [
-                                                                                                        "name",
-                                                                                                        "slug",
-                                                                                                        "slug_crc",
-                                                                                                ],
-                                                                                        },
-                                                                                ],
-                                                                        },
-                                                                ],
-                                                        },
-                                                ],
-                                                order: [
-                                                        [
-                                                                db.new_article,
-                                                                "views",
-                                                                "DESC",
-                                                        ],
-                                                ],
-                                        });
-                        } else {
-                                list_article_most_views =
-                                        await db.new_article.findAll({
-                                                // where: [
-                                                //         {
-                                                //                 status: 1,
-                                                //         },
-                                                // ],
-                                                limit: 5,
-                                                attributes: [
-                                                        "avatar",
-                                                        "slug",
-                                                        "slug_crc",
-                                                        "title",
-                                                        "views",
-                                                ],
-                                                order: [["views", "DESC"]],
-
-                                                include: [
-                                                        {
-                                                                model: db.new_articles_category,
-                                                                attributes: [
-                                                                        "category_id",
-                                                                ],
-                                                                include: [
-                                                                        {
-                                                                                model: db.new_category,
-                                                                                attributes: [
-                                                                                        "name",
-                                                                                        "slug",
-                                                                                        "slug_crc",
-                                                                                ],
-                                                                        },
-                                                                ],
-                                                        },
-                                                ],
-                                        });
-                        }
-                        resolve(list_article_most_views);
-                });
-        },
-        getByPublishAt: (slug_crc) => {
-                try {
-                        return new Promise(async (resolve, reject) => {
-                                let list_article_new;
-                                if (!slug_crc) {
-                                        const idBook =
-                                                await db.new_category.findOne({
-                                                        where: [
-                                                                {
-                                                                        slug: "Xuất bản",
-                                                                },
-                                                        ],
-                                                        attributes: [
-                                                                "id",
-                                                                "slug",
-                                                                "slug_crc",
-                                                                "parent_id",
-                                                                "name",
-                                                        ],
-                                                });
-                                        list_article_new =
-                                                await db.new_articles_category.findAll(
-                                                        {
-                                                                // where: {
-                                                                //         [Op.not]:
-                                                                //                 {
-                                                                //                         category_id:
-                                                                //                                 idBook?.id,
-                                                                //                 },
-                                                                // },
-                                                                include: [
-                                                                        {
-                                                                                model: db.new_article,
-                                                                                required: true,
-                                                                        },
-                                                                ],
-                                                                order: [
-                                                                        [
-                                                                                db.new_article,
-                                                                                "publishAt",
-                                                                                "DESC",
-                                                                        ],
-                                                                ],
-                                                                limit: 20,
-                                                        }
-                                                );
+                                        },
+                                });
+                                if (check) {
+                                        return {
+                                                status: 0,
+                                                message: "Đã tồn tại bài viết với title này ",
+                                        };
                                 } else {
-                                        const idCate =
+                                        const newArticle =
+                                                await db.new_article.create({
+                                                        ...data,
+                                                        slug_crc,
+                                                });
+                                        const response =
                                                 await db.new_category.findOne({
-                                                        where: [{ slug_crc }],
+                                                        where: {
+                                                                [Op.or]: {
+                                                                        id: data.category_id,
+                                                                        parent_id: data.category_id,
+                                                                },
+                                                        },
                                                         attributes: [
+                                                                "name",
                                                                 "id",
                                                                 "slug",
-                                                                "slug_crc",
                                                                 "parent_id",
-                                                                "name",
                                                         ],
                                                 });
-                                        list_article_new =
-                                                await db.new_articles_category.findAll(
+                                        const res =
+                                                await db.new_articles_category.create(
                                                         {
-                                                                where: {
-                                                                        category_id:
-                                                                                idCate.id,
-                                                                },
-                                                                include: [
-                                                                        {
-                                                                                model: db.new_article,
-                                                                                required: true,
-                                                                        },
-                                                                ],
-                                                                order: [
-                                                                        [
-                                                                                db.new_article,
-                                                                                "publishAt",
-                                                                                "DESC",
-                                                                        ],
-                                                                ],
+                                                                category_id:
+                                                                        data.category_id,
+                                                                article_id: newArticle.id,
                                                         }
                                                 );
+
+                                        if (response.parent_id) {
+                                                const parent =
+                                                        await db.new_articles_category.create(
+                                                                {
+                                                                        category_id:
+                                                                                response.parent_id,
+                                                                        article_id: newArticle.id,
+                                                                }
+                                                        );
+                                        }
+
+                                        return {
+                                                status: 0,
+                                                message: "Đã thêm bài viết thành công",
+                                                newArticle,
+                                        };
                                 }
-
-                                resolve(list_article_new);
-                        });
-                } catch (error) {
-                        console.log(error);
-                }
+                        } catch (error) {
+                                return error;
+                        }
+                },
         },
-        getHotCategoryService: (slug_crc) => {
-                return new Promise(async (resolve, reject) => {
-                        const res = await db.new_category.findOne({
-                                where: {
-                                        slug_crc,
-                                },
-                                attributes: ["name", "slug", "slug_crc"],
-                                include: [
-                                        {
-                                                model: db.new_articles_hot_category,
-                                                attributes: [
-                                                        "article_id",
-                                                        "position",
-                                                ],
-                                                order: [["position", "ASC"]],
-                                                include: [
-                                                        {
-                                                                model: db.new_article,
-                                                                attributes: [
-                                                                        "avatar",
-                                                                        "slug",
-                                                                        "slug_crc",
-                                                                        "title",
-                                                                        "sapo",
-                                                                ],
-                                                        },
-                                                ],
-                                        },
-                                ],
-                        });
-                        resolve(res);
-                });
-        },
-        getHotBoxSubCategoryService: (slug_crc) => {
-                return new Promise(async (resolve, reject) => {
-                        const res = await db.new_category.findOne({
-                                where: {
-                                        slug_crc,
-                                },
-                                attributes: ["name", "slug", "slug_crc", "id"],
-                        });
-                        const child = await db.new_category.findAll({
-                                where: {
-                                        parent_id: res.id,
-                                },
-                                attributes: ["name", "slug", "slug_crc", "id"],
-                                include: [
-                                        {
-                                                model: db.new_articles_hot_category,
-                                                attributes: [
-                                                        "article_id",
-                                                        "position",
-                                                ],
-                                                order: [["position", "ASC"]],
-                                                include: [
-                                                        {
-                                                                model: db.new_article,
-                                                                attributes: [
-                                                                        "avatar",
-                                                                        "slug",
-                                                                        "slug_crc",
-                                                                        "title",
-                                                                        "sapo",
-                                                                ],
-                                                        },
-                                                ],
-                                        },
-                                ],
-                        });
-
-                        resolve(child);
-                });
-        },
-        insertDataService: (data) => {
-                return new Promise(async (resolve, reject) => {
+        insert: {
+                insertDataService: async (data) => {
                         for (let articels of data) {
                                 const subCate = await db.new_category.findOne({
                                         where: {
@@ -855,11 +824,9 @@ const articlesService = {
                                         }
                                 }
                         }
-                        resolve({ message: "okkkk" });
-                });
-        },
-        pushlishedAllService: () => {
-                return new Promise(async (resolve, reject) => {
+                        return { message: "okkkk" };
+                },
+                pushlishedAllService: async () => {
                         const articels = await db.new_article.findAll({
                                 attributes: ["id"],
                         });
@@ -909,7 +876,7 @@ const articlesService = {
                                         );
                                 position = position + 1;
                         }
-                });
+                },
         },
 };
 

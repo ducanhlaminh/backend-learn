@@ -1,5 +1,4 @@
 const express = require("express");
-const { update_articles } = require("../newControllers/articlesController");
 const articlesRoutes = express.Router();
 const articlesController = require("../newControllers/articlesController");
 
@@ -27,8 +26,6 @@ articlesRoutes.get(
         "/views",
         articlesController.get_articles.getByViewsController
 );
-articlesRoutes.get("/insert", articlesController.insertData);
-articlesRoutes.get("/publishAll", articlesController.publishData);
 
 articlesRoutes.post(
         "/title",
@@ -51,6 +48,12 @@ articlesRoutes.put(
         "/hot-main/:id",
         articlesController.update_articles.updateHotMainController
 );
-articlesRoutes.put("/:id", update_articles.publishController);
+articlesRoutes.put(
+        "/:id",
+        articlesController.update_articles.publishController
+);
 
+// insert data
+articlesRoutes.get("/insert", articlesController.insert.insertData);
+articlesRoutes.get("/publishAll", articlesController.insert.publishData);
 module.exports = articlesRoutes;
