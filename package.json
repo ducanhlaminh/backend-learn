@@ -31,7 +31,8 @@
     "pace-js": "^1.2.4",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
-    "sequelize": "^6.31.1"
+    "sequelize": "^6.31.1",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "sequelize-cli": "^6.6.0"

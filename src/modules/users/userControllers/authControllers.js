@@ -1,6 +1,4 @@
-const { response } = require("express");
 const userServices = require("../userServices/authServices");
-const { Model } = require("sequelize");
 const authControllers = {
     registerController: async (req, res) => {
         const response = await userServices.registerService(req.body);
@@ -8,6 +6,10 @@ const authControllers = {
     },
     loginController: async (req, res) => {
         const response = await userServices.loginService(req.body);
+        res.status(200).json(response);
+    },
+    loginSuccessController: async (req, res) => {
+        const response = await userServices.loginGoogleService(req.params.id);
         res.status(200).json(response);
     },
 };
