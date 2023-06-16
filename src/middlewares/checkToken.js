@@ -1,5 +1,17 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const db = require("../config/userModels");
+function accessTokenIsValid(accessToken) {
+    try {
+        const decodedToken = jwt.verify(accessToken, secretKey);
+        // Nếu không xảy ra lỗi khi xác minh chữ ký, access token được coi là hợp lệ
+        return true;
+    } catch (error) {
+        // Xử lý lỗi xác minh chữ ký
+        return false;
+    }
+}
+
 const checkToken = (req, res, next) => {
     let accessToken = req?.headers?.authorization;
     if (!accessToken) {
@@ -16,13 +28,33 @@ const checkToken = (req, res, next) => {
             message: "Token không hợp lệ",
         });
     let token = accessToken.split(" ")[1];
-    jwt.verify(token, process.env.SECRET_KEY, (err, decode) => {
+    jwt.verify(token, process.env.SECRET_KEY, async (err, decode) => {
         if (err) {
             return res.status(401).json({
                 status: -1,
                 message: "Verify Failed !!!",
             });
         }
+        const user = await db.User.findOne({
+            where: {
+                id: decode.id,
+            },
+        });
+        if (user?.tokenOAuth) {
+            jwt.verify(
+                user?.tokenOAuth,
+                process.env.GOOGLE_CLIENT_SECRET,
+                (err, decoded) => {
+                    if (err) {
+                        return res.status(401).json({
+                            status: -1,
+                            message: "Verify GG Failed !!!",
+                        });
+                    }
+                }
+            );
+        }
+
         req.user = decode;
         next();
     });

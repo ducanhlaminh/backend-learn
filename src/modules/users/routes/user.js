@@ -3,6 +3,6 @@ const userRouters = express.Router();
 const userControllers = require("../userControllers/userControllers");
 const { checkToken } = require("../../../middlewares/checkToken");
 
-userRouters.get("/get-data", checkToken, userControllers.getUser);
+userRouters.get("/get-data", userControllers.getUser);
 
 module.exports = userRouters;
