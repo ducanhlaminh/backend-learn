@@ -1,6 +1,6 @@
 require("dotenv").config();
+const { v4: uuidv4 } = require("uuid");
 const db = require("./src/config/userModels");
-const jwt = require("jsonwebtoken");
 var GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
 passport.use(
@@ -16,10 +16,11 @@ passport.use(
             }
             const [user, created] = await db.User.findOrCreate({
                 where: {
-                    id: profile?.id,
+                    email: profile?.emails[0]?.value,
+                    typeLogin: 1,
                 },
                 defaults: {
-                    id: profile?.id,
+                    id: profile.id,
                     email: profile?.emails[0]?.value,
                     typeLogin: 1,
                     name: profile?.displayName,
@@ -36,11 +37,13 @@ passport.use(
                     },
                     {
                         where: {
-                            id: profile.id,
+                            email: profile?.emails[0]?.value,
+                            typeLogin: 1,
                         },
                     }
                 );
             }
+            console.log(123);
             return cb(null, profile);
         }
     )

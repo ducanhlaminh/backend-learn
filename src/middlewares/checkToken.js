@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const db = require("../config/userModels");
-function accessTokenIsValid(accessToken) {
+function accessTokenIsValid(accessToken, secretKey) {
     try {
         const decodedToken = jwt.verify(accessToken, secretKey);
         // Nếu không xảy ra lỗi khi xác minh chữ ký, access token được coi là hợp lệ
@@ -35,26 +35,6 @@ const checkToken = (req, res, next) => {
                 message: "Verify Failed !!!",
             });
         }
-        const user = await db.User.findOne({
-            where: {
-                id: decode.id,
-            },
-        });
-        if (user?.tokenOAuth) {
-            jwt.verify(
-                user?.tokenOAuth,
-                process.env.GOOGLE_CLIENT_SECRET,
-                (err, decoded) => {
-                    if (err) {
-                        return res.status(401).json({
-                            status: -1,
-                            message: "Verify GG Failed !!!",
-                        });
-                    }
-                }
-            );
-        }
-
         req.user = decode;
         next();
     });

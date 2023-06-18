@@ -88,6 +88,7 @@ const authServices = {
         }
     },
     loginGoogleService: async (id) => {
+        console.log(id);
         const user = await db.User.findOne({
             where: {
                 id,
@@ -96,9 +97,9 @@ const authServices = {
         if (user) {
             const token = jwt.sign(
                 { userId: user.id, role: user.role_id },
-                process.env.SECRET_KEY,
-                options
+                process.env.SECRET_KEY
             );
+            console.log("token:", token);
             return {
                 token: `Bearer ${token}`,
                 message: "Đăng nhập google thành công",
