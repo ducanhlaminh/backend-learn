@@ -11,7 +11,7 @@ passport.use(
             callbackURL: "http://localhost:4000/api/v1/auth/google/callback",
         },
         async function (accessToken, refreshToken, profile, cb) {
-            if (refreshToken !== profile.refreshToken) {
+            if (refreshToken !== localStorage.getItem("token")) {
                 return cb(null, false);
             }
             const [user, created] = await db.User.findOrCreate({
@@ -43,7 +43,6 @@ passport.use(
                     }
                 );
             }
-            console.log(123);
             return cb(null, profile);
         }
     )
