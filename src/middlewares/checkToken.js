@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
+const fetch = require("node-fetch");
 require("dotenv").config();
 const db = require("../config/userModels");
+const passport = require("passport");
 
 const checkToken = (req, res, next) => {
     let accessToken = req?.headers?.authorization;
@@ -18,40 +20,16 @@ const checkToken = (req, res, next) => {
             message: "Token không hợp lệ",
         });
     let token = accessToken.split(" ")[1];
-    jwt.verify(token, process.env.SECRET_KEY, async (err, decode) => {
+    jwt.verify(token, process.env.SECRET_KEY, async (err, user) => {
         if (err) {
             return res.status(401).json({
                 status: -1,
                 message: "Verify Failed !!!",
             });
         }
-        req.user = decode;
+        req.user = user;
         next();
     });
-};
-const checkTokenGG = (req, res, next) => {
-    passport.use(
-        new GoogleOAuth2Strategy(
-            {
-                clientID: process.env.GOOGLE_CLIENT_ID, // Thay YOUR_CLIENT_ID bằng Client ID của ứng dụng Google
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET, // Thay YOUR_CLIENT_SECRET bằng Client Secret của ứng dụng Google
-            },
-            (accessToken, refreshToken, profile, done) => {
-                // Kiểm tra tính hợp lệ của accessToken
-                if (accessToken === localStorage.getItem("token")) {
-                    // Access token hợp lệ
-                    console.log(profile);
-                    next();
-                } else {
-                    // Access token không hợp lệ
-                    return res.status(401).json({
-                        status: -1,
-                        message: "Verify Failed GG!!!",
-                    });
-                }
-            }
-        )
-    );
 };
 const checkEditor = (req, res, next) => {
     if (req.user?.role !== "0") {
@@ -71,4 +49,9 @@ const checkManager = (req, res, next) => {
     }
     next();
 };
-module.exports = { checkToken, checkManager, checkEditor };
+
+module.exports = {
+    checkToken,
+    checkManager,
+    checkEditor,
+};

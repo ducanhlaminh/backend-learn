@@ -11,7 +11,6 @@ const authServices = {
             const hash = await new Promise((resolve, reject) => {
                 bcrypt.genSalt(10, (err, salt) => {
                     if (err) {
-                        console.log(err);
                     }
 
                     bcrypt.hash(
