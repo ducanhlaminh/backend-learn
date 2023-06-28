@@ -94,14 +94,14 @@ const articlesController = {
     },
     insert: {
         insertData: async (req, res) => {
-            const response = await articlesService.create.insertDataService(
+            const response = await articlesService.insert.insertDataService(
                 articels
             );
             res.status(200).json(response);
         },
         publishData: async (req, res) => {
             const response =
-                await articlesService.create.pushlishedAllService();
+                await articlesService.insert.pushlishedAllService();
             res.status(200).json(response);
         },
     },

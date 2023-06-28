@@ -2,7 +2,7 @@ const express = require("express");
 const articlesRoutes = express.Router();
 const { checkToken } = require("../../../middlewares/checkToken");
 const articlesController = require("../newControllers/articlesController");
-articlesRoutes.use(checkToken);
+// articlesRoutes.use(checkToken);
 articlesRoutes.get(
     "/hot-main",
     articlesController.get_articles.getHotControllers
