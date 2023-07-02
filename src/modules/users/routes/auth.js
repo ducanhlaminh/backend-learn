@@ -14,10 +14,15 @@ authRoutes.get(
 authRoutes.get(
       "/google/callback",
       (req, res, next) => {
-            passport.authenticate("google", (err, profile) => {
-                  req.user = profile;
-                  next();
-            })(req, res, next);
+            // passport.authenticate("google", (err, data) => {
+            //       req.user = data.profile;
+            //       next();
+            // })(req, res, next);
+            res.redirect(
+                  process.env.CLIENT_URL +
+                        "/login-success?code=" +
+                        req.query.code
+            );
       },
       (req, res) => {
             // Successful authentication, redirect home.
@@ -26,5 +31,14 @@ authRoutes.get(
             );
       }
 );
-authRoutes.get("/login-success/:id", authController.loginSuccessController);
+authRoutes.get(
+      "/login-success",
+      (req, res, next) => {
+            passport.authenticate("google", (err, profile) => {
+                  req.user = profile;
+                  next();
+            })(req, res, next);
+      },
+      authController.loginSuccessController
+);
 module.exports = authRoutes;
