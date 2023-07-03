@@ -11,6 +11,12 @@ const categoryControllers = {
                 const response = await categoryService.getAll();
                 res.status(200).json(response);
         },
+        getByName: async (req, res) => {
+                const response = await categoryService.getByNameService(
+                        req.query.name
+                );
+                res.status(200).json(response);
+        },
         getSubCate: async (req, res) => {
                 const response = await categoryService.getSubCateService(
                         req.params.slug_crc

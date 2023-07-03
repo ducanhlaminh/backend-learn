@@ -11,26 +11,15 @@ authRoutes.get(
       passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-authRoutes.get(
-      "/google/callback",
-      (req, res, next) => {
-            // passport.authenticate("google", (err, data) => {
-            //       req.user = data.profile;
-            //       next();
-            // })(req, res, next);
-            res.redirect(
-                  process.env.CLIENT_URL +
-                        "/login-success?code=" +
-                        req.query.code
-            );
-      },
-      (req, res) => {
-            // Successful authentication, redirect home.
-            res.redirect(
-                  process.env.CLIENT_URL + "/login-success/" + req.user?.id
-            );
-      }
-);
+authRoutes.get("/google/callback", (req, res) => {
+      // passport.authenticate("google", (err, data) => {
+      //       req.user = data.profile;
+      //       next();
+      // })(req, res, next);
+      res.redirect(
+            process.env.CLIENT_URL + "/login-success?code=" + req.query.code
+      );
+});
 authRoutes.get(
       "/login-success",
       (req, res, next) => {

@@ -107,6 +107,7 @@ const authServices = {
                   );
                   return {
                         token: `Bearer ${token}`,
+                        role_id: user.role_id,
                         message: "Đăng nhập google thành công",
                   };
             } else {

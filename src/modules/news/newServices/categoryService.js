@@ -1,4 +1,4 @@
-const { Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
 const db = require("../../../config/newModels");
 const crc32 = require("crc/crc32");
 const categoryService = {
@@ -34,7 +34,20 @@ const categoryService = {
                         }
                 });
         },
-
+        getByNameService: async (name) => {
+                console.log(name);
+                const response = await db.new_category.findAll({
+                        where: {
+                                slug: {
+                                        [Op.like]: `%${name}%`,
+                                },
+                        },
+                        attributes: ["name", "id", "slug"],
+                        limit: 5,
+                });
+                console.log(response);
+                return response;
+        },
         getAll: () => {
                 return new Promise(async (resolve, reject) => {
                         try {
