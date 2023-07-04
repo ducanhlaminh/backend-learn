@@ -20,6 +20,7 @@
   "dependencies": {
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.2",
     "cor": "^0.0.0",
     "cors": "^2.8.5",
     "crc": "^4.3.2",
@@ -28,6 +29,7 @@
     "google-auth-library": "^8.8.0",
     "jsonwebtoken": "^9.0.0",
     "mariadb": "^3.1.1",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.3.3",
     "node-fetch": "^2.6.11",
     "nodemon": "^2.0.22",
