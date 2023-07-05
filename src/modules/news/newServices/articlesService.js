@@ -5,6 +5,19 @@ const fs = require("fs");
 
 const articlesService = {
         get: {
+                getAllService: async (req, res) => {
+                        try {
+                                const articles = await db.new_article.findAll({
+                                        limit: 10,
+                                        page: 1,
+                                });
+                                return articles;
+                        } catch (error) {
+                                return {
+                                        message: "Failed to get articles",
+                                };
+                        }
+                },
                 getHotService: async (req, res) => {
                         try {
                                 const hot_main =
@@ -714,68 +727,69 @@ const articlesService = {
                 },
                 createArticleService: async (file, data) => {
                         const slug_crc = crc32(data.slug);
-                        console.log(data);
                         const ext = file.originalname.split(".").pop();
                         const newFilePath = `src/uploadFile/avatarArticles/${
                                 slug_crc + "." + ext
                         }`;
+                        let avatar = fs.readFileSync(file.path, "base64");
+                        avatar = `data:image/${ext};base64,` + avatar;
                         fs.rename(file.path, newFilePath, (error) => {
                                 if (error) {
                                         console.log(error);
                                         return;
                                 }
                         });
-                        // try {
-                        //     // Check article some title or some slug_crc
-                        //     const check = await db.new_article.findOne({
-                        //         where: {
-                        //             [Op.or]: {
-                        //                 title: data.title,
-                        //                 slug_crc: slug_crc,
-                        //             },
-                        //         },
-                        //     });
-                        //     if (check) {
-                        //         return {
-                        //             status: 0,
-                        //             message: "Đã tồn tại bài viết với title này ",
-                        //         };
-                        //     } else {
-                        //         const newArticle = await db.new_article.create({
-                        //             ...data,
-                        //             slug_crc,
-                        //         });
-                        //         const response = await db.new_category.findOne({
-                        //             where: {
-                        //                 [Op.or]: {
-                        //                     id: data.category_id,
-                        //                     parent_id: data.category_id,
-                        //                 },
-                        //             },
-                        //             attributes: ["name", "id", "slug", "parent_id"],
-                        //         });
-                        //         const res = await db.new_articles_category.create({
-                        //             category_id: data.category_id,
-                        //             article_id: newArticle.id,
-                        //         });
+                        try {
+                                console.log(data);
+                                const [articel, created] =
+                                        await db.new_article.findOrCreate({
+                                                where: {
+                                                        slug_crc: slug_crc,
+                                                },
+                                                defaults: {
+                                                        slug: data.slug,
+                                                        slug_crc,
+                                                        sapo: data.sapo,
+                                                        title: data.title,
+                                                },
+                                        });
+                                const category = await db.new_category.findOne({
+                                        where: {
+                                                [Op.or]: {
+                                                        id: data.categoryId,
+                                                        parent_id: data.categoryId,
+                                                },
+                                        },
+                                        attributes: [
+                                                "name",
+                                                "id",
+                                                "slug",
+                                                "parent_id",
+                                        ],
+                                });
 
-                        //         if (response.parent_id) {
-                        //             const parent = await db.new_articles_category.create({
-                        //                 category_id: response.parent_id,
-                        //                 article_id: newArticle.id,
-                        //             });
-                        //         }
-
-                        //         return {
-                        //             status: 0,
-                        //             message: "Đã thêm bài viết thành công",
-                        //             newArticle,
-                        //         };
-                        //     }
-                        // } catch (error) {
-                        //     return error;
-                        // }
-                        return { message: "ok" };
+                                const res =
+                                        await db.new_articles_category.create({
+                                                category_id: data.categoryId,
+                                                article_id: articel.id,
+                                        });
+                                if (category.parent_id) {
+                                        const parent =
+                                                await db.new_articles_category.create(
+                                                        {
+                                                                category_id:
+                                                                        category.parent_id,
+                                                                article_id: articel.id,
+                                                        }
+                                                );
+                                }
+                                return { ...articel.dataValues, avatar };
+                        } catch (error) {
+                                console.log(error);
+                                return {
+                                        message: "Failed at articleService",
+                                };
+                        }
                 },
         },
         insert: {

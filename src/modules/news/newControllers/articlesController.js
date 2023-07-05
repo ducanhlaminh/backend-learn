@@ -2,6 +2,11 @@ const articlesService = require("../newServices/articlesService");
 const { articels } = require("../../../untils/dataDemo");
 const articlesController = {
         get_articles: {
+                getAllController: async (req, res) => {
+                        const response =
+                                await articlesService.get.getAllService();
+                        res.status(200).json(response);
+                },
                 getHotCategoryController: async (req, res) => {
                         const hotArticlesCate =
                                 await articlesService.get.getHotCategoryService(
