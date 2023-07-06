@@ -4,7 +4,9 @@ const articlesController = {
         get_articles: {
                 getAllController: async (req, res) => {
                         const response =
-                                await articlesService.get.getAllService();
+                                await articlesService.get.getAllService(
+                                        req.query
+                                );
                         res.status(200).json(response);
                 },
                 getHotCategoryController: async (req, res) => {

@@ -2,17 +2,66 @@ const db = require("../../../config/newModels");
 const { Op } = require("sequelize");
 const crc32 = require("crc/crc32");
 const fs = require("fs");
+require("dotenv").config();
 
 const articlesService = {
         get: {
-                getAllService: async (req, res) => {
+                getAllService: async ({ page, category_id, order }) => {
+                        let queries = {};
+                        if (!page) {
+                                page = 1;
+                        }
+                        (queries.limit = +process.env.LIMIT),
+                                (queries.offset =
+                                        (page - 1) * +process.env.LIMIT);
+                        if (order) queries.order = [order];
                         try {
-                                const articles = await db.new_article.findAll({
-                                        limit: 10,
-                                        page: 1,
-                                });
+                                let articles;
+                                if (!category_id) {
+                                        articles =
+                                                await db.new_article.findAndCountAll(
+                                                        {
+                                                                ...queries,
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_articles_category,
+                                                                                include: [
+                                                                                        {
+                                                                                                model: db.new_category,
+                                                                                        },
+                                                                                ],
+                                                                        },
+                                                                ],
+                                                        }
+                                                );
+                                } else {
+                                        let articlesId =
+                                                await db.new_articles_category.findAll(
+                                                        {
+                                                                where: {
+                                                                        category_id,
+                                                                },
+                                                                attributes: [
+                                                                        "article_id",
+                                                                ],
+                                                        }
+                                                );
+                                        articlesId = articlesId.map(
+                                                (item) => item.article_id
+                                        );
+                                        articles = await db.new_article.findAll(
+                                                {
+                                                        where: {
+                                                                id: articlesId,
+                                                        },
+                                                        ...queries,
+                                                }
+                                        );
+                                }
+
                                 return articles;
                         } catch (error) {
+                                console.log(error);
                                 return {
                                         message: "Failed to get articles",
                                 };
