@@ -27,5 +27,10 @@ const categoryControllers = {
                 const response = await categoryService.insertDataService(cates);
                 res.status(200).json(response);
         },
+        // admin
+        getAllByAdminControl: async (req, res) => {
+                const response = await categoryService.getAllByAdmin();
+                res.status(200).json(response);
+        },
 };
 module.exports = categoryControllers;

@@ -51,30 +51,34 @@ const categoryService = {
         getAll: () => {
                 return new Promise(async (resolve, reject) => {
                         try {
-                                const response = await db.new_category.findAll({
-                                        attributes: [
-                                                "name",
-                                                "id",
-                                                "slug",
-                                                "slug_crc",
-                                        ],
-
-                                        where: [
-                                                {
-                                                        parent_id: null,
-                                                },
-                                        ],
-                                        include: {
-                                                model: db.new_category,
+                                const response =
+                                        await db.new_category.findAndCountAll({
                                                 attributes: [
                                                         "name",
                                                         "id",
                                                         "slug",
                                                         "slug_crc",
+                                                        "updatedAt",
+                                                        "createdAt",
                                                 ],
-                                        },
-                                });
-                                resolve({ categories: response });
+
+                                                where: [
+                                                        {
+                                                                parent_id: null,
+                                                        },
+                                                ],
+                                                include: {
+                                                        model: db.new_category,
+                                                        attributes: [
+                                                                "name",
+                                                                "id",
+                                                                "slug",
+                                                                "slug_crc",
+                                                                "updatedAt",
+                                                        ],
+                                                },
+                                        });
+                                resolve(response);
                         } catch (error) {
                                 reject(error);
                         }
@@ -104,6 +108,49 @@ const categoryService = {
                                 resolve("Successfully created");
                         } catch (error) {
                                 console.log(error);
+                        }
+                });
+        },
+        // Admin
+        getAllByAdmin: () => {
+                return new Promise(async (resolve, reject) => {
+                        try {
+                                const response =
+                                        await db.new_category.findAndCountAll({
+                                                attributes: [
+                                                        "name",
+                                                        "id",
+                                                        "slug",
+                                                        "updatedAt",
+                                                        "createdAt",
+                                                ],
+                                                where: [
+                                                        {
+                                                                parent_id: null,
+                                                        },
+                                                ],
+                                                include: [
+                                                        {
+                                                                model: db.new_category,
+                                                                attributes: [
+                                                                        "name",
+                                                                        "id",
+                                                                        "slug",
+                                                                        "slug_crc",
+                                                                        "updatedAt",
+                                                                ],
+                                                        },
+                                                        {
+                                                                model: db.new_articles_category,
+                                                                attributes: [
+                                                                        "id",
+                                                                ],
+                                                        },
+                                                ],
+                                        });
+                                resolve(response);
+                        } catch (error) {
+                                reject(error);
                         }
                 });
         },

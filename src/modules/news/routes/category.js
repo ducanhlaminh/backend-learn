@@ -7,4 +7,7 @@ categoryRoutes.get("/get-all", categoryControllers.getAll);
 categoryRoutes.get("/", categoryControllers.getByName);
 categoryRoutes.get("/sub-cate/:slug_crc", categoryControllers.getSubCate);
 categoryRoutes.get("/insert", categoryControllers.insertData);
+
+// Amin
+categoryRoutes.get("/admin/get-all", categoryControllers.getAllByAdminControl);
 module.exports = categoryRoutes;

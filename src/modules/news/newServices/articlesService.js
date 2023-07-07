@@ -7,6 +7,7 @@ require("dotenv").config();
 const articlesService = {
         get: {
                 getAllService: async ({ page, category_id, order }) => {
+                        console.log(+process.env.LIMIT);
                         let queries = {};
                         if (!page) {
                                 page = 1;
@@ -14,9 +15,10 @@ const articlesService = {
                         (queries.limit = +process.env.LIMIT),
                                 (queries.offset =
                                         (page - 1) * +process.env.LIMIT);
-                        if (order) queries.order = [order];
+                        if (order) queries.order = JSON.parse(order);
                         try {
                                 let articles;
+                                console.log({ ...queries });
                                 if (!category_id) {
                                         articles =
                                                 await db.new_article.findAndCountAll(
@@ -246,6 +248,7 @@ const articlesService = {
                                                 "name",
                                         ],
                                 });
+                                console.log(idCate);
                                 if (idCate) {
                                         list_article_most_views =
                                                 await db.new_articles_category.findAll(
@@ -266,6 +269,12 @@ const articlesService = {
                                                                                         "title",
                                                                                         "views",
                                                                                 ],
+                                                                                order: [
+                                                                                        [
+                                                                                                "views",
+                                                                                                "DESC",
+                                                                                        ],
+                                                                                ],
                                                                                 include: [
                                                                                         {
                                                                                                 model: db.new_articles_category,
@@ -285,13 +294,6 @@ const articlesService = {
                                                                                         },
                                                                                 ],
                                                                         },
-                                                                ],
-                                                                order: [
-                                                                        [
-                                                                                db.new_article,
-                                                                                "views",
-                                                                                "DESC",
-                                                                        ],
                                                                 ],
                                                         }
                                                 );
