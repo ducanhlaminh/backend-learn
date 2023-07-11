@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
                         new_category.hasMany(models.new_category, {
                                 foreignKey: "parent_id",
                         });
+                        new_category.belongsTo(models.new_category, {
+                                foreignKey: "parent_id",
+                        });
                         new_category.hasMany(models.new_articles_category, {
                                 foreignKey: "category_id",
                         });

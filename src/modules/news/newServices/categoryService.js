@@ -117,13 +117,6 @@ const categoryService = {
                         try {
                                 const response =
                                         await db.new_category.findAndCountAll({
-                                                attributes: [
-                                                        "name",
-                                                        "id",
-                                                        "slug",
-                                                        "updatedAt",
-                                                        "createdAt",
-                                                ],
                                                 where: [
                                                         {
                                                                 parent_id: null,
@@ -132,12 +125,10 @@ const categoryService = {
                                                 include: [
                                                         {
                                                                 model: db.new_category,
-                                                                attributes: [
-                                                                        "name",
-                                                                        "id",
-                                                                        "slug",
-                                                                        "slug_crc",
-                                                                        "updatedAt",
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_articles_category,
+                                                                        },
                                                                 ],
                                                         },
                                                         {
