@@ -32,5 +32,11 @@ const categoryControllers = {
                 const response = await categoryService.getAllByAdmin();
                 res.status(200).json(response);
         },
+        deleteCategory: async (req, res) => {
+                const response = await categoryService.deleteService(
+                        req.query.id
+                );
+                res.status(200).json(response);
+        },
 };
 module.exports = categoryControllers;

@@ -25,6 +25,7 @@ const categoryService = {
                                                 slug_crc,
                                         },
                                         include: {
+                                                as: "childCategories",
                                                 model: db.new_category,
                                         },
                                 });
@@ -69,6 +70,7 @@ const categoryService = {
                                                 ],
                                                 include: {
                                                         model: db.new_category,
+                                                        as: "childCategories",
                                                         attributes: [
                                                                 "name",
                                                                 "id",
@@ -125,9 +127,14 @@ const categoryService = {
                                                 include: [
                                                         {
                                                                 model: db.new_category,
+                                                                as: "childCategories",
                                                                 include: [
                                                                         {
                                                                                 model: db.new_articles_category,
+                                                                                as: "articles",
+                                                                                attributes: [
+                                                                                        "id",
+                                                                                ],
                                                                         },
                                                                 ],
                                                         },
@@ -136,10 +143,31 @@ const categoryService = {
                                                                 attributes: [
                                                                         "id",
                                                                 ],
+                                                                as: "articles",
                                                         },
                                                 ],
                                         });
                                 resolve(response);
+                        } catch (error) {
+                                reject(error);
+                        }
+                });
+        },
+        deleteService: (id) => {
+                return new Promise(async (resolve, reject) => {
+                        try {
+                                if (!id)
+                                        resolve({
+                                                message: "Delete category failed",
+                                        });
+                                await db.new_category.destroy({
+                                        where: {
+                                                id,
+                                        },
+                                });
+                                resolve({
+                                        message: "Delete category successfully",
+                                });
                         } catch (error) {
                                 reject(error);
                         }

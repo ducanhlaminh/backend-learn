@@ -6,19 +6,14 @@ require("dotenv").config();
 
 const articlesService = {
         get: {
-                getAllService: async ({ page, category_id, order }) => {
-                        console.log(+process.env.LIMIT);
+                getAllService: async ({ page = 1, category_id, order }) => {
                         let queries = {};
-                        if (!page) {
-                                page = 1;
-                        }
                         (queries.limit = +process.env.LIMIT),
                                 (queries.offset =
                                         (page - 1) * +process.env.LIMIT);
                         if (order) queries.order = JSON.parse(order);
                         try {
                                 let articles;
-                                console.log({ ...queries });
                                 if (!category_id) {
                                         articles =
                                                 await db.new_article.findAndCountAll(
@@ -30,6 +25,7 @@ const articlesService = {
                                                                                 include: [
                                                                                         {
                                                                                                 model: db.new_category,
+                                                                                                as: "category",
                                                                                         },
                                                                                 ],
                                                                         },
@@ -207,6 +203,7 @@ const articlesService = {
                                                                         },
                                                                         include: [
                                                                                 {
+                                                                                        as: "article",
                                                                                         model: db.new_article,
                                                                                         required: true,
                                                                                 },
@@ -248,7 +245,6 @@ const articlesService = {
                                                 "name",
                                         ],
                                 });
-                                console.log(idCate);
                                 if (idCate) {
                                         list_article_most_views =
                                                 await db.new_articles_category.findAll(
@@ -283,6 +279,7 @@ const articlesService = {
                                                                                                 ],
                                                                                                 include: [
                                                                                                         {
+                                                                                                                as: "category",
                                                                                                                 model: db.new_category,
                                                                                                                 attributes: [
                                                                                                                         "name",
@@ -324,6 +321,7 @@ const articlesService = {
                                                                 ],
                                                                 include: [
                                                                         {
+                                                                                as: "category",
                                                                                 model: db.new_category,
                                                                                 attributes: [
                                                                                         "name",
@@ -356,27 +354,19 @@ const articlesService = {
                                         ],
                                 });
                                 list_article_new =
-                                        await db.new_articles_category.findAll({
-                                                // where: {
-                                                //         [Op.not]:
-                                                //                 {
-                                                //                         category_id:
-                                                //                                 idBook?.id,
-                                                //                 },
-                                                // },
+                                        await db.new_article.findAndCountAll({
                                                 include: [
                                                         {
-                                                                model: db.new_article,
-                                                                required: true,
+                                                                model: db.new_articles_category,
+                                                                include: [
+                                                                        {
+                                                                                as: "category",
+                                                                                model: db.new_category,
+                                                                        },
+                                                                ],
                                                         },
                                                 ],
-                                                order: [
-                                                        [
-                                                                db.new_article,
-                                                                "publishAt",
-                                                                "DESC",
-                                                        ],
-                                                ],
+                                                order: [["publishAt", "DESC"]],
                                                 limit: 20,
                                         });
                         } else {
