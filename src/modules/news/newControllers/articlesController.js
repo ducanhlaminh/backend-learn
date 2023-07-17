@@ -100,7 +100,7 @@ const articlesController = {
                 createHotMainController: async (req, res) => {
                         const response =
                                 await articlesService.create.createHotMain(
-                                        req.body
+                                        req.body.data
                                 );
                         res.status(200).json(response);
                 },
@@ -110,6 +110,15 @@ const articlesController = {
                                         req.body
                                 );
                         res.status(200).json(response);
+                },
+        },
+        delete: {
+                deleteHotMain: async (req, res) => {
+                        const response =
+                                await articlesService.delete.deleteHotMainService(
+                                        req.query
+                                );
+                        return res.status(200).json(response);
                 },
         },
         insert: {

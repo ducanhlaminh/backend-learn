@@ -41,7 +41,7 @@ articlesRoutes.post(
 );
 articlesRoutes.post(
         "/hot-main",
-        checkManager,
+        // checkManager,
         articlesController.create_articles.createHotMainController
 );
 articlesRoutes.post(
@@ -52,14 +52,14 @@ articlesRoutes.post(
 
 articlesRoutes.put(
         "/hot-main/:id",
-        checkManager,
+        // checkManager,
         articlesController.update_articles.updateHotMainController
 );
-articlesRoutes.put(
-        "/:id",
-        checkManager,
-        articlesController.update_articles.publishController
-);
+// articlesRoutes.put(
+//         "/:id",
+//         // checkManager,
+//         articlesController.update_articles.publishController
+// );
 
 // insert data
 articlesRoutes.get(
@@ -79,4 +79,6 @@ articlesRoutes.get(
         "/get-all",
         articlesController.get_articles.getAllController
 );
+articlesRoutes.delete("/hot-main", articlesController.delete.deleteHotMain);
+
 module.exports = articlesRoutes;

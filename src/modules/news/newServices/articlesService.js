@@ -83,6 +83,7 @@ const articlesService = {
                                                                         "sapo",
                                                                         "slug",
                                                                         "slug_crc",
+                                                                        "id",
                                                                 ],
                                                         },
                                                 ],
@@ -141,6 +142,7 @@ const articlesService = {
                                                         "avatar",
                                                         "sapo",
                                                         "publishAt",
+                                                        "id",
                                                 ],
                                                 where: {
                                                         title: {
@@ -641,20 +643,23 @@ const articlesService = {
         },
         update: {
                 updateHotMain: async (data, id) => {
-                        const response = await db.new_articles_hot_main.update(
+                        const response = await db.new_articles_hot_main.destroy(
                                 {
-                                        position: data.position,
-                                },
-                                { where: { article_id: id } }
+                                        where: {
+                                                [Op.or]: {
+                                                        article_id: id,
+                                                        position: data.position,
+                                                },
+                                        },
+                                }
                         );
-                        if (response !== null) {
-                                return {
-                                        message: "Cập nhật vị trí thành công",
-                                };
-                        }
+                        const create = await db.new_articles_hot_main.create({
+                                article_id: data.id,
+                                position: data.position,
+                        });
 
                         return {
-                                message: "Cập nhật vị trí không thành công",
+                                message: "Cập nhật vị trí thành công",
                         };
                 },
                 publishService: async (article_id) => {
@@ -685,7 +690,7 @@ const articlesService = {
         create: {
                 createHotMain: async (data) => {
                         const check = await db.new_articles_hot_main.findOne({
-                                where: { article_id: data.article_id },
+                                where: { article_id: data.id },
                         });
                         if (!check) {
                                 // check position invalid
@@ -705,13 +710,11 @@ const articlesService = {
                                         const response =
                                                 await db.new_articles_hot_main.create(
                                                         {
-                                                                ...data,
+                                                                article_id: data.id,
+                                                                position: data.position,
                                                         }
                                                 );
                                         return response;
-                                        return {
-                                                message: "Bàn viết này đã được set trong tin nổi bật",
-                                        };
                                 } else {
                                         return {
                                                 message: "Set vị trí nổi bật không thành công",
@@ -958,6 +961,23 @@ const articlesService = {
                                                 }
                                         );
                                 position = position + 1;
+                        }
+                },
+        },
+        delete: {
+                deleteHotMainService: async (data) => {
+                        try {
+                                await db.new_articles_hot_main.destroy({
+                                        where: {
+                                                article_id: data.id,
+                                                position: data.position,
+                                        },
+                                });
+                                return {
+                                        message: "Xóa vị trị nổi bật của bài viết thành công",
+                                };
+                        } catch (error) {
+                                console.log(error);
                         }
                 },
         },
