@@ -55,6 +55,11 @@ articlesRoutes.put(
         // checkManager,
         articlesController.update_articles.updateHotMainController
 );
+articlesRoutes.put(
+        "/hot-cate/:id",
+        // checkManager,
+        articlesController.update_articles.updateHotCateController
+);
 // articlesRoutes.put(
 //         "/:id",
 //         // checkManager,

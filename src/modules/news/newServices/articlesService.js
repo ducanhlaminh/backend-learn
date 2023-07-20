@@ -703,6 +703,43 @@ const articlesService = {
                                 message: "Cập nhật vị trí thành công",
                         };
                 },
+                updateHotCate: async (data, id) => {
+                        const checkPosition =
+                                await db.new_articles_hot_category.findOne({
+                                        where: {
+                                                position: data.position,
+                                        },
+                                });
+                        if (checkPosition) {
+                                await db.new_articles_hot_category.update(
+                                        {
+                                                ...data,
+                                        },
+                                        {
+                                                where: {
+                                                        article_id: id,
+                                                },
+                                        }
+                                );
+                                return {
+                                        message: "Cập nhật vị trí thành công",
+                                };
+                        } else {
+                                const article =
+                                        await db.new_articles_hot_category.findOne(
+                                                {
+                                                        where: {
+                                                                article_id: id,
+                                                        },
+                                                }
+                                        );
+                                const tempValue = checkPosition.position;
+                                checkPosition.position = article.position;
+                                article.position = tempValue;
+                                await article.save();
+                                await checkPosition.save();
+                        }
+                },
                 publishService: async (article_id) => {
                         try {
                                 const now = new Date();
@@ -768,47 +805,11 @@ const articlesService = {
                         }
                 },
                 createHotCate: async (data) => {
-                        const checkArticle = await db.new_article.findOne({
-                                where: [
-                                        {
-                                                id: data.article_id,
-                                        },
-                                ],
-                        });
-                        if (checkArticle) {
-                                const res =
-                                        await db.new_articles_hot_category.findOne(
-                                                {
-                                                        where: {
-                                                                article_id: data.article_id,
-                                                        },
-                                                }
-                                        );
-                                if (res === null) {
-                                        const categoryNew =
-                                                await db.new_articles_category.findOne(
-                                                        {
-                                                                where: {
-                                                                        article_id: data.article_id,
-                                                                },
-                                                        }
-                                                );
-                                        const response =
-                                                await db.new_articles_hot_category.create(
-                                                        {
-                                                                ...data,
-                                                                category_id:
-                                                                        categoryNew.category_id,
-                                                        }
-                                                );
-                                        return response;
-                                }
-                                return {
-                                        message: "Bàn viết này đã được set trong tin nổi bật",
-                                };
-                        } else {
-                                return { message: "Failed to create" };
-                        }
+                        const response =
+                                await db.new_articles_hot_category.create({
+                                        ...data,
+                                });
+                        return response;
                 },
                 createArticleService: async (file, data) => {
                         const slug_crc = crc32(data.slug);

@@ -87,6 +87,14 @@ const articlesController = {
                                 );
                         res.status(200).json(response);
                 },
+                updateHotCateController: async (req, res) => {
+                        const response =
+                                await articlesService.update.updateHotCate(
+                                        req.body,
+                                        req.params.id
+                                );
+                        res.status(200).json(response);
+                },
         },
         create_articles: {
                 createArticleControllers: async (req, res) => {
