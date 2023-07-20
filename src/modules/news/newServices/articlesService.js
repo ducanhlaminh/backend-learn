@@ -132,30 +132,58 @@ const articlesService = {
                                 return error;
                         }
                 },
-                getByTitleService: async (title) => {
+                getByTitleService: async (title, category_id) => {
                         try {
-                                const articles =
-                                        await db.new_article.findAndCountAll({
-                                                attributes: [
-                                                        "title",
-                                                        "slug",
-                                                        "avatar",
-                                                        "sapo",
-                                                        "publishAt",
-                                                        "id",
-                                                ],
-                                                where: {
-                                                        title: {
-                                                                [Op.like]: `%${title}%`,
-                                                        },
-                                                },
-                                                limit: 15,
-                                                order: [["publishAt", "DESC"]],
-                                        });
-                                return {
-                                        data: articles,
-                                        status: 0,
-                                };
+                                if (category_id) {
+                                        const articles =
+                                                await db.new_articles_category.findAll(
+                                                        {
+                                                                where: {
+                                                                        category_id,
+                                                                },
+                                                                include: {
+                                                                        model: db.new_article,
+                                                                        where: {
+                                                                                title: {
+                                                                                        [Op.like]: `%${title}%`,
+                                                                                },
+                                                                        },
+                                                                },
+                                                                limit: 10,
+                                                        }
+                                                );
+                                        return articles;
+                                } else {
+                                        const articles =
+                                                await db.new_article.findAndCountAll(
+                                                        {
+                                                                attributes: [
+                                                                        "title",
+                                                                        "slug",
+                                                                        "avatar",
+                                                                        "sapo",
+                                                                        "publishAt",
+                                                                        "id",
+                                                                ],
+                                                                where: {
+                                                                        title: {
+                                                                                [Op.like]: `%${title}%`,
+                                                                        },
+                                                                },
+                                                                limit: 15,
+                                                                order: [
+                                                                        [
+                                                                                "publishAt",
+                                                                                "DESC",
+                                                                        ],
+                                                                ],
+                                                        }
+                                                );
+                                        return {
+                                                data: articles,
+                                                status: 0,
+                                        };
+                                }
                         } catch (error) {
                                 return error;
                         }
@@ -205,7 +233,6 @@ const articlesService = {
                                                                         },
                                                                         include: [
                                                                                 {
-                                                                                        as: "article",
                                                                                         model: db.new_article,
                                                                                         required: true,
                                                                                 },
@@ -578,7 +605,7 @@ const articlesService = {
                                                         include: [
                                                                 {
                                                                         model: db.new_category,
-
+                                                                        as: "childCategories",
                                                                         attributes: [
                                                                                 "name",
                                                                                 "id",
@@ -643,21 +670,35 @@ const articlesService = {
         },
         update: {
                 updateHotMain: async (data, id) => {
-                        const response = await db.new_articles_hot_main.destroy(
-                                {
+                        const checkPosition =
+                                await db.new_articles_hot_main.findOne({
+                                        where: { position: data.position },
+                                });
+                        const checkIdArticle =
+                                await db.new_articles_hot_main.findOne({
+                                        where: { article_id: id },
+                                });
+                        if (!checkPosition) {
+                                await db.new_articles_hot_main.destroy({
                                         where: {
-                                                [Op.or]: {
-                                                        article_id: id,
-                                                        position: data.position,
-                                                },
+                                                article_id: id,
                                         },
-                                }
-                        );
-                        const create = await db.new_articles_hot_main.create({
-                                article_id: data.id,
-                                position: data.position,
-                        });
-
+                                });
+                                await db.new_articles_hot_main.create({
+                                        position: data.position,
+                                        article_id: id,
+                                });
+                        } else {
+                                const article =
+                                        await db.new_articles_hot_main.findOne({
+                                                where: { article_id: id },
+                                        });
+                                const tempValue = checkPosition.position;
+                                checkPosition.position = article.position;
+                                article.position = tempValue;
+                                await article.save();
+                                await checkPosition.save();
+                        }
                         return {
                                 message: "Cập nhật vị trí thành công",
                         };

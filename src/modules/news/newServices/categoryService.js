@@ -131,10 +131,10 @@ const categoryService = {
                                                                 include: [
                                                                         {
                                                                                 model: db.new_articles_category,
-                                                                                as: "articles",
                                                                                 attributes: [
                                                                                         "id",
                                                                                 ],
+                                                                                as: "articles",
                                                                         },
                                                                 ],
                                                         },

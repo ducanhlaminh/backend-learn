@@ -35,7 +35,8 @@ const articlesController = {
                 getByTitleControllers: async (req, res) => {
                         const response =
                                 await articlesService.get.getByTitleService(
-                                        req.query.title
+                                        req.query.title,
+                                        req.query.category_id
                                 );
                         res.status(200).json(response);
                 },
