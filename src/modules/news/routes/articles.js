@@ -46,7 +46,7 @@ articlesRoutes.post(
 );
 articlesRoutes.post(
         "/hot-cate",
-        checkManager,
+        // checkManager,
         articlesController.create_articles.createHotCateController
 );
 
@@ -60,11 +60,6 @@ articlesRoutes.put(
         // checkManager,
         articlesController.update_articles.updateHotCateController
 );
-// articlesRoutes.put(
-//         "/:id",
-//         // checkManager,
-//         articlesController.update_articles.publishController
-// );
 
 // insert data
 articlesRoutes.get(
@@ -85,5 +80,5 @@ articlesRoutes.get(
         articlesController.get_articles.getAllController
 );
 articlesRoutes.delete("/hot-main", articlesController.delete.deleteHotMain);
-
+articlesRoutes.delete("/hot-cate", articlesController.delete.deleteHotCate);
 module.exports = articlesRoutes;

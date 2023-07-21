@@ -14,11 +14,11 @@ const articlesController = {
                                 await articlesService.get.getHotCategoryService(
                                         req.query.slug_crc
                                 );
-                        const boxSubCate =
-                                await articlesService.get.getHotBoxSubCategoryService(
-                                        req.query.slug_crc
-                                );
-                        res.status(200).json({ hotArticlesCate, boxSubCate });
+                        // const boxSubCate =
+                        //         await articlesService.get.getHotBoxSubCategoryService(
+                        //                 req.query.slug_crc
+                        //         );
+                        res.status(200).json({ hotArticlesCate });
                 },
                 getHotSubCategoryController: async (req, res) => {
                         const box =
@@ -125,6 +125,13 @@ const articlesController = {
                 deleteHotMain: async (req, res) => {
                         const response =
                                 await articlesService.delete.deleteHotMainService(
+                                        req.query
+                                );
+                        return res.status(200).json(response);
+                },
+                deleteHotCate: async (req, res) => {
+                        const response =
+                                await articlesService.delete.deleteHotCateService(
                                         req.query
                                 );
                         return res.status(200).json(response);

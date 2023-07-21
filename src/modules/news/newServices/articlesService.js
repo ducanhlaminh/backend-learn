@@ -442,25 +442,19 @@ const articlesService = {
                                 where: {
                                         slug_crc,
                                 },
-                                attributes: ["name", "slug", "slug_crc"],
+                                order: [
+                                        [
+                                                db.new_articles_hot_category,
+                                                "position",
+                                                "ASC",
+                                        ],
+                                ],
                                 include: [
                                         {
                                                 model: db.new_articles_hot_category,
-                                                attributes: [
-                                                        "article_id",
-                                                        "position",
-                                                ],
-                                                order: [["position", "ASC"]],
                                                 include: [
                                                         {
                                                                 model: db.new_article,
-                                                                attributes: [
-                                                                        "avatar",
-                                                                        "slug",
-                                                                        "slug_crc",
-                                                                        "title",
-                                                                        "sapo",
-                                                                ],
                                                         },
                                                 ],
                                         },
@@ -704,41 +698,106 @@ const articlesService = {
                         };
                 },
                 updateHotCate: async (data, id) => {
-                        const checkPosition =
-                                await db.new_articles_hot_category.findOne({
-                                        where: {
-                                                position: data.position,
-                                        },
-                                });
-                        if (checkPosition) {
-                                await db.new_articles_hot_category.update(
-                                        {
-                                                ...data,
-                                        },
-                                        {
-                                                where: {
-                                                        article_id: id,
-                                                },
-                                        }
-                                );
-                                return {
-                                        message: "Cập nhật vị trí thành công",
-                                };
-                        } else {
-                                const article =
+                        try {
+                                const checkPosition =
                                         await db.new_articles_hot_category.findOne(
+                                                {
+                                                        where: {
+                                                                position: data.position,
+                                                        },
+                                                }
+                                        );
+                                if (checkPosition) {
+                                        const article =
+                                                await db.new_articles_hot_category.findOne(
+                                                        {
+                                                                where: {
+                                                                        article_id: id,
+                                                                },
+                                                        }
+                                                );
+                                        const tempValue =
+                                                checkPosition.position;
+                                        checkPosition.position =
+                                                article.position;
+                                        article.position = tempValue;
+                                        await article.save();
+                                        await checkPosition.save();
+                                } else {
+                                        await db.new_articles_hot_category.update(
+                                                {
+                                                        ...data,
+                                                },
                                                 {
                                                         where: {
                                                                 article_id: id,
                                                         },
                                                 }
                                         );
-                                const tempValue = checkPosition.position;
-                                checkPosition.position = article.position;
-                                article.position = tempValue;
-                                await article.save();
-                                await checkPosition.save();
+                                }
+
+                                return {
+                                        message: "Cập nhật vị trí thành công",
+                                };
+                        } catch (error) {
+                                return {
+                                        message: error,
+                                };
                         }
+                        // const check =
+                        //         await db.new_articles_hot_category.findOne({
+                        //                 where: {
+                        //                         article_id: id,
+                        //                 },
+                        //         });
+                        //         if(!check){
+                        //                 await db.new_articles_hot_category.create({
+                        //                         article_id: id,
+                        //                 });
+                        //         }
+
+                        // if (!checkCategory) {
+                        //         await db.new_articles_hot_category.update(
+                        //                 {
+                        //                         category_id:data.category_id
+                        //                 },
+                        //                 {
+                        //                         where: {
+                        //                                 article_id: id,
+                        //                         },
+                        //                 }
+                        //         );
+                        // }
+                        // if (!checkPosition) {
+                        //         await db.new_articles_hot_category.update(
+                        //                 {
+                        //                         ...data,
+                        //                 },
+                        //                 {
+                        //                         where: {
+                        //                                 article_id: id,
+                        //                         },
+                        //                 }
+                        //         );
+                        //         return {
+                        //                 message: "Cập nhật vị trí thành công",
+                        //         };
+                        // } else {
+                        //         const article =
+                        //                 await db.new_articles_hot_category.findOne(
+                        //                         {
+                        //                                 where: {
+                        //                                         article_id: id,
+                        //                                 },
+                        //                         }
+                        //                 );
+                        //         const tempValue = checkPosition.position;
+                        //         checkPosition.position = article.position;
+                        //         article.position = tempValue;
+                        //         await article.save();
+                        //         await checkPosition.save();
+                        //
+                        // }
                 },
                 publishService: async (article_id) => {
                         try {
@@ -1013,6 +1072,20 @@ const articlesService = {
                                         where: {
                                                 article_id: data.id,
                                                 position: data.position,
+                                        },
+                                });
+                                return {
+                                        message: "Xóa vị trị nổi bật của bài viết thành công",
+                                };
+                        } catch (error) {
+                                console.log(error);
+                        }
+                },
+                deleteHotCateService: async (data) => {
+                        try {
+                                await db.new_articles_hot_category.destroy({
+                                        where: {
+                                                ...data,
                                         },
                                 });
                                 return {
