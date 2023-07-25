@@ -530,21 +530,20 @@ const articlesService = {
                                 });
 
                                 if (article !== null) {
-                                        const view =
-                                                await db.new_article.update(
-                                                        {
-                                                                views:
-                                                                        article.views +
-                                                                        1,
-                                                        },
-                                                        {
-                                                                where: [
-                                                                        {
-                                                                                id: article.id,
-                                                                        },
-                                                                ],
-                                                        }
-                                                );
+                                        await db.new_article.update(
+                                                {
+                                                        views:
+                                                                article.views +
+                                                                1,
+                                                },
+                                                {
+                                                        where: [
+                                                                {
+                                                                        id: article.id,
+                                                                },
+                                                        ],
+                                                }
+                                        );
                                         const res =
                                                 await db.new_articles_category.findOne(
                                                         {
@@ -608,6 +607,7 @@ const articlesService = {
                                                                         include: [
                                                                                 {
                                                                                         model: db.new_articles_category,
+                                                                                        as: "articles",
                                                                                         attributes: [
                                                                                                 "article_id",
                                                                                                 "category_id",
@@ -628,6 +628,7 @@ const articlesService = {
                                                                 },
                                                                 {
                                                                         model: db.new_articles_category,
+                                                                        as: "articles",
                                                                         attributes: [
                                                                                 "article_id",
                                                                                 "category_id",
@@ -646,7 +647,6 @@ const articlesService = {
                                                                 },
                                                         ],
                                                 });
-
                                         return {
                                                 article,
                                                 articlesCate,
