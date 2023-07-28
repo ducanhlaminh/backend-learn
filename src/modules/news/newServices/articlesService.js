@@ -56,6 +56,21 @@ const articlesService = {
                                                 }
                                         );
                                 }
+                                articles.rows.map((article) => {
+                                        if (!article.avatar) {
+                                                const path = `src/uploadFile/avatarArticles/${
+                                                        article.slug_crc +
+                                                        ".png"
+                                                }`;
+                                                const url = fs.readFileSync(
+                                                        path,
+                                                        "base64"
+                                                );
+                                                if (url) {
+                                                        article.avatar = `data:image/png;base64,${url}`;
+                                                }
+                                        }
+                                });
 
                                 return articles;
                         } catch (error) {
@@ -877,7 +892,7 @@ const articlesService = {
                                 slug_crc + "." + ext
                         }`;
                         let avatar = fs.readFileSync(file.path, "base64");
-                        avatar = `data:image/${ext};base64,` + avatar;
+                        avatar = `data:image/png;base64,` + avatar;
                         fs.rename(file.path, newFilePath, (error) => {
                                 if (error) {
                                         console.log(error);
@@ -885,7 +900,6 @@ const articlesService = {
                                 }
                         });
                         try {
-                                console.log(data);
                                 const [articel, created] =
                                         await db.new_article.findOrCreate({
                                                 where: {
