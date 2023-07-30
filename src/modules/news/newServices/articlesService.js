@@ -3,84 +3,90 @@ const { Op } = require("sequelize");
 const crc32 = require("crc/crc32");
 const fs = require("fs");
 require("dotenv").config();
-
+const asyncHandler = require("express-async-handler");
 const articlesService = {
         get: {
-                getAllService: async ({ page = 1, category_id, order }) => {
-                        let queries = {};
-                        (queries.limit = +process.env.LIMIT),
-                                (queries.offset =
-                                        (page - 1) * +process.env.LIMIT);
-                        if (order) queries.order = JSON.parse(order);
-                        try {
-                                let articles;
-                                if (!category_id) {
-                                        articles =
-                                                await db.new_article.findAndCountAll(
-                                                        {
-                                                                ...queries,
-                                                                include: [
-                                                                        {
-                                                                                model: db.new_articles_category,
-                                                                                include: [
-                                                                                        {
-                                                                                                model: db.new_category,
-                                                                                                as: "category",
-                                                                                        },
-                                                                                ],
+                getAllService: asyncHandler(
+                        async ({ page = 1, category_id, order }) => {
+                                let queries = {};
+                                (queries.limit = +process.env.LIMIT),
+                                        (queries.offset =
+                                                (page - 1) *
+                                                +process.env.LIMIT);
+                                if (order) queries.order = JSON.parse(order);
+                                try {
+                                        let articles;
+                                        if (!category_id) {
+                                                articles =
+                                                        await db.new_article.findAndCountAll(
+                                                                {
+                                                                        ...queries,
+                                                                        include: [
+                                                                                {
+                                                                                        model: db.new_articles_category,
+                                                                                        include: [
+                                                                                                {
+                                                                                                        model: db.new_category,
+                                                                                                        as: "category",
+                                                                                                },
+                                                                                        ],
+                                                                                },
+                                                                        ],
+                                                                }
+                                                        );
+                                        } else {
+                                                let articlesId =
+                                                        await db.new_articles_category.findAll(
+                                                                {
+                                                                        where: {
+                                                                                category_id,
                                                                         },
-                                                                ],
-                                                        }
+                                                                        attributes: [
+                                                                                "article_id",
+                                                                        ],
+                                                                }
+                                                        );
+                                                articlesId = articlesId.map(
+                                                        (item) =>
+                                                                item.article_id
                                                 );
-                                } else {
-                                        let articlesId =
-                                                await db.new_articles_category.findAll(
-                                                        {
-                                                                where: {
-                                                                        category_id,
-                                                                },
-                                                                attributes: [
-                                                                        "article_id",
-                                                                ],
-                                                        }
-                                                );
-                                        articlesId = articlesId.map(
-                                                (item) => item.article_id
-                                        );
-                                        articles = await db.new_article.findAll(
-                                                {
-                                                        where: {
-                                                                id: articlesId,
-                                                        },
-                                                        ...queries,
-                                                }
-                                        );
-                                }
-                                articles.rows.map((article) => {
-                                        if (!article.avatar) {
-                                                const path = `src/uploadFile/avatarArticles/${
-                                                        article.slug_crc +
-                                                        ".png"
-                                                }`;
-                                                const url = fs.readFileSync(
-                                                        path,
-                                                        "base64"
-                                                );
-                                                if (url) {
-                                                        article.avatar = `data:image/png;base64,${url}`;
-                                                }
+                                                articles =
+                                                        await db.new_article.findAll(
+                                                                {
+                                                                        where: {
+                                                                                id: articlesId,
+                                                                        },
+                                                                        ...queries,
+                                                                }
+                                                        );
                                         }
-                                });
+                                        articles.rows.map((article) => {
+                                                if (!article.avatar) {
+                                                        const path = `src/uploadFile/avatarArticles/${
+                                                                article.slug_crc +
+                                                                ".png"
+                                                        }`;
+                                                        const url =
+                                                                fs.readFileSync(
+                                                                        path,
+                                                                        "base64"
+                                                                );
+                                                        if (url) {
+                                                                article.avatar = `data:image/png;base64,${url}`;
+                                                        }
+                                                }
+                                        });
 
-                                return articles;
-                        } catch (error) {
-                                console.log(error);
-                                return {
-                                        message: "Failed to get articles",
-                                };
+                                        return articles;
+                                } catch (error) {
+                                        console.log(error);
+                                        return {
+                                                message: "Failed to get articles",
+                                        };
+                                }
                         }
-                },
-                getHotService: async (req, res) => {
+                ),
+                getHotService: asyncHandler(async (req, res) => {
                         try {
                                 const hot_main =
                                         await db.new_articles_hot_main.findAll({
@@ -146,8 +152,8 @@ const articlesService = {
                         } catch (error) {
                                 return error;
                         }
-                },
-                getByTitleService: async (title, category_id) => {
+                }),
+                getByTitleService: asyncHandler(async (title, category_id) => {
                         try {
                                 if (category_id) {
                                         const articles =
@@ -202,8 +208,8 @@ const articlesService = {
                         } catch (error) {
                                 return error;
                         }
-                },
-                getByCateService: async (slug, slug_crc) => {
+                }),
+                getByCateService: asyncHandler(async (slug, slug_crc) => {
                         try {
                                 // const checkcrc = await db.new_category.findOne({
                                 //       where: [{ slug_crc }],
@@ -275,8 +281,8 @@ const articlesService = {
                         } catch (error) {
                                 return error;
                         }
-                },
-                getByMostView: async (slug_crc) => {
+                }),
+                getByMostView: asyncHandler(async (slug_crc) => {
                         var list_article_most_views;
                         if (slug_crc) {
                                 const idCate = await db.new_category.findOne({
@@ -379,8 +385,8 @@ const articlesService = {
                                         });
                         }
                         return list_article_most_views;
-                },
-                getByPublishAt: async (slug_crc) => {
+                }),
+                getByPublishAt: asyncHandler(async (slug_crc) => {
                         let list_article_new;
                         if (!slug_crc) {
                                 const idBook = await db.new_category.findOne({
@@ -451,8 +457,8 @@ const articlesService = {
                         }
 
                         return list_article_new;
-                },
-                getHotCategoryService: async (slug_crc) => {
+                }),
+                getHotCategoryService: asyncHandler(async (slug_crc) => {
                         const res = await db.new_category.findOne({
                                 where: {
                                         slug_crc,
@@ -476,8 +482,8 @@ const articlesService = {
                                 ],
                         });
                         return res;
-                },
-                getHotBoxSubCategoryService: async (slug_crc) => {
+                }),
+                getHotBoxSubCategoryService: asyncHandler(async (slug_crc) => {
                         const res = await db.new_category.findOne({
                                 where: {
                                         slug_crc,
@@ -526,8 +532,8 @@ const articlesService = {
                                 return child;
                         }
                         return;
-                },
-                getDetailService: async (slug, slug_crc) => {
+                }),
+                getDetailService: asyncHandler(async (slug, slug_crc) => {
                         const checkslugsrc = await db.new_article.findOne({
                                 where: [
                                         {
@@ -675,7 +681,7 @@ const articlesService = {
                         } else {
                                 return { message: "Khong tim thay bai viet" };
                         }
-                },
+                }),
         },
         update: {
                 updateHotMain: async (data, id) => {

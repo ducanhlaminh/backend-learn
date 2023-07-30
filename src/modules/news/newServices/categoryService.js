@@ -1,6 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../../../config/newModels");
 const crc32 = require("crc/crc32");
+const asyncHandler = require("express-async-handler");
 const categoryService = {
         create: (data) => {
                 return new Promise(async (resolve, reject) => {
