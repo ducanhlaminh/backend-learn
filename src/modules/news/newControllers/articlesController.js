@@ -1,5 +1,5 @@
 const articlesService = require("../newServices/articlesService");
-const { articels } = require("../../../untils/dataDemo");
+
 const articlesController = {
         get_articles: {
                 getAllController: async (req, res) => {
@@ -69,86 +69,6 @@ const articlesController = {
                                 req.query.text
                         );
                         res.status(200).json({ newArticleCate: news });
-                },
-        },
-        update_articles: {
-                publishController: async (req, res) => {
-                        const response =
-                                await articlesService.update.publishService(
-                                        req.params.id
-                                );
-                        res.status(200).json(response);
-                },
-                updateHotMainController: async (req, res) => {
-                        const response =
-                                await articlesService.update.updateHotMain(
-                                        req.body,
-                                        req.params.id
-                                );
-                        res.status(200).json(response);
-                },
-                updateHotCateController: async (req, res) => {
-                        const response =
-                                await articlesService.update.updateHotCate(
-                                        req.body,
-                                        req.params.id
-                                );
-                        res.status(200).json(response);
-                },
-        },
-        create_articles: {
-                createArticleControllers: async (req, res) => {
-                        const file = req.file;
-                        const response =
-                                await articlesService.create.createArticleService(
-                                        file,
-                                        req.body
-                                );
-                        res.status(200).json(response);
-                },
-                createHotMainController: async (req, res) => {
-                        const response =
-                                await articlesService.create.createHotMain(
-                                        req.body.data
-                                );
-                        res.status(200).json(response);
-                },
-                createHotCateController: async (req, res) => {
-                        const response =
-                                await articlesService.create.createHotCate(
-                                        req.body
-                                );
-                        res.status(200).json(response);
-                },
-        },
-        delete: {
-                deleteHotMain: async (req, res) => {
-                        const response =
-                                await articlesService.delete.deleteHotMainService(
-                                        req.query
-                                );
-                        return res.status(200).json(response);
-                },
-                deleteHotCate: async (req, res) => {
-                        const response =
-                                await articlesService.delete.deleteHotCateService(
-                                        req.query
-                                );
-                        return res.status(200).json(response);
-                },
-        },
-        insert: {
-                insertData: async (req, res) => {
-                        const response =
-                                await articlesService.insert.insertDataService(
-                                        articels
-                                );
-                        res.status(200).json(response);
-                },
-                publishData: async (req, res) => {
-                        const response =
-                                await articlesService.insert.pushlishedAllService();
-                        res.status(200).json(response);
                 },
         },
 };
