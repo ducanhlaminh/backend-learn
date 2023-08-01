@@ -10,8 +10,8 @@ const initWebRoutes = (app) => {
         app.use("/api/v1/categories", categoriesRouter);
         app.use("/api/v1/users", userRouters);
         app.use("/api/v1/admin", adminRoutes);
-        app.use(notFound);
         app.use(errHandler);
+        app.use(notFound);
 };
 
 module.exports = initWebRoutes;

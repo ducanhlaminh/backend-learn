@@ -1,8 +1,6 @@
 const express = require("express");
 const articlesRoutes = express.Router();
-const { checkToken, checkManager } = require("../../../middlewares/checkToken");
 const articlesController = require("../newControllers/articlesController");
-const uploadFileServer = require("../../../uploadFile/multer");
 // articlesRoutes.use(checkToken);
 articlesRoutes.get(
         "/hot-main",

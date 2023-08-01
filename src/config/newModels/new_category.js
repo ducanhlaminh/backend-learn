@@ -10,15 +10,15 @@ module.exports = (sequelize, DataTypes) => {
                 static associate(models) {
                         new_category.hasMany(models.new_category, {
                                 foreignKey: "parent_id",
-                                as: "childCategories",
+                                // as: "childCategories",
                         });
                         new_category.belongsTo(models.new_category, {
                                 foreignKey: "parent_id",
-                                as: "parentCategory",
+                                // as: "parentCategory",
                         });
                         new_category.hasMany(models.new_articles_category, {
                                 foreignKey: "category_id",
-                                as: "articles",
+                                // as: "articles",
                         });
                         new_category.hasMany(models.new_articles_hot_category, {
                                 foreignKey: "category_id",
@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
                         slug: DataTypes.STRING,
                         slug_crc: DataTypes.BIGINT,
                         parent_id: DataTypes.INTEGER,
+                        status: DataTypes.INTEGER,
                         updated_user_id: DataTypes.INTEGER,
                         created_user_id: DataTypes.INTEGER,
                         updatedAt: DataTypes.DATE,

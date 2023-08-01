@@ -21,6 +21,9 @@ module.exports = {
                         parent_id: {
                                 type: Sequelize.INTEGER,
                         },
+                        status: {
+                                type: Sequelize.INTEGER,
+                        },
                         updated_user_id: {
                                 type: Sequelize.INTEGER,
                         },

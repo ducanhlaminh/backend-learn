@@ -3,20 +3,14 @@ const db = require("../../../config/newModels");
 const crc32 = require("crc/crc32");
 const asyncHandler = require("express-async-handler");
 const categoryService = {
-        create: (data) => {
-                return new Promise(async (resolve, reject) => {
-                        const query = `SELECT CRC32('${data.slug}') AS crcValue;`;
-                        const result = await db.sequelize.query(query);
-                        try {
-                                const response = await db.new_category.create({
-                                        ...data,
-                                        slug_crc: result[0][0].crcValue,
-                                });
-                                resolve(response);
-                        } catch (error) {
-                                console.log(error);
-                        }
+        create: async (data) => {
+                const query = `SELECT CRC32('${data.slug}') AS crcValue;`;
+                const result = await db.sequelize.query(query);
+                const response = await db.new_category.create({
+                        ...data,
+                        slug_crc: result[0][0].crcValue,
                 });
+                return response;
         },
         getSubCateService: (slug_crc) => {
                 return new Promise(async (resolve, reject) => {
@@ -95,6 +89,7 @@ const categoryService = {
                                         const createCate =
                                                 await db.new_category.create({
                                                         ...cate,
+                                                        status: 1,
                                                         slug_crc: slug_crc_cate,
                                                 });
                                         for (let subCate of cate.sub) {

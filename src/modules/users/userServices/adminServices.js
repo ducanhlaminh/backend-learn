@@ -5,6 +5,7 @@ const fs = require("fs");
 const axios = require("axios");
 require("dotenv").config();
 const asyncHandler = require("express-async-handler");
+const path = require("path");
 const adminServices = {
         get: {
                 getAllService: asyncHandler(
@@ -380,7 +381,7 @@ const adminServices = {
                 createArticleService: async (file, data) => {
                         const slug_crc = crc32(data.slug);
                         const ext = file.originalname.split(".").pop();
-                        const newFilePath = `src/uploadFile/avatarArticles/${
+                        const newFilePath = `src/uploadFile/avatars/${
                                 slug_crc + "." + ext
                         }`;
                         let avatar = fs.readFileSync(file.path, "base64");
@@ -445,36 +446,33 @@ const adminServices = {
         },
         insert: {
                 insertDataService: async (data) => {
-                        const imageDirectory = "./impages";
-                        if (!fs.existsSync(imageDirectory)) {
-                                fs.mkdirSync(imageDirectory);
-                        }
+                        const imageDirectory = "/src/uploadFile/avatars";
 
-                        async function downloadImage(url, path) {
+                        async function downloadImage(object, name, pathDir) {
                                 try {
-                                        const response = await axios.get(url, {
-                                                responseType: "stream",
-                                        });
-                                        const writer =
-                                                fs.createWriteStream(path);
-                                        response.data.pipe(writer);
-                                        return new Promise(
-                                                (resolve, reject) => {
-                                                        writer.on(
-                                                                "finish",
-                                                                resolve
-                                                        );
-                                                        writer.on(
-                                                                "error",
-                                                                reject
-                                                        );
+                                        const response = await axios.get(
+                                                object.avatar,
+                                                {
+                                                        responseType:
+                                                                "arraybuffer",
                                                 }
                                         );
-                                } catch (error) {
-                                        throw new Error(
-                                                `Không thể tải xuống từ URL: ${url}`
+                                        const imageBuffer = Buffer.from(
+                                                response.data,
+                                                "binary"
                                         );
-                                }
+                                        const newFilePath = `src/uploadFile/avatars/${
+                                                name + ".png"
+                                        }`;
+
+                                        fs.writeFileSync(
+                                                newFilePath,
+                                                imageBuffer
+                                        );
+                                        console.log(
+                                                `đã được tải về và lưu trong `
+                                        );
+                                } catch (error) {}
                         }
                         for (let articels of data) {
                                 const subCate = await db.new_category.findOne({
@@ -500,22 +498,41 @@ const adminServices = {
                                         const slug_crc = crc32(
                                                 articels.article[i].slug
                                         );
-                                        const filePath = `../../../uploadFile/avatarArticles/${slug_crc}`;
                                         try {
-                                                await downloadImage(
-                                                        articels.article[i]
-                                                                .avatar,
+                                                let a = await downloadImage(
+                                                        articels.article[i],
+                                                        slug_crc,
                                                         imageDirectory
                                                 );
+                                                const newArticle =
+                                                        await db.new_article.create(
+                                                                {
+                                                                        ...articels
+                                                                                .article[
+                                                                                i
+                                                                        ],
+                                                                        slug_crc,
+                                                                        avatar: slug_crc,
+                                                                }
+                                                        );
                                         } catch (error) {
                                                 continue;
                                         }
-
-                                        const newArticle =
-                                                await db.new_article.create({
+                                        const stats = fs.statSync(
+                                                `src/uploadFile/avatars/${
+                                                        slug_crc + ".png"
+                                                }`
+                                        );
+                                        var dataArticel;
+                                        if (stats.isFile()) {
+                                                dataArticel = {};
+                                        } else {
+                                                dataArticel = {
                                                         ...articels.article[i],
                                                         slug_crc,
-                                                });
+                                                };
+                                        }
+
                                         if (i < 9) {
                                                 const res =
                                                         await db.new_articles_category.create(
