@@ -36,6 +36,22 @@ const adminServices = {
                                                                         ],
                                                                 }
                                                         );
+                                                articles.rows.map((item) => {
+                                                        if (
+                                                                fs.existsSync(
+                                                                        `src/uploadFile/avatars/${
+                                                                                item.avatar +
+                                                                                ".png"
+                                                                        }`
+                                                                )
+                                                        ) {
+                                                                // Tạo URL từ đường dẫn tới hình ảnh
+                                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                                item.avatar =
+                                                                        imageUrl;
+                                                        } else {
+                                                        }
+                                                });
                                         } else {
                                                 let articlesId =
                                                         await db.new_articles_category.findAll(
@@ -62,22 +78,6 @@ const adminServices = {
                                                                 }
                                                         );
                                         }
-                                        articles.rows.map((article) => {
-                                                if (!article.avatar) {
-                                                        const path = `src/uploadFile/avatarArticles/${
-                                                                article.slug_crc +
-                                                                ".png"
-                                                        }`;
-                                                        const url =
-                                                                fs.readFileSync(
-                                                                        path,
-                                                                        "base64"
-                                                                );
-                                                        if (url) {
-                                                                article.avatar = `data:image/png;base64,${url}`;
-                                                        }
-                                                }
-                                        });
 
                                         return articles;
                                 } catch (error) {
@@ -226,11 +226,26 @@ const adminServices = {
                         //
                         // }
                 },
-                updateArticleService: asyncHandler(async (article_id, data) => {
+                updateArticleService: async (article_id, data, file) => {
                         try {
                                 const now = new Date();
                                 let infor = null;
-                                console.log(data.publishAt === true, data);
+                                if (file) {
+                                        console.log(file.path);
+                                        const ext = file.originalname
+                                                .split(".")
+                                                .pop();
+                                        const newFilePath = `src/uploadFile/avatars/${
+                                                data.slug_crc + "." + ext
+                                        }`;
+                                        fs.rename(
+                                                file.path,
+                                                newFilePath,
+                                                (error) => {
+                                                        console.log(error);
+                                                }
+                                        );
+                                }
                                 if (data.publishAt === true) {
                                         infor = {
                                                 ...data,
@@ -330,7 +345,7 @@ const adminServices = {
                         } catch (error) {
                                 console.log(error);
                         }
-                }),
+                },
         },
         create: {
                 createHotMain: async (data) => {
@@ -384,14 +399,7 @@ const adminServices = {
                         const newFilePath = `src/uploadFile/avatars/${
                                 slug_crc + "." + ext
                         }`;
-                        let avatar = fs.readFileSync(file.path, "base64");
-                        avatar = `data:image/png;base64,` + avatar;
-                        fs.rename(file.path, newFilePath, (error) => {
-                                if (error) {
-                                        console.log(error);
-                                        return;
-                                }
-                        });
+                        fs.rename(file.path, newFilePath);
                         try {
                                 const [articel, created] =
                                         await db.new_article.findOrCreate({
@@ -435,7 +443,7 @@ const adminServices = {
                                                         }
                                                 );
                                 }
-                                return { ...articel.dataValues, avatar };
+                                return { ...articel.dataValues };
                         } catch (error) {
                                 console.log(error);
                                 return {
@@ -498,13 +506,14 @@ const adminServices = {
                                         const slug_crc = crc32(
                                                 articels.article[i].slug
                                         );
+                                        var newArticle;
                                         try {
-                                                let a = await downloadImage(
+                                                await downloadImage(
                                                         articels.article[i],
                                                         slug_crc,
                                                         imageDirectory
                                                 );
-                                                const newArticle =
+                                                newArticle =
                                                         await db.new_article.create(
                                                                 {
                                                                         ...articels
@@ -516,63 +525,53 @@ const adminServices = {
                                                                 }
                                                         );
                                         } catch (error) {
+                                                newArticle =
+                                                        await db.new_article.create(
+                                                                {
+                                                                        ...articels
+                                                                                .article[
+                                                                                i
+                                                                        ],
+                                                                        slug_crc,
+                                                                }
+                                                        );
                                                 continue;
-                                        }
-                                        const stats = fs.statSync(
-                                                `src/uploadFile/avatars/${
-                                                        slug_crc + ".png"
-                                                }`
-                                        );
-                                        var dataArticel;
-                                        if (stats.isFile()) {
-                                                dataArticel = {};
-                                        } else {
-                                                dataArticel = {
-                                                        ...articels.article[i],
-                                                        slug_crc,
-                                                };
                                         }
 
                                         if (i < 9) {
-                                                const res =
-                                                        await db.new_articles_category.create(
-                                                                {
-                                                                        category_id:
-                                                                                subCate.id,
-
-                                                                        article_id: newArticle.id,
-                                                                }
-                                                        );
+                                                await db.new_articles_category.create(
+                                                        {
+                                                                category_id:
+                                                                        subCate.id,
+                                                                article_id: newArticle.id,
+                                                        }
+                                                );
                                         } else if (
                                                 subCate.new_categories.length >=
                                                 Math.floor(i / 9)
                                         ) {
-                                                const res =
-                                                        await db.new_articles_category.create(
-                                                                {
-                                                                        category_id:
-                                                                                subCate
-                                                                                        .new_categories[
-                                                                                        Math.floor(
-                                                                                                i /
-                                                                                                        9
-                                                                                        ) -
-                                                                                                1
-                                                                                ]
-                                                                                        .id,
-                                                                        article_id: newArticle.id,
-                                                                }
-                                                        );
+                                                await db.new_articles_category.create(
+                                                        {
+                                                                category_id:
+                                                                        subCate
+                                                                                .new_categories[
+                                                                                Math.floor(
+                                                                                        i /
+                                                                                                9
+                                                                                ) -
+                                                                                        1
+                                                                        ].id,
+                                                                article_id: newArticle.id,
+                                                        }
+                                                );
+                                                await db.new_articles_category.create(
+                                                        {
+                                                                category_id:
+                                                                        subCate.id,
 
-                                                const parent =
-                                                        await db.new_articles_category.create(
-                                                                {
-                                                                        category_id:
-                                                                                subCate.id,
-
-                                                                        article_id: newArticle.id,
-                                                                }
-                                                        );
+                                                                article_id: newArticle.id,
+                                                        }
+                                                );
                                         }
                                 }
                         }

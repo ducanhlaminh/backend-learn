@@ -14,11 +14,11 @@ const articlesController = {
                                 await articlesService.get.getHotCategoryService(
                                         req.query.slug_crc
                                 );
-                        // const boxSubCate =
-                        //         await articlesService.get.getHotBoxSubCategoryService(
-                        //                 req.query.slug_crc
-                        //         );
-                        res.status(200).json({ hotArticlesCate });
+                        const boxSubCate =
+                                await articlesService.get.getHotBoxSubCategoryService(
+                                        req.query.slug_crc
+                                );
+                        res.status(200).json({ hotArticlesCate, boxSubCate });
                 },
                 getHotSubCategoryController: async (req, res) => {
                         const box =
@@ -65,8 +65,7 @@ const articlesController = {
                 },
                 getByPublishAtController: async (req, res) => {
                         const news = await articlesService.get.getByPublishAt(
-                                req.query.slug,
-                                req.query.text
+                                req.query.slug
                         );
                         res.status(200).json({ newArticleCate: news });
                 },

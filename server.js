@@ -14,7 +14,7 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("src/uploadFile/avatarArticles"));
+app.use(express.static("src/uploadFile/avatars"));
 initWebRoutes(app);
 
 const PORT = process.env.PORT || 8888;

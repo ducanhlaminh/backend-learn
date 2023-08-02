@@ -2,7 +2,7 @@ var multer = require("multer");
 const crc32 = require("crc/crc32");
 var storage = multer.diskStorage({
         destination: function (req, file, cb) {
-                cb(null, "src/uploadFile/avatarArticles");
+                cb(null, "src/uploadFile/avatars");
         },
         filename: function (req, file, cb) {
                 cb(null, file.originalname);

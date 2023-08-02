@@ -6,86 +6,6 @@ require("dotenv").config();
 const asyncHandler = require("express-async-handler");
 const articlesService = {
         get: {
-                getAllService: asyncHandler(
-                        async ({ page = 1, category_id, order }) => {
-                                let queries = {};
-                                (queries.limit = +process.env.LIMIT),
-                                        (queries.offset =
-                                                (page - 1) *
-                                                +process.env.LIMIT);
-                                if (order) queries.order = JSON.parse(order);
-                                try {
-                                        let articles;
-                                        if (!category_id) {
-                                                articles =
-                                                        await db.new_article.findAndCountAll(
-                                                                {
-                                                                        ...queries,
-                                                                        include: [
-                                                                                {
-                                                                                        model: db.new_articles_category,
-                                                                                        include: [
-                                                                                                {
-                                                                                                        model: db.new_category,
-                                                                                                        as: "category",
-                                                                                                },
-                                                                                        ],
-                                                                                },
-                                                                        ],
-                                                                }
-                                                        );
-                                        } else {
-                                                let articlesId =
-                                                        await db.new_articles_category.findAll(
-                                                                {
-                                                                        where: {
-                                                                                category_id,
-                                                                        },
-                                                                        attributes: [
-                                                                                "article_id",
-                                                                        ],
-                                                                }
-                                                        );
-                                                articlesId = articlesId.map(
-                                                        (item) =>
-                                                                item.article_id
-                                                );
-                                                articles =
-                                                        await db.new_article.findAll(
-                                                                {
-                                                                        where: {
-                                                                                id: articlesId,
-                                                                        },
-                                                                        ...queries,
-                                                                }
-                                                        );
-                                        }
-                                        articles.rows.map((article) => {
-                                                if (!article.avatar) {
-                                                        const path = `src/uploadFile/avatarArticles/${
-                                                                article.slug_crc +
-                                                                ".png"
-                                                        }`;
-                                                        const url =
-                                                                fs.readFileSync(
-                                                                        path,
-                                                                        "base64"
-                                                                );
-                                                        if (url) {
-                                                                article.avatar = `data:image/png;base64,${url}`;
-                                                        }
-                                                }
-                                        });
-
-                                        return articles;
-                                } catch (error) {
-                                        console.log(error);
-                                        return {
-                                                message: "Failed to get articles",
-                                        };
-                                }
-                        }
-                ),
                 getHotService: asyncHandler(async (req, res) => {
                         try {
                                 const hot_main =
@@ -109,45 +29,26 @@ const articlesService = {
                                                         },
                                                 ],
                                         });
-                                const hot_categories =
-                                        await db.new_category.findAll({
-                                                where: {
-                                                        parent_id: null,
-                                                },
-                                                attributes: [
-                                                        "name",
-                                                        "slug",
-                                                        "slug_crc",
-                                                ],
-                                                include: [
-                                                        {
-                                                                model: db.new_articles_hot_category,
-                                                                attributes: [
-                                                                        "article_id",
-                                                                        "position",
-                                                                ],
 
-                                                                order: [
-                                                                        [
-                                                                                "position",
-                                                                                "ASC",
-                                                                        ],
-                                                                ],
-                                                                include: [
-                                                                        {
-                                                                                model: db.new_article,
-                                                                                attributes: [
-                                                                                        "avatar",
-                                                                                        "title",
-                                                                                ],
-                                                                        },
-                                                                ],
-                                                        },
-                                                ],
-                                        });
+                                hot_main.map((item) => {
+                                        if (
+                                                fs.existsSync(
+                                                        `src/uploadFile/avatars/${
+                                                                item.new_article
+                                                                        .avatar +
+                                                                ".png"
+                                                        }`
+                                                )
+                                        ) {
+                                                // Tạo URL từ đường dẫn tới hình ảnh
+                                                const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
+                                                item.new_article.avatar =
+                                                        imageUrl;
+                                        } else {
+                                        }
+                                });
                                 return {
                                         hot_main,
-                                        hot_categories,
                                 };
                         } catch (error) {
                                 return error;
@@ -200,6 +101,21 @@ const articlesService = {
                                                                 ],
                                                         }
                                                 );
+                                        articles.rows.map((item) => {
+                                                if (
+                                                        fs.existsSync(
+                                                                `src/uploadFile/avatars/${
+                                                                        item.avatar +
+                                                                        ".png"
+                                                                }`
+                                                        )
+                                                ) {
+                                                        // Tạo URL từ đường dẫn tới hình ảnh
+                                                        const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                        item.avatar = imageUrl;
+                                                } else {
+                                                }
+                                        });
                                         return {
                                                 data: articles,
                                                 status: 0,
@@ -304,22 +220,22 @@ const articlesService = {
                                                                                 idCate.id,
                                                                 },
                                                                 limit: 5,
+                                                                order: [
+                                                                        [
+                                                                                db.new_article,
+                                                                                "views",
+                                                                                "DESC",
+                                                                        ],
+                                                                ],
                                                                 include: [
                                                                         {
                                                                                 model: db.new_article,
-                                                                                required: true,
                                                                                 attributes: [
                                                                                         "avatar",
                                                                                         "slug",
                                                                                         "slug_crc",
                                                                                         "title",
                                                                                         "views",
-                                                                                ],
-                                                                                order: [
-                                                                                        [
-                                                                                                "views",
-                                                                                                "DESC",
-                                                                                        ],
                                                                                 ],
                                                                                 include: [
                                                                                         {
@@ -345,6 +261,37 @@ const articlesService = {
                                                         }
                                                 );
                                 }
+                                list_article_most_views.map((item) => {
+                                        if (
+                                                fs.existsSync(
+                                                        `src/uploadFile/avatars/${
+                                                                item.avatar +
+                                                                ".png"
+                                                        }`
+                                                )
+                                        ) {
+                                                // Tạo URL từ đường dẫn tới hình ảnh
+                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                item.avatar = imageUrl;
+                                        } else {
+                                        }
+                                });
+                                list_article_most_views.map((item) => {
+                                        if (
+                                                fs.existsSync(
+                                                        `src/uploadFile/avatars/${
+                                                                item.new_article
+                                                                        .avatar +
+                                                                ".png"
+                                                        }`
+                                                )
+                                        ) {
+                                                // Tạo URL từ đường dẫn tới hình ảnh
+                                                const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
+                                                item.new_article.avatar =
+                                                        imageUrl;
+                                        }
+                                });
                         } else {
                                 list_article_most_views =
                                         await db.new_article.findAll({
@@ -383,7 +330,22 @@ const articlesService = {
                                                         },
                                                 ],
                                         });
+                                list_article_most_views.map((item) => {
+                                        if (
+                                                fs.existsSync(
+                                                        `src/uploadFile/avatars/${
+                                                                item.avatar +
+                                                                ".png"
+                                                        }`
+                                                )
+                                        ) {
+                                                // Tạo URL từ đường dẫn tới hình ảnh
+                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                item.avatar = imageUrl;
+                                        }
+                                });
                         }
+
                         return list_article_most_views;
                 }),
                 getByPublishAt: asyncHandler(async (slug_crc) => {
@@ -419,6 +381,21 @@ const articlesService = {
                                                 order: [["publishAt", "DESC"]],
                                                 limit: 20,
                                         });
+                                list_article_new.rows.map((item) => {
+                                        if (
+                                                fs.existsSync(
+                                                        `src/uploadFile/avatars/${
+                                                                item.avatar +
+                                                                ".png"
+                                                        }`
+                                                )
+                                        ) {
+                                                // Tạo URL từ đường dẫn tới hình ảnh
+                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                item.avatar = imageUrl;
+                                        } else {
+                                        }
+                                });
                         } else {
                                 const idCate = await db.new_category.findOne({
                                         where: [{ slug_crc }],
@@ -454,8 +431,24 @@ const articlesService = {
                                                         }
                                                 );
                                 }
+                                list_article_new.map((item) => {
+                                        if (
+                                                fs.existsSync(
+                                                        `src/uploadFile/avatars/${
+                                                                item.new_article
+                                                                        .avatar +
+                                                                ".png"
+                                                        }`
+                                                )
+                                        ) {
+                                                // Tạo URL từ đường dẫn tới hình ảnh
+                                                const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
+                                                item.new_article.avatar =
+                                                        imageUrl;
+                                        } else {
+                                        }
+                                });
                         }
-
                         return list_article_new;
                 }),
                 getHotCategoryService: asyncHandler(async (slug_crc) => {
@@ -480,6 +473,21 @@ const articlesService = {
                                                 ],
                                         },
                                 ],
+                        });
+                        res.new_articles_hot_categories.map((item) => {
+                                if (
+                                        fs.existsSync(
+                                                `src/uploadFile/avatars/${
+                                                        item.new_article
+                                                                .avatar + ".png"
+                                                }`
+                                        )
+                                ) {
+                                        // Tạo URL từ đường dẫn tới hình ảnh
+                                        const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
+                                        item.new_article.avatar = imageUrl;
+                                } else {
+                                }
                         });
                         return res;
                 }),

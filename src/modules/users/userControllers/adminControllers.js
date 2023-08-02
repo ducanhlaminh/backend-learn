@@ -11,10 +11,12 @@ const adminControllers = {
         },
         update_articles: {
                 publishController: async (req, res) => {
+                        const file = req.file;
                         const response =
                                 await adminServices.update.updateArticleService(
                                         req.params.id,
-                                        req.body
+                                        req.body,
+                                        file
                                 );
                         res.status(200).json(response);
                 },
