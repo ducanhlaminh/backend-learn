@@ -6,6 +6,8 @@ const axios = require("axios");
 require("dotenv").config();
 const asyncHandler = require("express-async-handler");
 const path = require("path");
+const sharp = require("sharp");
+
 const adminServices = {
         get: {
                 getAllService: asyncHandler(
@@ -399,7 +401,21 @@ const adminServices = {
                         const newFilePath = `src/uploadFile/avatars/${
                                 slug_crc + "." + ext
                         }`;
-                        fs.rename(file.path, newFilePath);
+                        sharp(file.path)
+                                .resize(500, 500)
+                                .toFile(newFilePath, (err, info) => {
+                                        if (err) {
+                                                console.error(
+                                                        "Error resizing image:",
+                                                        err
+                                                );
+                                        } else {
+                                                console.log(
+                                                        "Image resized successfully:",
+                                                        info
+                                                );
+                                        }
+                                });
                         try {
                                 const [articel, created] =
                                         await db.new_article.findOrCreate({

@@ -907,12 +907,14 @@ const articlesService = {
                         }`;
                         let avatar = fs.readFileSync(file.path, "base64");
                         avatar = `data:image/png;base64,` + avatar;
-                        fs.rename(file.path, newFilePath, (error) => {
-                                if (error) {
-                                        console.log(error);
-                                        return;
-                                }
-                        });
+
+                        // fs.rename(file.path, newFilePath, (error) => {
+                        //         if (error) {
+                        //                 console.log(error);
+                        //                 return;
+                        //         }
+                        // });
+
                         try {
                                 const [articel, created] =
                                         await db.new_article.findOrCreate({
