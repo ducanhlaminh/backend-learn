@@ -30,5 +30,9 @@ articlesRoutes.get(
         "/title",
         articlesController.get_articles.getByTitleControllers
 );
+articlesRoutes.get(
+        "/box-category",
+        articlesController.get_articles.getBoxCategoryControllers
+);
 
 module.exports = articlesRoutes;

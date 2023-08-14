@@ -169,6 +169,18 @@ const categoryService = {
                         }
                 });
         },
+        updateService: async (data, id) => {
+                await db.new_category.update(
+                        {
+                                ...data,
+                        },
+                        {
+                                where: {
+                                        id,
+                                },
+                        }
+                );
+        },
 };
 
 module.exports = categoryService;

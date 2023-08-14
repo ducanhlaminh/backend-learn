@@ -39,5 +39,12 @@ const categoryControllers = {
                 );
                 res.status(200).json(response);
         },
+        updateCategory: async (req, res) => {
+                const response = await categoryService.updateService(
+                        req.body,
+                        req.query.id
+                );
+                res.status(200).json(response);
+        },
 };
 module.exports = categoryControllers;

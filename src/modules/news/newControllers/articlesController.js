@@ -69,6 +69,13 @@ const articlesController = {
                         );
                         res.status(200).json({ newArticleCate: news });
                 },
+                getBoxCategoryControllers: async (req, res) => {
+                        const box =
+                                await articlesService.get.getBoxCategoryService(
+                                        req.query?.slug_crc
+                                );
+                        res.status(200).json({ box });
+                },
         },
 };
 

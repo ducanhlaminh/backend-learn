@@ -11,4 +11,5 @@ categoryRoutes.get("/insert", categoryControllers.insertData);
 // Amin
 categoryRoutes.get("/admin/get-all", categoryControllers.getAllByAdminControl);
 categoryRoutes.delete("/admin", categoryControllers.deleteCategory);
+categoryRoutes.put("/admin", categoryControllers.deleteCategory);
 module.exports = categoryRoutes;
