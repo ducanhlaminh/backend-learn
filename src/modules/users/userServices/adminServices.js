@@ -414,6 +414,18 @@ const adminServices = {
                                                         "Image resized successfully:",
                                                         info
                                                 );
+                                                fs.unlink(file.path, (err) => {
+                                                        if (err) {
+                                                                console.error(
+                                                                        "Lỗi khi xóa tệp tin:",
+                                                                        err
+                                                                );
+                                                        } else {
+                                                                console.log(
+                                                                        "Tệp tin đã được xóa thành công."
+                                                                );
+                                                        }
+                                                });
                                         }
                                 });
                         try {
@@ -449,7 +461,7 @@ const adminServices = {
                                                 category_id: data.categoryId,
                                                 article_id: articel.id,
                                         });
-                                if (category.parent_id) {
+                                if (category?.parent_id) {
                                         const parent =
                                                 await db.new_articles_category.create(
                                                         {
@@ -492,9 +504,6 @@ const adminServices = {
                                         fs.writeFileSync(
                                                 newFilePath,
                                                 imageBuffer
-                                        );
-                                        console.log(
-                                                `đã được tải về và lưu trong `
                                         );
                                 } catch (error) {}
                         }
