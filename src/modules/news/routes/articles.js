@@ -1,7 +1,6 @@
 const express = require("express");
 const articlesRoutes = express.Router();
 const articlesController = require("../newControllers/articlesController");
-// articlesRoutes.use(checkToken);
 articlesRoutes.get(
         "/hot-main",
         articlesController.get_articles.getHotControllers

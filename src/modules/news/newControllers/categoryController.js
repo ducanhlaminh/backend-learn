@@ -1,6 +1,7 @@
 const categoryService = require("../newServices/categoryService");
 const { cates } = require("../../../untils/dataDemo");
 const asyncHandler = require("express-async-handler");
+const { log } = require("console");
 
 const categoryControllers = {
         createCategoryControllers: asyncHandler(async (req, res) => {
@@ -43,6 +44,13 @@ const categoryControllers = {
                 const response = await categoryService.updateService(
                         req.body,
                         req.query.id
+                );
+                res.status(200).json(response);
+        },
+        updatePositionCategories: async (req, res) => {
+                console.log(req.body);
+                const response = await categoryService.updatePositionService(
+                        req.body
                 );
                 res.status(200).json(response);
         },

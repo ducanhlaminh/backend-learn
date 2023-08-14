@@ -9,6 +9,8 @@ const categoryService = {
                 const response = await db.new_category.create({
                         ...data,
                         slug_crc: result[0][0].crcValue,
+                        status: 0,
+                        position: null,
                 });
                 return response;
         },
@@ -56,11 +58,13 @@ const categoryService = {
                                                         "slug_crc",
                                                         "updatedAt",
                                                         "createdAt",
+                                                        "position",
                                                 ],
-
+                                                order: [["position", "ASC"]],
                                                 where: [
                                                         {
                                                                 parent_id: null,
+                                                                status: 1,
                                                         },
                                                 ],
                                                 include: {
@@ -84,6 +88,7 @@ const categoryService = {
         insertDataService: (data) => {
                 return new Promise(async (resolve, reject) => {
                         try {
+                                let position = 1;
                                 for (let cate of data) {
                                         const slug_crc_cate = crc32(cate.slug);
                                         const createCate =
@@ -91,13 +96,16 @@ const categoryService = {
                                                         ...cate,
                                                         status: 1,
                                                         slug_crc: slug_crc_cate,
+                                                        position,
                                                 });
+                                        ++position;
                                         for (let subCate of cate.sub) {
                                                 const slug_crc_subCate = crc32(
                                                         subCate.slug
                                                 );
                                                 await db.new_category.create({
                                                         ...subCate,
+                                                        status: 1,
                                                         slug_crc: slug_crc_subCate,
                                                         parent_id: createCate.id,
                                                 });
@@ -120,6 +128,7 @@ const categoryService = {
                                                                 parent_id: null,
                                                         },
                                                 ],
+                                                order: [["position", "ASC"]],
                                                 include: [
                                                         {
                                                                 model: db.new_category,
@@ -180,6 +189,38 @@ const categoryService = {
                                 },
                         }
                 );
+        },
+        updatePositionService: async (data) => {
+                data.map(async (category) => {
+                        const res = await db.new_category.findOne({
+                                where: {
+                                        position: category.position,
+                                },
+                        });
+                        if (res) {
+                                await db.new_category.update(
+                                        {
+                                                position: null,
+                                        },
+                                        {
+                                                where: {
+                                                        id: category.id,
+                                                },
+                                        }
+                                );
+                        }
+                        await db.new_category.update(
+                                {
+                                        position: category.position,
+                                },
+                                {
+                                        where: {
+                                                id: category.id,
+                                        },
+                                }
+                        );
+                });
+                return { message: "Update position successfully" };
         },
 };
 

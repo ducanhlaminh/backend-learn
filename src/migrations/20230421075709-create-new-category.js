@@ -18,6 +18,9 @@ module.exports = {
                         slug_crc: {
                                 type: Sequelize.BIGINT,
                         },
+                        position: {
+                                type: Sequelize.INTEGER,
+                        },
                         parent_id: {
                                 type: Sequelize.INTEGER,
                         },

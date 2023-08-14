@@ -71,7 +71,7 @@ const articlesController = {
                 },
                 getBoxCategoryControllers: async (req, res) => {
                         const box =
-                                await articlesService.get.getBoxCategoryService(
+                                await articlesService.get.getHotBoxSubCategoryService(
                                         req.query?.slug_crc
                                 );
                         res.status(200).json({ box });

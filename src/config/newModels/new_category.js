@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
                         slug: DataTypes.STRING,
                         slug_crc: DataTypes.BIGINT,
                         parent_id: DataTypes.INTEGER,
+                        position: DataTypes.INTEGER,
                         status: DataTypes.INTEGER,
                         updated_user_id: DataTypes.INTEGER,
                         created_user_id: DataTypes.INTEGER,

@@ -4,6 +4,7 @@ const crc32 = require("crc/crc32");
 const fs = require("fs");
 require("dotenv").config();
 const asyncHandler = require("express-async-handler");
+const { log } = require("console");
 const articlesService = {
         get: {
                 getHotService: asyncHandler(async (req, res) => {
@@ -492,8 +493,9 @@ const articlesService = {
                         return res;
                 }),
                 getHotBoxSubCategoryService: asyncHandler(async (slug_crc) => {
+                        let res;
                         if (!slug_crc) {
-                                const res = await db.new_category.findOne({
+                                res = await db.new_category.findAll({
                                         where: {
                                                 parent_id: null,
                                         },
@@ -503,12 +505,20 @@ const articlesService = {
                                                 "slug_crc",
                                                 "id",
                                         ],
+                                        include: {
+                                                model: db.new_articles_hot_category,
+                                                include: {
+                                                        model: db.new_article,
+                                                },
+                                        },
                                 });
-                                return res;
                         } else {
-                                const res = await db.new_category.findOne({
+                                const parent = await db.new_category.findOne({
+                                        where: { slug_crc },
+                                });
+                                res = await db.new_category.findAll({
                                         where: {
-                                                slug_crc,
+                                                parent_id: parent.id,
                                         },
                                         attributes: [
                                                 "name",
@@ -516,50 +526,58 @@ const articlesService = {
                                                 "slug_crc",
                                                 "id",
                                         ],
-                                });
-                                if (res) {
-                                        const child =
-                                                await db.new_category.findAll({
-                                                        where: {
-                                                                parent_id: res.id,
-                                                        },
+                                        include: [
+                                                {
+                                                        model: db.new_articles_hot_category,
                                                         attributes: [
-                                                                "name",
-                                                                "slug",
-                                                                "slug_crc",
-                                                                "id",
+                                                                "article_id",
+                                                                "position",
+                                                        ],
+                                                        order: [
+                                                                [
+                                                                        "position",
+                                                                        "ASC",
+                                                                ],
                                                         ],
                                                         include: [
                                                                 {
-                                                                        model: db.new_articles_hot_category,
+                                                                        model: db.new_article,
                                                                         attributes: [
-                                                                                "article_id",
-                                                                                "position",
-                                                                        ],
-                                                                        order: [
-                                                                                [
-                                                                                        "position",
-                                                                                        "ASC",
-                                                                                ],
-                                                                        ],
-                                                                        include: [
-                                                                                {
-                                                                                        model: db.new_article,
-                                                                                        attributes: [
-                                                                                                "avatar",
-                                                                                                "slug",
-                                                                                                "slug_crc",
-                                                                                                "title",
-                                                                                                "sapo",
-                                                                                        ],
-                                                                                },
+                                                                                "avatar",
+                                                                                "slug",
+                                                                                "slug_crc",
+                                                                                "title",
+                                                                                "sapo",
                                                                         ],
                                                                 },
                                                         ],
-                                                });
-                                        return child;
-                                }
+                                                },
+                                        ],
+                                });
                         }
+                        res.map((item) => {
+                                item.new_articles_hot_categories.map(
+                                        (article) => {
+                                                console.log();
+                                                if (
+                                                        fs.existsSync(
+                                                                `src/uploadFile/avatars/${
+                                                                        article
+                                                                                .new_article
+                                                                                .avatar +
+                                                                        ".png"
+                                                                }`
+                                                        )
+                                                ) {
+                                                        const imageUrl = `http://localhost:4000/${article.new_article.avatar}.png`;
+                                                        article.new_article.avatar =
+                                                                imageUrl;
+                                                } else {
+                                                }
+                                        }
+                                );
+                        });
+                        return res;
                 }),
                 getDetailService: asyncHandler(async (slug, slug_crc) => {
                         const checkslugsrc = await db.new_article.findOne({

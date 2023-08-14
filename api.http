@@ -4,7 +4,7 @@
 #    "id":5
 # }
 
-GET http://localhost:4000/api/v1/articles/publishAll
+GET http://localhost:4000/api/v1/categories/insert
 content-type: application/json
 
 
