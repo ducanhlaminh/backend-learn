@@ -233,7 +233,7 @@ const adminServices = {
                                 const now = new Date();
                                 let infor = null;
                                 if (file) {
-                                        console.log(file.path);
+                                        console.log("path", file.path);
                                         const ext = file.originalname
                                                 .split(".")
                                                 .pop();
@@ -244,7 +244,10 @@ const adminServices = {
                                                 file.path,
                                                 newFilePath,
                                                 (error) => {
-                                                        console.log(error);
+                                                        console.log(
+                                                                "error",
+                                                                error
+                                                        );
                                                 }
                                         );
                                 }
@@ -485,6 +488,7 @@ const adminServices = {
                         const imageDirectory = "/src/uploadFile/avatars";
 
                         async function downloadImage(object, name, pathDir) {
+                                const slug_crc = crc32(name);
                                 try {
                                         const response = await axios.get(
                                                 object.avatar,
@@ -497,14 +501,50 @@ const adminServices = {
                                                 response.data,
                                                 "binary"
                                         );
-                                        const newFilePath = `src/uploadFile/avatars/${
+                                        const Path = `src/uploadFile/avatars/${
                                                 name + ".png"
                                         }`;
-
-                                        fs.writeFileSync(
-                                                newFilePath,
-                                                imageBuffer
-                                        );
+                                        const newFilePath = `src/uploadFile/avatars/${
+                                                slug_crc + ".png"
+                                        }`;
+                                        fs.writeFileSync(Path, imageBuffer);
+                                        sharp(Path)
+                                                .resize(500, 500)
+                                                .toFile(
+                                                        newFilePath,
+                                                        (err, info) => {
+                                                                if (err) {
+                                                                        console.error(
+                                                                                "Error resizing image:",
+                                                                                err
+                                                                        );
+                                                                } else {
+                                                                        console.log(
+                                                                                "Image resized successfully:",
+                                                                                info
+                                                                        );
+                                                                        fs.unlink(
+                                                                                Path,
+                                                                                (
+                                                                                        err
+                                                                                ) => {
+                                                                                        if (
+                                                                                                err
+                                                                                        ) {
+                                                                                                console.error(
+                                                                                                        "Lỗi khi xóa tệp tin:",
+                                                                                                        err
+                                                                                                );
+                                                                                        } else {
+                                                                                                console.log(
+                                                                                                        "Tệp tin đã được xóa thành công."
+                                                                                                );
+                                                                                        }
+                                                                                }
+                                                                        );
+                                                                }
+                                                        }
+                                                );
                                 } catch (error) {}
                         }
                         for (let articels of data) {
@@ -528,14 +568,15 @@ const adminServices = {
                                         i < articels.article.length;
                                         i++
                                 ) {
+                                        var newArticle;
                                         const slug_crc = crc32(
                                                 articels.article[i].slug
                                         );
-                                        var newArticle;
                                         try {
                                                 await downloadImage(
                                                         articels.article[i],
-                                                        slug_crc,
+                                                        articels.article[i]
+                                                                .slug,
                                                         imageDirectory
                                                 );
                                                 newArticle =

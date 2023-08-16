@@ -128,11 +128,10 @@ const articlesService = {
                 }),
                 getByCateService: asyncHandler(async (slug, slug_crc) => {
                         try {
-                                // const checkcrc = await db.new_category.findOne({
-                                //       where: [{ slug_crc }],
-                                // });
-                                // console.log(slug_crc);
-                                if (1) {
+                                const checkcrc = await db.new_category.findOne({
+                                        where: [{ slug_crc }],
+                                });
+                                if (checkcrc) {
                                         const checkSlug =
                                                 await db.new_category.findOne({
                                                         where: [

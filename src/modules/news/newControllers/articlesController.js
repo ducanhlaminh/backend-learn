@@ -1,15 +1,15 @@
 const articlesService = require("../newServices/articlesService");
-
+const asyncHandler = require("express-async-handler");
 const articlesController = {
         get_articles: {
-                getAllController: async (req, res) => {
+                getAllController: asyncHandler(async (req, res) => {
                         const response =
                                 await articlesService.get.getAllService(
                                         req.query
                                 );
                         res.status(200).json(response);
-                },
-                getHotCategoryController: async (req, res) => {
+                }),
+                getHotCategoryController: asyncHandler(async (req, res) => {
                         const hotArticlesCate =
                                 await articlesService.get.getHotCategoryService(
                                         req.query.slug_crc
@@ -19,63 +19,63 @@ const articlesController = {
                                         req.query.slug_crc
                                 );
                         res.status(200).json({ hotArticlesCate, boxSubCate });
-                },
-                getHotSubCategoryController: async (req, res) => {
+                }),
+                getHotSubCategoryController: asyncHandler(async (req, res) => {
                         const box =
                                 await articlesService.get.getHotBoxSubCategoryService(
                                         req.query.slug_crc
                                 );
                         res.status(200).json({ box });
-                },
-                getHotControllers: async (req, res) => {
+                }),
+                getHotControllers: asyncHandler(async (req, res) => {
                         const hot_news =
                                 await articlesService.get.getHotService();
                         res.status(200).json({ hot_news });
-                },
-                getByTitleControllers: async (req, res) => {
+                }),
+                getByTitleControllers: asyncHandler(async (req, res) => {
                         const response =
                                 await articlesService.get.getByTitleService(
                                         req.query.title,
                                         req.query.category_id
                                 );
                         res.status(200).json(response);
-                },
-                getByCateControllers: async (req, res) => {
+                }),
+                getByCateControllers: asyncHandler(async (req, res) => {
                         const response =
                                 await articlesService.get.getByCateService(
                                         req.params.slug,
                                         req.params.slug_crc
                                 );
                         res.status(200).json(response);
-                },
-                getDetailControllers: async (req, res) => {
+                }),
+                getDetailControllers: asyncHandler(async (req, res) => {
                         const response =
                                 await articlesService.get.getDetailService(
                                         req.params.slug,
                                         req.params.slug_crc
                                 );
                         res.status(200).json(response);
-                },
-                getByViewsController: async (req, res) => {
+                }),
+                getByViewsController: asyncHandler(async (req, res) => {
                         const views_news =
                                 await articlesService.get.getByMostView(
                                         req.query.slug_crc
                                 );
                         res.status(200).json(views_news);
-                },
-                getByPublishAtController: async (req, res) => {
+                }),
+                getByPublishAtController: asyncHandler(async (req, res) => {
                         const news = await articlesService.get.getByPublishAt(
                                 req.query.slug
                         );
                         res.status(200).json({ newArticleCate: news });
-                },
-                getBoxCategoryControllers: async (req, res) => {
+                }),
+                getBoxCategoryControllers: asyncHandler(async (req, res) => {
                         const box =
                                 await articlesService.get.getHotBoxSubCategoryService(
                                         req.query?.slug_crc
                                 );
                         res.status(200).json({ box });
-                },
+                }),
         },
 };
 
