@@ -48,7 +48,6 @@ const categoryControllers = {
                 res.status(200).json(response);
         },
         updatePositionCategories: async (req, res) => {
-                console.log(req.body);
                 const response = await categoryService.updatePositionService(
                         req.body
                 );

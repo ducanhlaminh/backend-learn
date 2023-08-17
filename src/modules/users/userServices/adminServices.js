@@ -233,7 +233,6 @@ const adminServices = {
                                 const now = new Date();
                                 let infor = null;
                                 if (file) {
-                                        console.log("path", file.path);
                                         const ext = file.originalname
                                                 .split(".")
                                                 .pop();

@@ -207,158 +207,168 @@ const articlesService = {
                 }),
                 getByMostView: asyncHandler(async (slug_crc) => {
                         var list_article_most_views;
-                        if (slug_crc) {
-                                const idCate = await db.new_category.findOne({
-                                        where: [{ slug_crc }],
-                                        attributes: [
-                                                "id",
-                                                "slug",
-                                                "slug_crc",
-                                                "parent_id",
-                                                "name",
-                                        ],
-                                });
-                                if (idCate) {
-                                        list_article_most_views =
-                                                await db.new_articles_category.findAll(
-                                                        {
-                                                                where: {
-                                                                        category_id:
-                                                                                idCate.id,
-                                                                },
-                                                                limit: 5,
-
-                                                                include: [
-                                                                        {
-                                                                                model: db.new_article,
-                                                                                attributes: [
-                                                                                        "avatar",
-                                                                                        "slug",
-                                                                                        "slug_crc",
-                                                                                        "title",
-                                                                                        "views",
-                                                                                        "status",
-                                                                                ],
-
-                                                                                include: [
-                                                                                        {
-                                                                                                model: db.new_articles_category,
-                                                                                                attributes: [
-                                                                                                        "category_id",
-                                                                                                ],
-                                                                                                include: [
-                                                                                                        {
-                                                                                                                as: "category",
-                                                                                                                model: db.new_category,
-                                                                                                                attributes: [
-                                                                                                                        "name",
-                                                                                                                        "slug",
-                                                                                                                        "slug_crc",
-                                                                                                                ],
-                                                                                                        },
-                                                                                                ],
-                                                                                        },
-                                                                                ],
+                        try {
+                                if (slug_crc) {
+                                        const idCate =
+                                                await db.new_category.findOne({
+                                                        where: [{ slug_crc }],
+                                                        attributes: [
+                                                                "id",
+                                                                "slug",
+                                                                "slug_crc",
+                                                                "parent_id",
+                                                                "name",
+                                                        ],
+                                                });
+                                        if (idCate) {
+                                                list_article_most_views =
+                                                        await db.new_articles_category.findAll(
+                                                                {
+                                                                        where: {
+                                                                                category_id:
+                                                                                        idCate.id,
                                                                         },
-                                                                ],
-                                                                order: [
-                                                                        [
+                                                                        limit: 5,
+
+                                                                        include: [
                                                                                 {
                                                                                         model: db.new_article,
+                                                                                        attributes: [
+                                                                                                "avatar",
+                                                                                                "slug",
+                                                                                                "slug_crc",
+                                                                                                "title",
+                                                                                                "views",
+                                                                                                "status",
+                                                                                        ],
+
+                                                                                        include: [
+                                                                                                {
+                                                                                                        model: db.new_articles_category,
+                                                                                                        attributes: [
+                                                                                                                "category_id",
+                                                                                                        ],
+                                                                                                        include: [
+                                                                                                                {
+                                                                                                                        as: "category",
+                                                                                                                        model: db.new_category,
+                                                                                                                        attributes: [
+                                                                                                                                "name",
+                                                                                                                                "slug",
+                                                                                                                                "slug_crc",
+                                                                                                                        ],
+                                                                                                                },
+                                                                                                        ],
+                                                                                                },
+                                                                                        ],
                                                                                 },
-                                                                                "views",
-                                                                                "DESC",
                                                                         ],
-                                                                ],
-                                                        }
-                                                );
-                                }
-                                list_article_most_views.map((item) => {
-                                        if (
-                                                fs.existsSync(
-                                                        `src/uploadFile/avatars/${
-                                                                item.avatar +
-                                                                ".png"
-                                                        }`
-                                                )
-                                        ) {
-                                                // Tạo URL từ đường dẫn tới hình ảnh
-                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                                                item.avatar = imageUrl;
-                                        } else {
-                                        }
-                                });
-                                list_article_most_views.map((item) => {
-                                        if (
-                                                fs.existsSync(
-                                                        `src/uploadFile/avatars/${
-                                                                item.new_article
-                                                                        .avatar +
-                                                                ".png"
-                                                        }`
-                                                )
-                                        ) {
-                                                // Tạo URL từ đường dẫn tới hình ảnh
-                                                const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
-                                                item.new_article.avatar =
-                                                        imageUrl;
-                                        }
-                                });
-                        } else {
-                                list_article_most_views =
-                                        await db.new_article.findAll({
-                                                where: [
-                                                        {
-                                                                status: 1,
-                                                        },
-                                                ],
-                                                limit: 5,
-                                                attributes: [
-                                                        "avatar",
-                                                        "slug",
-                                                        "slug_crc",
-                                                        "title",
-                                                        "views",
-                                                ],
-                                                order: [["views", "DESC"]],
-
-                                                include: [
-                                                        {
-                                                                model: db.new_articles_category,
-                                                                attributes: [
-                                                                        "category_id",
-                                                                ],
-                                                                include: [
-                                                                        {
-                                                                                as: "category",
-                                                                                model: db.new_category,
-                                                                                attributes: [
-                                                                                        "name",
-                                                                                        "slug",
-                                                                                        "slug_crc",
+                                                                        order: [
+                                                                                [
+                                                                                        {
+                                                                                                model: db.new_article,
+                                                                                        },
+                                                                                        "views",
+                                                                                        "DESC",
                                                                                 ],
-                                                                        },
-                                                                ],
-                                                        },
-                                                ],
-                                        });
-                                list_article_most_views.map((item) => {
-                                        if (
-                                                fs.existsSync(
-                                                        `src/uploadFile/avatars/${
-                                                                item.avatar +
-                                                                ".png"
-                                                        }`
-                                                )
-                                        ) {
-                                                // Tạo URL từ đường dẫn tới hình ảnh
-                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                                                item.avatar = imageUrl;
+                                                                        ],
+                                                                }
+                                                        );
                                         }
-                                });
-                        }
+                                        list_article_most_views.map((item) => {
+                                                if (
+                                                        fs.existsSync(
+                                                                `src/uploadFile/avatars/${
+                                                                        item.avatar +
+                                                                        ".png"
+                                                                }`
+                                                        )
+                                                ) {
+                                                        // Tạo URL từ đường dẫn tới hình ảnh
+                                                        const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                        item.avatar = imageUrl;
+                                                } else {
+                                                }
+                                        });
+                                        list_article_most_views.map((item) => {
+                                                if (
+                                                        fs.existsSync(
+                                                                `src/uploadFile/avatars/${
+                                                                        item
+                                                                                .new_article
+                                                                                .avatar +
+                                                                        ".png"
+                                                                }`
+                                                        )
+                                                ) {
+                                                        // Tạo URL từ đường dẫn tới hình ảnh
+                                                        const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
+                                                        item.new_article.avatar =
+                                                                imageUrl;
+                                                }
+                                        });
+                                } else {
+                                        list_article_most_views =
+                                                await db.new_article.findAll({
+                                                        where: [
+                                                                {
+                                                                        status: 1,
+                                                                },
+                                                        ],
+                                                        limit: 5,
+                                                        attributes: [
+                                                                "avatar",
+                                                                "slug",
+                                                                "slug_crc",
+                                                                "title",
+                                                                "views",
+                                                        ],
+                                                        order: [
+                                                                [
+                                                                        "views",
+                                                                        "DESC",
+                                                                ],
+                                                        ],
 
-                        return list_article_most_views;
+                                                        include: [
+                                                                {
+                                                                        model: db.new_articles_category,
+                                                                        attributes: [
+                                                                                "category_id",
+                                                                        ],
+                                                                        include: [
+                                                                                {
+                                                                                        as: "category",
+                                                                                        model: db.new_category,
+                                                                                        attributes: [
+                                                                                                "name",
+                                                                                                "slug",
+                                                                                                "slug_crc",
+                                                                                        ],
+                                                                                },
+                                                                        ],
+                                                                },
+                                                        ],
+                                                });
+                                        list_article_most_views.map((item) => {
+                                                if (
+                                                        fs.existsSync(
+                                                                `src/uploadFile/avatars/${
+                                                                        item.avatar +
+                                                                        ".png"
+                                                                }`
+                                                        )
+                                                ) {
+                                                        // Tạo URL từ đường dẫn tới hình ảnh
+                                                        const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                        item.avatar = imageUrl;
+                                                }
+                                        });
+                                }
+                                return list_article_most_views;
+                        } catch (error) {
+                                console.log(error);
+                        }
                 }),
                 getByPublishAt: asyncHandler(async ({ page = 1, slug_crc }) => {
                         let list_article_new;
@@ -573,7 +583,6 @@ const articlesService = {
                         res.map((item) => {
                                 item.new_articles_hot_categories.map(
                                         (article) => {
-                                                console.log();
                                                 if (
                                                         fs.existsSync(
                                                                 `src/uploadFile/avatars/${
@@ -610,7 +619,6 @@ const articlesService = {
                                                 },
                                         ],
                                 });
-
                                 if (article !== null) {
                                         await db.new_article.update(
                                                 {
@@ -638,33 +646,6 @@ const articlesService = {
                                                                 ],
                                                         }
                                                 );
-
-                                        const category =
-                                                await db.new_category.findOne({
-                                                        where: [
-                                                                {
-                                                                        id: res?.category_id,
-                                                                },
-                                                        ],
-                                                        attributes: [
-                                                                "name",
-                                                                "id",
-                                                                "slug",
-                                                        ],
-                                                });
-                                        const cateChild =
-                                                await db.new_category.findOne({
-                                                        where: [
-                                                                {
-                                                                        parent_id: res.category_id,
-                                                                },
-                                                        ],
-                                                        attributes: [
-                                                                "name",
-                                                                "id",
-                                                                "slug",
-                                                        ],
-                                                });
                                         const articlesCate =
                                                 await db.new_category.findAll({
                                                         attributes: [
@@ -731,8 +712,6 @@ const articlesService = {
                                                 });
                                         return {
                                                 article,
-                                                articlesCate,
-                                                cateChild,
                                         };
                                 } else {
                                         return {
