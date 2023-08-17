@@ -65,7 +65,7 @@ const articlesController = {
                 }),
                 getByPublishAtController: asyncHandler(async (req, res) => {
                         const news = await articlesService.get.getByPublishAt(
-                                req.query.slug
+                                req.query
                         );
                         res.status(200).json({ newArticleCate: news });
                 }),

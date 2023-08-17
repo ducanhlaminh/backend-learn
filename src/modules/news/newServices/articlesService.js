@@ -70,6 +70,7 @@ const articlesService = {
                                                                                 title: {
                                                                                         [Op.like]: `%${title}%`,
                                                                                 },
+                                                                                status: 1,
                                                                         },
                                                                 },
                                                                 limit: 10,
@@ -92,6 +93,7 @@ const articlesService = {
                                                                         title: {
                                                                                 [Op.like]: `%${title}%`,
                                                                         },
+                                                                        status: 1,
                                                                 },
                                                                 limit: 15,
                                                                 order: [
@@ -172,11 +174,16 @@ const articlesService = {
                                                                                 {
                                                                                         model: db.new_article,
                                                                                         required: true,
+                                                                                        where: {
+                                                                                                status: 1,
+                                                                                        },
                                                                                 },
                                                                         ],
                                                                         order: [
                                                                                 [
-                                                                                        db.new_article,
+                                                                                        {
+                                                                                                model: db.new_article,
+                                                                                        },
                                                                                         "publishAt",
                                                                                         "DESC",
                                                                                 ],
@@ -220,13 +227,7 @@ const articlesService = {
                                                                                 idCate.id,
                                                                 },
                                                                 limit: 5,
-                                                                order: [
-                                                                        [
-                                                                                db.new_article,
-                                                                                "views",
-                                                                                "DESC",
-                                                                        ],
-                                                                ],
+
                                                                 include: [
                                                                         {
                                                                                 model: db.new_article,
@@ -236,7 +237,9 @@ const articlesService = {
                                                                                         "slug_crc",
                                                                                         "title",
                                                                                         "views",
+                                                                                        "status",
                                                                                 ],
+
                                                                                 include: [
                                                                                         {
                                                                                                 model: db.new_articles_category,
@@ -257,6 +260,15 @@ const articlesService = {
                                                                                         },
                                                                                 ],
                                                                         },
+                                                                ],
+                                                                order: [
+                                                                        [
+                                                                                {
+                                                                                        model: db.new_article,
+                                                                                },
+                                                                                "views",
+                                                                                "DESC",
+                                                                        ],
                                                                 ],
                                                         }
                                                 );
@@ -295,11 +307,11 @@ const articlesService = {
                         } else {
                                 list_article_most_views =
                                         await db.new_article.findAll({
-                                                // where: [
-                                                //         {
-                                                //                 status: 1,
-                                                //         },
-                                                // ],
+                                                where: [
+                                                        {
+                                                                status: 1,
+                                                        },
+                                                ],
                                                 limit: 5,
                                                 attributes: [
                                                         "avatar",
@@ -348,8 +360,12 @@ const articlesService = {
 
                         return list_article_most_views;
                 }),
-                getByPublishAt: asyncHandler(async (slug_crc) => {
+                getByPublishAt: asyncHandler(async ({ page = 1, slug_crc }) => {
                         let list_article_new;
+                        let queries = {};
+                        (queries.limit = +process.env.LIMIT),
+                                (queries.offset =
+                                        (page - 1) * +process.env.LIMIT);
                         if (!slug_crc) {
                                 const idBook = await db.new_category.findOne({
                                         where: [
@@ -367,6 +383,7 @@ const articlesService = {
                                 });
                                 list_article_new =
                                         await db.new_article.findAndCountAll({
+                                                ...queries,
                                                 include: [
                                                         {
                                                                 model: db.new_articles_category,
@@ -379,7 +396,6 @@ const articlesService = {
                                                         },
                                                 ],
                                                 order: [["publishAt", "DESC"]],
-                                                limit: 20,
                                         });
                                 list_article_new.rows.map((item) => {
                                         if (
@@ -411,6 +427,7 @@ const articlesService = {
                                         list_article_new =
                                                 await db.new_articles_category.findAll(
                                                         {
+                                                                ...queries,
                                                                 where: {
                                                                         category_id:
                                                                                 idCate.id,
@@ -418,7 +435,6 @@ const articlesService = {
                                                                 include: [
                                                                         {
                                                                                 model: db.new_article,
-                                                                                required: true,
                                                                         },
                                                                 ],
                                                                 order: [

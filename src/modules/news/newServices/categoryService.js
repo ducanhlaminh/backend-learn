@@ -77,6 +77,11 @@ const categoryService = {
                                                                 "slug_crc",
                                                                 "updatedAt",
                                                         ],
+                                                        where: [
+                                                                {
+                                                                        status: 1,
+                                                                },
+                                                        ],
                                                 },
                                         });
                                 resolve(response);
