@@ -36,23 +36,12 @@ const adminServices = {
                                                                                         ],
                                                                                 },
                                                                         ],
+                                                                        distinct: true,
                                                                 }
                                                         );
                                                 articles.rows.map((item) => {
-                                                        if (
-                                                                fs.existsSync(
-                                                                        `src/uploadFile/avatars/${
-                                                                                item.avatar +
-                                                                                ".png"
-                                                                        }`
-                                                                )
-                                                        ) {
-                                                                // Tạo URL từ đường dẫn tới hình ảnh
-                                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                                                                item.avatar =
-                                                                        imageUrl;
-                                                        } else {
-                                                        }
+                                                        const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                        item.avatar = imageUrl;
                                                 });
                                         } else {
                                                 let articlesId =

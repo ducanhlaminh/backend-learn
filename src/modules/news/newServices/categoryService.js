@@ -32,41 +32,23 @@ const categoryService = {
                         }
                 });
         },
-        getByNameService: async (name) => {
-                console.log(name);
-                const response = await db.new_category.findAll({
-                        where: {
-                                slug: {
-                                        [Op.like]: `%${name}%`,
-                                },
-                        },
-                        attributes: ["name", "id", "slug"],
-                        limit: 5,
-                });
-                console.log(response);
-                return response;
-        },
+
         getAll: () => {
                 return new Promise(async (resolve, reject) => {
                         try {
                                 const response =
                                         await db.new_category.findAndCountAll({
-                                                attributes: [
-                                                        "name",
-                                                        "id",
-                                                        "slug",
-                                                        "slug_crc",
-                                                        "updatedAt",
-                                                        "createdAt",
-                                                        "position",
-                                                ],
-                                                order: [["position", "ASC"]],
-                                                where: [
-                                                        {
-                                                                parent_id: null,
-                                                                status: 1,
-                                                        },
-                                                ],
+                                                where: {
+                                                        [Op.and]: [
+                                                                {
+                                                                        parent_id: null,
+                                                                },
+                                                                {
+                                                                        status: 1,
+                                                                },
+                                                        ],
+                                                },
+                                                require: false,
                                                 include: {
                                                         model: db.new_category,
                                                         as: "childCategories",
@@ -76,12 +58,13 @@ const categoryService = {
                                                                 "slug",
                                                                 "slug_crc",
                                                                 "updatedAt",
+                                                                "createdAt",
+                                                                "status",
                                                         ],
-                                                        where: [
-                                                                {
-                                                                        status: 1,
-                                                                },
-                                                        ],
+                                                        where: {
+                                                                status: 1,
+                                                        },
+                                                        required: false,
                                                 },
                                         });
                                 resolve(response);
@@ -196,25 +179,18 @@ const categoryService = {
                 );
         },
         updatePositionService: async (data) => {
-                data.map(async (category) => {
-                        const res = await db.new_category.findOne({
+                await db.new_category.update(
+                        { position: null },
+                        {
                                 where: {
-                                        position: category.position,
-                                },
-                        });
-                        if (res) {
-                                await db.new_category.update(
-                                        {
+                                        [Op.not]: {
                                                 position: null,
                                         },
-                                        {
-                                                where: {
-                                                        id: category.id,
-                                                },
-                                        }
-                                );
+                                },
                         }
-                        await db.new_category.update(
+                );
+                data.map(async (category) => {
+                        const res = await db.new_category.update(
                                 {
                                         position: category.position,
                                 },

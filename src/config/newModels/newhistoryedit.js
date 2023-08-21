@@ -13,8 +13,8 @@ module.exports = (sequelize, DataTypes) => {
         }
         NewHistoryEdit.init(
                 {
-                        articles_id: DataTypes.NUMBER,
-                        user_id: DataTypes.NUMBER,
+                        articles_id: DataTypes.INTEGER,
+                        user_id: DataTypes.INTEGER,
                         data: DataTypes.STRING,
                         updatedAt: DataTypes.DATE,
                         createdAt: DataTypes.DATE,

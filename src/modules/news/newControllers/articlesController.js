@@ -2,13 +2,6 @@ const articlesService = require("../newServices/articlesService");
 const asyncHandler = require("express-async-handler");
 const articlesController = {
         get_articles: {
-                getAllController: asyncHandler(async (req, res) => {
-                        const response =
-                                await articlesService.get.getAllService(
-                                        req.query
-                                );
-                        res.status(200).json(response);
-                }),
                 getHotCategoryController: asyncHandler(async (req, res) => {
                         const hotArticlesCate =
                                 await articlesService.get.getHotCategoryService(

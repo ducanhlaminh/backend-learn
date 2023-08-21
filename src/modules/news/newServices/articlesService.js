@@ -68,7 +68,7 @@ const articlesService = {
                                                                         model: db.new_article,
                                                                         where: {
                                                                                 title: {
-                                                                                        [Op.like]: `%${title}%`,
+                                                                                        [Op.like]: `${title}%`,
                                                                                 },
                                                                                 status: 1,
                                                                         },
@@ -81,14 +81,6 @@ const articlesService = {
                                         const articles =
                                                 await db.new_article.findAndCountAll(
                                                         {
-                                                                attributes: [
-                                                                        "title",
-                                                                        "slug",
-                                                                        "avatar",
-                                                                        "sapo",
-                                                                        "publishAt",
-                                                                        "id",
-                                                                ],
                                                                 where: {
                                                                         title: {
                                                                                 [Op.like]: `%${title}%`,
@@ -229,7 +221,6 @@ const articlesService = {
                                                                                         idCate.id,
                                                                         },
                                                                         limit: 5,
-
                                                                         include: [
                                                                                 {
                                                                                         model: db.new_article,
@@ -241,26 +232,10 @@ const articlesService = {
                                                                                                 "views",
                                                                                                 "status",
                                                                                         ],
-
-                                                                                        include: [
-                                                                                                {
-                                                                                                        model: db.new_articles_category,
-                                                                                                        attributes: [
-                                                                                                                "category_id",
-                                                                                                        ],
-                                                                                                        include: [
-                                                                                                                {
-                                                                                                                        as: "category",
-                                                                                                                        model: db.new_category,
-                                                                                                                        attributes: [
-                                                                                                                                "name",
-                                                                                                                                "slug",
-                                                                                                                                "slug_crc",
-                                                                                                                        ],
-                                                                                                                },
-                                                                                                        ],
-                                                                                                },
-                                                                                        ],
+                                                                                },
+                                                                                {
+                                                                                        model: db.new_category,
+                                                                                        as: "category",
                                                                                 },
                                                                         ],
                                                                         order: [
@@ -275,21 +250,6 @@ const articlesService = {
                                                                 }
                                                         );
                                         }
-                                        list_article_most_views.map((item) => {
-                                                if (
-                                                        fs.existsSync(
-                                                                `src/uploadFile/avatars/${
-                                                                        item.avatar +
-                                                                        ".png"
-                                                                }`
-                                                        )
-                                                ) {
-                                                        // Tạo URL từ đường dẫn tới hình ảnh
-                                                        const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                                                        item.avatar = imageUrl;
-                                                } else {
-                                                }
-                                        });
                                         list_article_most_views.map((item) => {
                                                 if (
                                                         fs.existsSync(
@@ -351,18 +311,9 @@ const articlesService = {
                                                         ],
                                                 });
                                         list_article_most_views.map((item) => {
-                                                if (
-                                                        fs.existsSync(
-                                                                `src/uploadFile/avatars/${
-                                                                        item.avatar +
-                                                                        ".png"
-                                                                }`
-                                                        )
-                                                ) {
-                                                        // Tạo URL từ đường dẫn tới hình ảnh
-                                                        const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                                                        item.avatar = imageUrl;
-                                                }
+                                                // Tạo URL từ đường dẫn tới hình ảnh
+                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                item.avatar = imageUrl;
                                         });
                                 }
                                 return list_article_most_views;
@@ -377,23 +328,10 @@ const articlesService = {
                                 (queries.offset =
                                         (page - 1) * +process.env.LIMIT);
                         if (!slug_crc) {
-                                const idBook = await db.new_category.findOne({
-                                        where: [
-                                                {
-                                                        slug: "Xuất bản",
-                                                },
-                                        ],
-                                        attributes: [
-                                                "id",
-                                                "slug",
-                                                "slug_crc",
-                                                "parent_id",
-                                                "name",
-                                        ],
-                                });
                                 list_article_new =
                                         await db.new_article.findAndCountAll({
                                                 ...queries,
+                                                distinct: true,
                                                 include: [
                                                         {
                                                                 model: db.new_articles_category,
@@ -438,6 +376,7 @@ const articlesService = {
                                                 await db.new_articles_category.findAll(
                                                         {
                                                                 ...queries,
+                                                                distinct: true,
                                                                 where: {
                                                                         category_id:
                                                                                 idCate.id,
