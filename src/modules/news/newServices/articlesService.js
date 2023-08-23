@@ -4,7 +4,7 @@ const crc32 = require("crc/crc32");
 const fs = require("fs");
 require("dotenv").config();
 const asyncHandler = require("express-async-handler");
-const { log } = require("console");
+const sharp = require("sharp");
 const articlesService = {
         get: {
                 getHotService: asyncHandler(async (req, res) => {
@@ -31,23 +31,23 @@ const articlesService = {
                                                 ],
                                         });
 
-                                hot_main.map((item) => {
-                                        if (
-                                                fs.existsSync(
-                                                        `src/uploadFile/avatars/${
-                                                                item.new_article
-                                                                        .avatar +
-                                                                ".png"
-                                                        }`
-                                                )
-                                        ) {
-                                                // Tạo URL từ đường dẫn tới hình ảnh
-                                                const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
-                                                item.new_article.avatar =
-                                                        imageUrl;
-                                        } else {
-                                        }
-                                });
+                                // hot_main.map((item) => {
+                                //         if (
+                                //                 fs.existsSync(
+                                //                         `src/uploadFile/avatars/${
+                                //                                 item.new_article
+                                //                                         .avatar +
+                                //                                 ".png"
+                                //                         }`
+                                //                 )
+                                //         ) {
+                                //                 // Tạo URL từ đường dẫn tới hình ảnh
+                                //                 const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
+                                //                 item.new_article.avatar =
+                                //                         imageUrl;
+                                //         } else {
+                                //         }
+                                // });
                                 return {
                                         hot_main,
                                 };
@@ -345,21 +345,6 @@ const articlesService = {
                                                 ],
                                                 order: [["publishAt", "DESC"]],
                                         });
-                                list_article_new.rows.map((item) => {
-                                        if (
-                                                fs.existsSync(
-                                                        `src/uploadFile/avatars/${
-                                                                item.avatar +
-                                                                ".png"
-                                                        }`
-                                                )
-                                        ) {
-                                                // Tạo URL từ đường dẫn tới hình ảnh
-                                                const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                                                item.avatar = imageUrl;
-                                        } else {
-                                        }
-                                });
                         } else {
                                 const idCate = await db.new_category.findOne({
                                         where: [{ slug_crc }],
@@ -396,23 +381,6 @@ const articlesService = {
                                                         }
                                                 );
                                 }
-                                list_article_new.map((item) => {
-                                        if (
-                                                fs.existsSync(
-                                                        `src/uploadFile/avatars/${
-                                                                item.new_article
-                                                                        .avatar +
-                                                                ".png"
-                                                        }`
-                                                )
-                                        ) {
-                                                // Tạo URL từ đường dẫn tới hình ảnh
-                                                const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
-                                                item.new_article.avatar =
-                                                        imageUrl;
-                                        } else {
-                                        }
-                                });
                         }
                         return list_article_new;
                 }),
@@ -661,6 +629,13 @@ const articlesService = {
                                 return { message: "Khong tim thay bai viet" };
                         }
                 }),
+                getAvatarService: async ({ slug_crc, height, width }) => {
+                        const path = `C:\\Users\\PC\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
+                        const avatarBuffer = await sharp(path)
+                                .resize(parseInt(height), parseInt(width))
+                                .toBuffer();
+                        return avatarBuffer;
+                },
         },
         update: {
                 updateHotMain: async (data, id) => {

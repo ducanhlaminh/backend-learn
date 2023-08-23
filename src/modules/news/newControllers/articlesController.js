@@ -70,6 +70,13 @@ const articlesController = {
                         res.status(200).json({ box });
                 }),
         },
+        getAvatarController: asyncHandler(async (req, res) => {
+                const avatar = await articlesService.get.getAvatarService(
+                        req?.query
+                );
+                res.set("Content-Type", "image/jpeg"); // Đặt loại nội dung là ảnh JPEG
+                res.send(avatar);
+        }),
 };
 
 module.exports = articlesController;

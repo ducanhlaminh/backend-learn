@@ -5,6 +5,7 @@ articlesRoutes.get(
         "/hot-main",
         articlesController.get_articles.getHotControllers
 );
+articlesRoutes.get("/avatar", articlesController.getAvatarController);
 articlesRoutes.get(
         "/cate/:slug/:slug_crc",
         articlesController.get_articles.getByCateControllers
