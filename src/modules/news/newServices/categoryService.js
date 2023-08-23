@@ -66,6 +66,7 @@ const categoryService = {
                                                         },
                                                         required: false,
                                                 },
+                                                order: [["position", "ASC"]],
                                         });
                                 resolve(response);
                         } catch (error) {
