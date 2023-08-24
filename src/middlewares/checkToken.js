@@ -27,6 +27,7 @@ const checkToken = (req, res, next) => {
                                 message: "Verify Failed !!!",
                         });
                 }
+
                 req.user = user;
                 next();
         });

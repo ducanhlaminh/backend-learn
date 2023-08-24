@@ -12,6 +12,7 @@ passport.use(
                                 "http://localhost:4000/api/v1/auth/google/callback",
                 },
                 async function (accessToken, refreshToken, profile, cb) {
+                        console.log(accessToken);
                         try {
                                 const [user, created] =
                                         await db.User.findOrCreate({

@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 require("dotenv").config();
 const { uuid } = require("uuidv4");
 const jwt = require("jsonwebtoken");
-const options = { expiresIn: "1h" };
+const options = { expiresIn: "10s" };
 const asyncHandler = require("express-async-handler");
 
 const authServices = {
@@ -79,7 +79,7 @@ const authServices = {
                                                         role: user.role_id,
                                                 },
                                                 process.env.SECRET_KEY,
-                                                options
+                                                { expiresIn: "10s" }
                                         );
                                         return {
                                                 token: `Bearer ${token}`,
@@ -111,7 +111,8 @@ const authServices = {
                 if (user) {
                         const token = jwt.sign(
                                 { userId: user.id, role: user.role_id },
-                                process.env.SECRET_KEY
+                                process.env.SECRET_KEY,
+                                { expiresIn: "1y" }
                         );
                         return {
                                 token: `Bearer ${token}`,

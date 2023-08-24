@@ -11,6 +11,9 @@ const articlesService = {
                         try {
                                 const hot_main =
                                         await db.new_articles_hot_main.findAll({
+                                                where: {
+                                                        status: 1,
+                                                },
                                                 order: [["position", "ASC"]],
                                                 attributes: [
                                                         "article_id",
@@ -630,7 +633,7 @@ const articlesService = {
                         }
                 }),
                 getAvatarService: async ({ slug_crc, height, width }) => {
-                        const path = `C:\\Users\\PC\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
+                        const path = `C:\\Users\\Admin\\OneDrive\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
                         const avatarBuffer = await sharp(path)
                                 .resize(parseInt(height), parseInt(width))
                                 .toBuffer();

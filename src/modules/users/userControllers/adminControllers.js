@@ -63,6 +63,13 @@ const adminControllers = {
                 },
         },
         delete: {
+                deleteArticleController: async (req, res) => {
+                        const response =
+                                await adminServices.delete.deleteArticleService(
+                                        req.params.id
+                                );
+                        return res.status(200).json(response);
+                },
                 deleteHotMain: async (req, res) => {
                         const response =
                                 await adminServices.delete.deleteHotMainService(

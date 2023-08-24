@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
                         article_id: DataTypes.INTEGER,
                         category_id: DataTypes.INTEGER,
                         position: DataTypes.INTEGER,
+                        status: DataTypes.INTEGER,
                         updatedAt: DataTypes.DATE,
                         createdAt: DataTypes.DATE,
                 },

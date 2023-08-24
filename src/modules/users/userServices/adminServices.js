@@ -684,6 +684,30 @@ const adminServices = {
                 },
         },
         delete: {
+                deleteArticleService: async (id) => {
+                        try {
+                                await db.new_article.destroy({
+                                        where: {
+                                                id,
+                                        },
+                                });
+                                await db.new_articles_hot_main.destroy({
+                                        where: {
+                                                article_id: id,
+                                        },
+                                });
+                                await db.new_articles_hot_category.destroy({
+                                        where: {
+                                                article_id: id,
+                                        },
+                                });
+                                return {
+                                        message: "Xóa bài viết thành công",
+                                };
+                        } catch (error) {
+                                console.log(error);
+                        }
+                },
                 deleteHotMainService: async (data) => {
                         try {
                                 await db.new_articles_hot_main.destroy({
