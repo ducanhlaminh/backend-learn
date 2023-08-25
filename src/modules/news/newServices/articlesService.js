@@ -58,71 +58,79 @@ const articlesService = {
                                 return error;
                         }
                 }),
-                getByTitleService: asyncHandler(async (title, category_id) => {
-                        try {
-                                if (category_id) {
-                                        const articles =
-                                                await db.new_articles_category.findAll(
-                                                        {
-                                                                where: {
-                                                                        category_id,
-                                                                },
-                                                                include: {
-                                                                        model: db.new_article,
+                getByTitleService: asyncHandler(
+                        async ({ title, category_id, page }) => {
+                                console.log(title, category_id, page);
+                                try {
+                                        let queries = {};
+                                        (queries.limit = +process.env.LIMIT),
+                                                (queries.offset =
+                                                        (page - 1) *
+                                                        +process.env.LIMIT);
+                                        if (category_id) {
+                                                const articles =
+                                                        await db.new_articles_category.findAll(
+                                                                {
+                                                                        where: {
+                                                                                category_id,
+                                                                        },
+                                                                        include: {
+                                                                                model: db.new_article,
+                                                                                where: {
+                                                                                        title: {
+                                                                                                [Op.like]: `${title}%`,
+                                                                                        },
+                                                                                        status: 1,
+                                                                                },
+                                                                        },
+                                                                        limit: 10,
+                                                                }
+                                                        );
+                                                return articles;
+                                        } else {
+                                                const articles =
+                                                        await db.new_article.findAndCountAll(
+                                                                {
                                                                         where: {
                                                                                 title: {
-                                                                                        [Op.like]: `${title}%`,
+                                                                                        [Op.like]: `%${title}%`,
                                                                                 },
                                                                                 status: 1,
                                                                         },
-                                                                },
-                                                                limit: 10,
-                                                        }
-                                                );
-                                        return articles;
-                                } else {
-                                        const articles =
-                                                await db.new_article.findAndCountAll(
-                                                        {
-                                                                where: {
-                                                                        title: {
-                                                                                [Op.like]: `%${title}%`,
-                                                                        },
-                                                                        status: 1,
-                                                                },
-                                                                limit: 15,
-                                                                order: [
-                                                                        [
-                                                                                "publishAt",
-                                                                                "DESC",
+                                                                        ...queries,
+                                                                        order: [
+                                                                                [
+                                                                                        "publishAt",
+                                                                                        "DESC",
+                                                                                ],
                                                                         ],
-                                                                ],
-                                                        }
-                                                );
-                                        articles.rows.map((item) => {
-                                                if (
-                                                        fs.existsSync(
-                                                                `src/uploadFile/avatars/${
-                                                                        item.avatar +
-                                                                        ".png"
-                                                                }`
-                                                        )
-                                                ) {
-                                                        // Tạo URL từ đường dẫn tới hình ảnh
-                                                        const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                                                        item.avatar = imageUrl;
-                                                } else {
-                                                }
-                                        });
-                                        return {
-                                                data: articles,
-                                                status: 0,
-                                        };
+                                                                }
+                                                        );
+                                                // articles.rows.map((item) => {
+                                                //         if (
+                                                //                 fs.existsSync(
+                                                //                         `src/uploadFile/avatars/${
+                                                //                                 item.avatar +
+                                                //                                 ".png"
+                                                //                         }`
+                                                //                 )
+                                                //         ) {
+                                                //                 // Tạo URL từ đường dẫn tới hình ảnh
+                                                //                 const imageUrl = `http://localhost:4000/${item.avatar}.png`;
+                                                //                 item.avatar = imageUrl;
+                                                //         } else {
+                                                //         }
+                                                // });
+                                                return {
+                                                        data: articles,
+                                                        status: 0,
+                                                };
+                                        }
+                                } catch (error) {
+                                        return error;
                                 }
-                        } catch (error) {
-                                return error;
                         }
-                }),
+                ),
                 getByCateService: asyncHandler(async (slug, slug_crc) => {
                         try {
                                 const checkcrc = await db.new_category.findOne({
@@ -235,6 +243,10 @@ const articlesService = {
                                                                                                 "views",
                                                                                                 "status",
                                                                                         ],
+                                                                                        require: true,
+                                                                                        where: {
+                                                                                                status: 1,
+                                                                                        },
                                                                                 },
                                                                                 {
                                                                                         model: db.new_category,
@@ -334,6 +346,7 @@ const articlesService = {
                                 list_article_new =
                                         await db.new_article.findAndCountAll({
                                                 ...queries,
+                                                where: { status: 1 },
                                                 distinct: true,
                                                 include: [
                                                         {
@@ -372,6 +385,10 @@ const articlesService = {
                                                                 include: [
                                                                         {
                                                                                 model: db.new_article,
+                                                                                require: true,
+                                                                                where: {
+                                                                                        status: 1,
+                                                                                },
                                                                         },
                                                                 ],
                                                                 order: [
@@ -405,6 +422,10 @@ const articlesService = {
                                                 include: [
                                                         {
                                                                 model: db.new_article,
+                                                                where: {
+                                                                        status: 1,
+                                                                },
+                                                                require: true,
                                                         },
                                                 ],
                                         },
@@ -521,6 +542,7 @@ const articlesService = {
                                         },
                                 ],
                         });
+
                         if (checkslugsrc !== null) {
                                 const article = await db.new_article.findOne({
                                         where: [
@@ -544,84 +566,30 @@ const articlesService = {
                                                         ],
                                                 }
                                         );
-                                        const res =
-                                                await db.new_articles_category.findOne(
+                                        const category =
+                                                await db.new_articles_category.findAll(
                                                         {
-                                                                where: [
-                                                                        {
-                                                                                article_id:
-                                                                                        article.id ||
-                                                                                        0,
-                                                                        },
+                                                                where: {
+                                                                        article_id: article.id,
+                                                                },
+                                                                include: {
+                                                                        as: "category",
+                                                                        model: db.new_category,
+                                                                },
+                                                                order: [
+                                                                        [
+                                                                                {
+                                                                                        model: "category",
+                                                                                },
+                                                                                "parent_id",
+                                                                                "ASC",
+                                                                        ],
                                                                 ],
                                                         }
                                                 );
-                                        const articlesCate =
-                                                await db.new_category.findAll({
-                                                        attributes: [
-                                                                "name",
-                                                                "id",
-                                                                "slug",
-                                                        ],
-                                                        where: [
-                                                                {
-                                                                        parent_id: null,
-                                                                },
-                                                        ],
-                                                        include: [
-                                                                {
-                                                                        model: db.new_category,
-                                                                        as: "childCategories",
-                                                                        attributes: [
-                                                                                "name",
-                                                                                "id",
-                                                                                "slug",
-                                                                        ],
-                                                                        include: [
-                                                                                {
-                                                                                        model: db.new_articles_category,
-                                                                                        as: "articles",
-                                                                                        attributes: [
-                                                                                                "article_id",
-                                                                                                "category_id",
-                                                                                        ],
-                                                                                        include: [
-                                                                                                {
-                                                                                                        model: db.new_article,
-                                                                                                        attributes: [
-                                                                                                                "id",
-                                                                                                                "title",
-                                                                                                                "slug",
-                                                                                                                "sapo",
-                                                                                                        ],
-                                                                                                },
-                                                                                        ],
-                                                                                },
-                                                                        ],
-                                                                },
-                                                                {
-                                                                        model: db.new_articles_category,
-                                                                        as: "articles",
-                                                                        attributes: [
-                                                                                "article_id",
-                                                                                "category_id",
-                                                                        ],
-                                                                        include: [
-                                                                                {
-                                                                                        model: db.new_article,
-                                                                                        attributes: [
-                                                                                                "id",
-                                                                                                "title",
-                                                                                                "slug",
-                                                                                                "sapo",
-                                                                                        ],
-                                                                                },
-                                                                        ],
-                                                                },
-                                                        ],
-                                                });
                                         return {
                                                 article,
+                                                category,
                                         };
                                 } else {
                                         return {
@@ -633,7 +601,7 @@ const articlesService = {
                         }
                 }),
                 getAvatarService: async ({ slug_crc, height, width }) => {
-                        const path = `C:\\Users\\Admin\\OneDrive\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
+                        const path = `C:\\Users\\PC\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
                         const avatarBuffer = await sharp(path)
                                 .resize(parseInt(height), parseInt(width))
                                 .toBuffer();

@@ -26,10 +26,10 @@ const articlesController = {
                         res.status(200).json({ hot_news });
                 }),
                 getByTitleControllers: asyncHandler(async (req, res) => {
+                        console.log(req.query);
                         const response =
                                 await articlesService.get.getByTitleService(
-                                        req.query.title,
-                                        req.query.category_id
+                                        req.query
                                 );
                         res.status(200).json(response);
                 }),

@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
                         title: DataTypes.STRING,
                         slug: DataTypes.STRING,
                         slug_crc: DataTypes.BIGINT,
-                        content: DataTypes.STRING,
+                        content: DataTypes.TEXT("long"),
                         sapo: DataTypes.STRING,
                         avatar: DataTypes.STRING,
                         views: DataTypes.INTEGER,
