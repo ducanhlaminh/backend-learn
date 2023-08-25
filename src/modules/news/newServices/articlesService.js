@@ -68,6 +68,7 @@ const articlesService = {
                                                         (page - 1) *
                                                         +process.env.LIMIT);
                                         if (category_id) {
+                                                console.log(title);
                                                 const articles =
                                                         await db.new_articles_category.findAll(
                                                                 {
@@ -76,9 +77,10 @@ const articlesService = {
                                                                         },
                                                                         include: {
                                                                                 model: db.new_article,
+                                                                                require: true,
                                                                                 where: {
                                                                                         title: {
-                                                                                                [Op.like]: `${title}%`,
+                                                                                                [Op.like]: `%${title}%`,
                                                                                         },
                                                                                         status: 1,
                                                                                 },
@@ -601,7 +603,7 @@ const articlesService = {
                         }
                 }),
                 getAvatarService: async ({ slug_crc, height, width }) => {
-                        const path = `C:\\Users\\PC\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
+                        const path = `C:\\Users\\Admin\\OneDrive\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
                         const avatarBuffer = await sharp(path)
                                 .resize(parseInt(height), parseInt(width))
                                 .toBuffer();
