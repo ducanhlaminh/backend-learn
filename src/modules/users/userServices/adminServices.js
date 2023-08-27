@@ -180,7 +180,8 @@ const adminServices = {
                         try {
                                 const now = new Date();
                                 let infor = null;
-                                if (data.status === 0) {
+                                console.log(data.status);
+                                if (data.status === 0 || !data.status) {
                                         await db.new_articles_hot_category.destroy(
                                                 {
                                                         where: {
@@ -195,6 +196,7 @@ const adminServices = {
                                         });
                                         infor = {
                                                 ...data,
+                                                status: 0,
                                         };
                                 } else {
                                         infor = {
@@ -734,11 +736,10 @@ const adminServices = {
         delete: {
                 deleteArticleService: async (id) => {
                         try {
-                                await db.new_article.destroy({
-                                        where: {
-                                                id,
-                                        },
+                                const article = await db.new_article.findOne({
+                                        where: { id },
                                 });
+
                                 await db.new_articles_hot_main.destroy({
                                         where: {
                                                 article_id: id,
@@ -749,6 +750,33 @@ const adminServices = {
                                                 article_id: id,
                                         },
                                 });
+                                await db.new_articles_category.destroy({
+                                        where: {
+                                                article_id: id,
+                                        },
+                                });
+                                await db.new_article.destroy({
+                                        where: {
+                                                id,
+                                        },
+                                });
+                                fs.unlink(
+                                        "src/uploadFile/avatars/" +
+                                                article.avatar +
+                                                ".png",
+                                        (err) => {
+                                                if (err) {
+                                                        console.error(
+                                                                "Lỗi khi xóa tệp tin:",
+                                                                err
+                                                        );
+                                                } else {
+                                                        console.log(
+                                                                "Tệp tin đã được xóa thành công."
+                                                        );
+                                                }
+                                        }
+                                );
                                 return {
                                         message: "Xóa bài viết thành công",
                                 };
