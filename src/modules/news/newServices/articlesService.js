@@ -433,21 +433,7 @@ const articlesService = {
                                         },
                                 ],
                         });
-                        res.new_articles_hot_categories.map((item) => {
-                                if (
-                                        fs.existsSync(
-                                                `src/uploadFile/avatars/${
-                                                        item.new_article
-                                                                .avatar + ".png"
-                                                }`
-                                        )
-                                ) {
-                                        // Tạo URL từ đường dẫn tới hình ảnh
-                                        const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
-                                        item.new_article.avatar = imageUrl;
-                                } else {
-                                }
-                        });
+
                         return res;
                 }),
                 getHotBoxSubCategoryService: asyncHandler(async (slug_crc) => {
@@ -603,7 +589,7 @@ const articlesService = {
                         }
                 }),
                 getAvatarService: async ({ slug_crc, height, width }) => {
-                        const path = `C:\\Users\\Admin\\OneDrive\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
+                        const path = `C:\\Users\\PC\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
                         const avatarBuffer = await sharp(path)
                                 .resize(parseInt(height), parseInt(width))
                                 .toBuffer();

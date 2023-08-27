@@ -3,7 +3,7 @@ const asyncHandler = require("express-async-handler");
 const articlesController = {
         get_articles: {
                 getHotCategoryController: asyncHandler(async (req, res) => {
-                        const hotArticlesCate =
+                        let hotArticlesCate =
                                 await articlesService.get.getHotCategoryService(
                                         req.query.slug_crc
                                 );
@@ -11,6 +11,11 @@ const articlesController = {
                                 await articlesService.get.getHotBoxSubCategoryService(
                                         req.query.slug_crc
                                 );
+                        if (hotArticlesCate === null) {
+                                hotArticlesCate = {};
+                                hotArticlesCate.new_articles_hot_categories =
+                                        [];
+                        }
                         res.status(200).json({ hotArticlesCate, boxSubCate });
                 }),
                 getHotSubCategoryController: asyncHandler(async (req, res) => {
@@ -74,7 +79,6 @@ const articlesController = {
                 const avatar = await articlesService.get.getAvatarService(
                         req?.query
                 );
-                res.set("Content-Type", "image/jpeg"); // Đặt loại nội dung là ảnh JPEG
                 res.send(avatar);
         }),
 };
