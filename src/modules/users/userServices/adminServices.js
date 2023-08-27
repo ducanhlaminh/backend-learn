@@ -83,26 +83,27 @@ const adminServices = {
         update: {
                 updateHotMain: async (data, id) => {
                         try {
+                                // check vi tri
                                 const checkPosition =
                                         await db.new_articles_hot_main.findOne({
                                                 where: {
                                                         position: data.position,
                                                 },
                                         });
-                                const checkIdArticle =
-                                        await db.new_articles_hot_main.findOne({
-                                                where: { article_id: id },
-                                        });
                                 if (!checkPosition) {
+                                        //  Vi tri chua duoc set
+                                        //  Xoa bai viet  do đang được set
                                         await db.new_articles_hot_main.destroy({
                                                 where: {
                                                         article_id: id,
                                                 },
                                         });
+                                        // tạo mới
                                         await db.new_articles_hot_main.create({
                                                 position: data.position,
                                                 article_id: id,
                                         });
+                                        return;
                                 } else {
                                         const article =
                                                 await db.new_articles_hot_main.findOne(
@@ -192,6 +193,15 @@ const adminServices = {
                                                         article_id,
                                                 },
                                         });
+                                        infor = {
+                                                ...data,
+                                        };
+                                } else {
+                                        infor = {
+                                                ...data,
+                                                publishAt: now,
+                                                status: 1,
+                                        };
                                 }
                                 if (file) {
                                         const ext = file.originalname
@@ -210,17 +220,6 @@ const adminServices = {
                                                         );
                                                 }
                                         );
-                                }
-                                if (data.publishAt === true) {
-                                        infor = {
-                                                ...data,
-                                                publishAt: now,
-                                                status: 1,
-                                        };
-                                } else {
-                                        infor = {
-                                                ...data,
-                                        };
                                 }
                                 if (data.category_id) {
                                         await db.new_article.update(
@@ -303,7 +302,7 @@ const adminServices = {
                                                 }
                                         );
                                         return {
-                                                message: "Xuat ban thanh cong",
+                                                message: "Cập nhật thông tin bài viết thành công",
                                                 status: 0,
                                         };
                                 }
