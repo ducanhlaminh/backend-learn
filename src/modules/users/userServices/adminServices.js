@@ -7,6 +7,7 @@ require("dotenv").config();
 const asyncHandler = require("express-async-handler");
 const path = require("path");
 const sharp = require("sharp");
+const { log } = require("console");
 
 const adminServices = {
         get: {
@@ -103,7 +104,10 @@ const adminServices = {
                                                 position: data.position,
                                                 article_id: id,
                                         });
-                                        return;
+                                        return {
+                                                message: "Cập nhật vị trí thành công",
+                                                status: 1,
+                                        };
                                 } else {
                                         const article =
                                                 await db.new_articles_hot_main.findOne(
@@ -120,12 +124,16 @@ const adminServices = {
                                         article.position = tempValue;
                                         await article.save();
                                         await checkPosition.save();
+                                        return {
+                                                message: "Cập nhật vị trí thành công",
+                                                status: 1,
+                                        };
                                 }
-                                return {
-                                        message: "Cập nhật vị trí thành công",
-                                };
                         } catch (error) {
-                                console.log(error);
+                                return {
+                                        message: "Cập nhật vị trí không thành công",
+                                        status: 0,
+                                };
                         }
                 },
                 updateHotCate: async (data, id) => {
@@ -134,10 +142,13 @@ const adminServices = {
                                         await db.new_articles_hot_category.findOne(
                                                 {
                                                         where: {
+                                                                category_id:
+                                                                        data.category_id,
                                                                 position: data.position,
                                                         },
                                                 }
                                         );
+
                                 if (checkPosition) {
                                         const article =
                                                 await db.new_articles_hot_category.findOne(
@@ -355,11 +366,34 @@ const adminServices = {
                         }
                 },
                 createHotCate: async (data) => {
-                        const response =
+                        const checkPosition =
+                                await db.new_articles_hot_category.findOne({
+                                        where: {
+                                                category_id: data.category_id,
+                                                position: data.position,
+                                        },
+                                });
+                        const checkArticle =
+                                await db.new_articles_hot_category.findOne({
+                                        where: {
+                                                category_id: data.category_id,
+                                                article_id: data.article_id,
+                                        },
+                                });
+                        if (!checkPosition && !checkArticle) {
                                 await db.new_articles_hot_category.create({
                                         ...data,
                                 });
-                        return response;
+                                return { message: "Tạo thành công", status: 1 };
+                        } else {
+                                return {
+                                        message: "Tạo không thành công",
+                                        detail: !checkPosition
+                                                ? "Vị trí này đã được set "
+                                                : "Bài viết này đã được set",
+                                        status: 0,
+                                };
+                        }
                 },
                 createArticleService: async (file, data) => {
                         const slug_crc = crc32(data.slug);
@@ -779,9 +813,14 @@ const adminServices = {
                                 );
                                 return {
                                         message: "Xóa bài viết thành công",
+                                        status: 1,
                                 };
                         } catch (error) {
                                 console.log(error);
+                                return {
+                                        message: "Xóa bài viết không thành công",
+                                        status: 0,
+                                };
                         }
                 },
                 deleteHotMainService: async (data) => {
