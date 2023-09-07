@@ -45,7 +45,7 @@ adminRoutes.get(
 adminRoutes.delete("/hot-main", adminControllers.delete.deleteHotMain);
 adminRoutes.delete("/hot-cate", adminControllers.delete.deleteHotCate);
 adminRoutes.delete(
-        "/articles/:id",
+        "/articles",
         adminControllers.delete.deleteArticleController
 );
 module.exports = adminRoutes;

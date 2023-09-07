@@ -11,75 +11,95 @@ const { log } = require("console");
 
 const adminServices = {
         get: {
-                getAllService: asyncHandler(
-                        async ({ page = 1, category_id, order }) => {
-                                let queries = {};
-                                (queries.limit = +process.env.LIMIT),
-                                        (queries.offset =
-                                                (page - 1) *
-                                                +process.env.LIMIT);
-                                if (order) queries.order = JSON.parse(order);
-                                try {
-                                        let articles;
-                                        if (!category_id) {
-                                                articles =
-                                                        await db.new_article.findAndCountAll(
-                                                                {
-                                                                        ...queries,
-                                                                        include: [
-                                                                                {
-                                                                                        model: db.new_articles_category,
-                                                                                        include: [
-                                                                                                {
-                                                                                                        model: db.new_category,
-                                                                                                        as: "category",
-                                                                                                },
-                                                                                        ],
-                                                                                },
-                                                                        ],
-                                                                        distinct: true,
-                                                                }
-                                                        );
-                                                articles.rows.map((item) => {
-                                                        const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                                                        item.avatar = imageUrl;
-                                                });
-                                        } else {
-                                                let articlesId =
-                                                        await db.new_articles_category.findAll(
-                                                                {
-                                                                        where: {
-                                                                                category_id,
-                                                                        },
-                                                                        attributes: [
-                                                                                "article_id",
-                                                                        ],
-                                                                }
-                                                        );
-                                                articlesId = articlesId.map(
-                                                        (item) =>
-                                                                item.article_id
-                                                );
-                                                articles =
-                                                        await db.new_article.findAll(
-                                                                {
-                                                                        where: {
-                                                                                id: articlesId,
-                                                                        },
-                                                                        ...queries,
-                                                                }
-                                                        );
-                                        }
-
-                                        return articles;
-                                } catch (error) {
-                                        console.log(error);
-                                        return {
-                                                message: "Failed to get articles",
-                                        };
-                                }
+                getAllService: async ({
+                        page = 1,
+                        category_id,
+                        order,
+                        title,
+                        ...query
+                }) => {
+                        let queries = {};
+                        if (title) {
+                                query.title = { [Op.substring]: title };
                         }
-                ),
+                        (queries.limit = +process.env.LIMIT),
+                                (queries.offset =
+                                        (page - 1) * +process.env.LIMIT);
+                        if (order) queries.order = JSON.parse(order);
+                        try {
+                                let articles;
+                                if (!category_id) {
+                                        articles =
+                                                await db.new_article.findAndCountAll(
+                                                        {
+                                                                ...queries,
+                                                                where: {
+                                                                        ...query,
+                                                                },
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_articles_category,
+                                                                                include: [
+                                                                                        {
+                                                                                                model: db.new_category,
+                                                                                                as: "category",
+                                                                                        },
+                                                                                ],
+                                                                        },
+                                                                ],
+                                                                distinct: true,
+                                                        }
+                                                );
+                                } else {
+                                        let articlesId =
+                                                await db.new_articles_category.findAll(
+                                                        {
+                                                                where: {
+                                                                        category_id,
+                                                                },
+                                                                attributes: [
+                                                                        "article_id",
+                                                                ],
+                                                        }
+                                                );
+                                        articlesId = articlesId.map(
+                                                (item) => item.article_id
+                                        );
+                                        articles =
+                                                await db.new_article.findAndCountAll(
+                                                        {
+                                                                ...queries,
+                                                                where: {
+                                                                        id: {
+                                                                                [Op.in]:
+                                                                                        articlesId,
+                                                                        },
+                                                                },
+                                                                include: [
+                                                                        {
+                                                                                model: db.new_articles_category,
+                                                                                include: [
+                                                                                        {
+                                                                                                model: db.new_category,
+                                                                                                as: "category",
+                                                                                        },
+                                                                                ],
+                                                                        },
+                                                                ],
+                                                                distinct: true,
+                                                                ...queries,
+                                                        }
+                                                );
+                                }
+
+                                return articles;
+                        } catch (error) {
+                                console.log(error);
+                                return {
+                                        message: "Failed to get articles",
+                                };
+                        }
+                },
         },
         update: {
                 updateHotMain: async (data, id) => {
@@ -769,54 +789,66 @@ const adminServices = {
         },
         delete: {
                 deleteArticleService: async (id) => {
+                        const listID = JSON.parse(id);
                         try {
-                                const article = await db.new_article.findOne({
-                                        where: { id },
+                                const articles = await db.new_article.findAll({
+                                        where: {
+                                                id: {
+                                                        [Op.in]: listID,
+                                                },
+                                        },
+                                        attributes: ["avatar"],
                                 });
 
                                 await db.new_articles_hot_main.destroy({
                                         where: {
-                                                article_id: id,
+                                                article_id: {
+                                                        [Op.in]: listID,
+                                                },
                                         },
                                 });
                                 await db.new_articles_hot_category.destroy({
                                         where: {
-                                                article_id: id,
+                                                article_id: {
+                                                        [Op.in]: listID,
+                                                },
                                         },
                                 });
                                 await db.new_articles_category.destroy({
                                         where: {
-                                                article_id: id,
+                                                article_id: {
+                                                        [Op.in]: listID,
+                                                },
                                         },
                                 });
                                 await db.new_article.destroy({
                                         where: {
-                                                id,
+                                                id: {
+                                                        [Op.in]: listID,
+                                                },
                                         },
                                 });
-                                fs.unlink(
-                                        "src/uploadFile/avatars/" +
-                                                article.avatar +
-                                                ".png",
-                                        (err) => {
-                                                if (err) {
-                                                        console.error(
-                                                                "Lỗi khi xóa tệp tin:",
-                                                                err
-                                                        );
-                                                } else {
-                                                        console.log(
-                                                                "Tệp tin đã được xóa thành công."
-                                                        );
+                                articles.map((article) => {
+                                        fs.unlink(
+                                                "src/uploadFile/avatars/" +
+                                                        article.avatar +
+                                                        ".png",
+                                                (err) => {
+                                                        if (err) {
+                                                        } else {
+                                                                console.log(
+                                                                        "Tệp tin đã được xóa thành công."
+                                                                );
+                                                        }
                                                 }
-                                        }
-                                );
+                                        );
+                                });
+
                                 return {
                                         message: "Xóa bài viết thành công",
                                         status: 1,
                                 };
                         } catch (error) {
-                                console.log(error);
                                 return {
                                         message: "Xóa bài viết không thành công",
                                         status: 0,

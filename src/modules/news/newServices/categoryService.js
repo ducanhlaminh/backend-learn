@@ -122,22 +122,6 @@ const categoryService = {
                                                         {
                                                                 model: db.new_category,
                                                                 as: "childCategories",
-                                                                include: [
-                                                                        {
-                                                                                model: db.new_articles_category,
-                                                                                attributes: [
-                                                                                        "id",
-                                                                                ],
-                                                                                as: "articles",
-                                                                        },
-                                                                ],
-                                                        },
-                                                        {
-                                                                model: db.new_articles_category,
-                                                                attributes: [
-                                                                        "id",
-                                                                ],
-                                                                as: "articles",
                                                         },
                                                 ],
                                         });

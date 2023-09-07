@@ -66,7 +66,7 @@ const adminControllers = {
                 deleteArticleController: async (req, res) => {
                         const response =
                                 await adminServices.delete.deleteArticleService(
-                                        req.params.id
+                                        req.query.id
                                 );
                         return res.status(200).json(response);
                 },
