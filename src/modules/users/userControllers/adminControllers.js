@@ -11,14 +11,23 @@ const adminControllers = {
         },
         update_articles: {
                 publishController: async (req, res) => {
-                        const file = req.file;
-                        const response =
-                                await adminServices.update.updateArticleService(
-                                        req.params.id,
-                                        req.body,
-                                        file
-                                );
-                        res.status(200).json(response);
+                        console.log(req.query.id);
+
+                        if (req.query.id) {
+                                var response =
+                                        await adminServices.update.publishArticlesSer(
+                                                req.query.id,
+                                                req.body.data
+                                        );
+                                res.status(200).json(response);
+                        }
+                        // const file = req.file;
+                        // const response =
+                        //         await adminServices.update.updateArticleService(
+                        //                 req.params.id,
+                        //                 req.body,
+                        //                 file
+                        //         );
                 },
                 updateHotMainController: async (req, res) => {
                         const response =

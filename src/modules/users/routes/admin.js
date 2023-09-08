@@ -25,7 +25,7 @@ adminRoutes.put(
         adminControllers.update_articles.updateHotMainController
 );
 adminRoutes.put(
-        "/articles/:id",
+        "/articles",
         uploadFileServer.single("avatar"),
         adminControllers.update_articles.publishController
 );

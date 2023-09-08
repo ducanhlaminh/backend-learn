@@ -7,7 +7,6 @@ require("dotenv").config();
 const asyncHandler = require("express-async-handler");
 const path = require("path");
 const sharp = require("sharp");
-const { log } = require("console");
 
 const adminServices = {
         get: {
@@ -20,6 +19,7 @@ const adminServices = {
                 }) => {
                         let queries = {};
                         if (title) {
+                                console.log(title);
                                 query.title = { [Op.substring]: title };
                         }
                         (queries.limit = +process.env.LIMIT),
@@ -74,6 +74,7 @@ const adminServices = {
                                                                                 [Op.in]:
                                                                                         articlesId,
                                                                         },
+                                                                        ...query,
                                                                 },
                                                                 include: [
                                                                         {
@@ -211,7 +212,6 @@ const adminServices = {
                         try {
                                 const now = new Date();
                                 let infor = null;
-                                console.log(data.status);
                                 if (data.status === 0 || !data.status) {
                                         await db.new_articles_hot_category.destroy(
                                                 {
@@ -339,6 +339,89 @@ const adminServices = {
                                                 status: 0,
                                         };
                                 }
+                        } catch (error) {
+                                console.log(error);
+                        }
+                },
+                publishArticlesSer: async (id, data) => {
+                        try {
+                                if (!Array.isArray(id)) {
+                                        id = [id]; // Chuyển đổi thành mảng nếu là số
+                                }
+                                await db.new_article.update(data, {
+                                        where: {
+                                                id: {
+                                                        [Op.in]: id,
+                                                },
+                                        },
+                                        attributes: ["avatar"],
+                                });
+                                if (data.category_id) {
+                                        const hotCate =
+                                                await db.new_articles_hot_category.findOne(
+                                                        {
+                                                                where: {
+                                                                        article_id: id,
+                                                                },
+                                                        }
+                                                );
+                                        const hotMain =
+                                                await db.new_articles_hot_main.findOne(
+                                                        {
+                                                                where: {
+                                                                        article_id: id,
+                                                                },
+                                                        }
+                                                );
+                                        if (hotMain) {
+                                                await db.new_articles_hot_main.destroy(
+                                                        {
+                                                                where: {
+                                                                        article_id: id,
+                                                                },
+                                                        }
+                                                );
+                                        }
+                                        if (hotCate) {
+                                                await db.new_articles_hot_category.destroy(
+                                                        {
+                                                                where: {
+                                                                        article_id: id,
+                                                                },
+                                                        }
+                                                );
+                                        }
+
+                                        await db.new_articles_category.destroy({
+                                                where: {
+                                                        article_id: id,
+                                                },
+                                        });
+                                        const category =
+                                                await db.new_category.findOne({
+                                                        where: {
+                                                                id: data.category_id,
+                                                        },
+                                                });
+
+                                        await db.new_articles_category.create({
+                                                category_id: data.category_id,
+                                                article_id: id,
+                                        });
+                                        if (category?.parent_id) {
+                                                await db.new_articles_category.create(
+                                                        {
+                                                                category_id:
+                                                                        category.parent_id,
+                                                                article_id: id,
+                                                        }
+                                                );
+                                        }
+                                }
+
+                                return {
+                                        message: "Đã cập nhật thành công",
+                                };
                         } catch (error) {
                                 console.log(error);
                         }
