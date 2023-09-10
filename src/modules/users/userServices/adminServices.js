@@ -281,6 +281,16 @@ const adminServices = {
                                                                 },
                                                         }
                                                 );
+                                        await db.new_articles_hot_main.destroy({
+                                                where: {
+                                                        article_id,
+                                                },
+                                        });
+                                        await db.new_articles_category.destroy({
+                                                where: {
+                                                        article_id,
+                                                },
+                                        });
                                         if (!hotMain && !hotCate) {
                                                 await db.new_articles_category.destroy(
                                                         {
@@ -356,42 +366,38 @@ const adminServices = {
                                         },
                                         attributes: ["avatar"],
                                 });
-                                if (data.category_id) {
-                                        const hotCate =
-                                                await db.new_articles_hot_category.findOne(
-                                                        {
-                                                                where: {
-                                                                        article_id: id,
-                                                                },
-                                                        }
-                                                );
-                                        const hotMain =
-                                                await db.new_articles_hot_main.findOne(
-                                                        {
-                                                                where: {
-                                                                        article_id: id,
-                                                                },
-                                                        }
-                                                );
-                                        if (hotMain) {
-                                                await db.new_articles_hot_main.destroy(
-                                                        {
-                                                                where: {
-                                                                        article_id: id,
-                                                                },
-                                                        }
-                                                );
-                                        }
-                                        if (hotCate) {
-                                                await db.new_articles_hot_category.destroy(
-                                                        {
-                                                                where: {
-                                                                        article_id: id,
-                                                                },
-                                                        }
-                                                );
-                                        }
+                                const hotCate =
+                                        await db.new_articles_hot_category.findOne(
+                                                {
+                                                        where: {
+                                                                article_id: id,
+                                                        },
+                                                }
+                                        );
+                                const hotMain =
+                                        await db.new_articles_hot_main.findAll({
+                                                where: {
+                                                        article_id: id,
+                                                },
+                                        });
 
+                                if (hotMain) {
+                                        await db.new_articles_hot_main.destroy({
+                                                where: {
+                                                        article_id: id,
+                                                },
+                                        });
+                                }
+                                if (hotCate) {
+                                        await db.new_articles_hot_category.destroy(
+                                                {
+                                                        where: {
+                                                                article_id: id,
+                                                        },
+                                                }
+                                        );
+                                }
+                                if (data.category_id) {
                                         await db.new_articles_category.destroy({
                                                 where: {
                                                         article_id: id,

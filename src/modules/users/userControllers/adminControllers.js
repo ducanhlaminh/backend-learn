@@ -11,8 +11,7 @@ const adminControllers = {
         },
         update_articles: {
                 publishController: async (req, res) => {
-                        console.log(req.query.id);
-
+                        console.log(req.user);
                         if (req.query.id) {
                                 var response =
                                         await adminServices.update.publishArticlesSer(
