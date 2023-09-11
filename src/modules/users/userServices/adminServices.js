@@ -88,7 +88,6 @@ const adminServices = {
                                                                         },
                                                                 ],
                                                                 distinct: true,
-                                                                ...queries,
                                                         }
                                                 );
                                 }

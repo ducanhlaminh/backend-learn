@@ -31,7 +31,9 @@ const categoryControllers = {
         },
         // admin
         getAllByAdminControl: async (req, res) => {
-                const response = await categoryService.getAllByAdmin();
+                const response = await categoryService.getAllByAdmin(
+                        req?.query
+                );
                 res.status(200).json(response);
         },
         deleteCategory: async (req, res) => {

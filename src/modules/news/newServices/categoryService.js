@@ -35,6 +35,7 @@ const categoryService = {
 
         getAll: () => {
                 return new Promise(async (resolve, reject) => {
+                        console.log(1);
                         try {
                                 const response =
                                         await db.new_category.findAndCountAll({
@@ -107,58 +108,76 @@ const categoryService = {
                 });
         },
         // Admin
-        getAllByAdmin: () => {
-                return new Promise(async (resolve, reject) => {
-                        try {
-                                const response =
-                                        await db.new_category.findAndCountAll({
-                                                where: [
-                                                        {
-                                                                parent_id: null,
-                                                        },
-                                                ],
-                                                order: [["position", "ASC"]],
-                                                include: [
-                                                        {
-                                                                model: db.new_category,
-                                                                as: "childCategories",
-                                                        },
-                                                ],
-                                        });
-                                resolve(response);
-                        } catch (error) {
-                                reject(error);
+        getAllByAdmin: async ({ page, ...query }) => {
+                try {
+                        let queries = {};
+                        if (query.name) {
+                                query.name = { [Op.substring]: query.name };
                         }
-                });
+                        if (page) {
+                                (queries.limit = +process.env.LIMIT),
+                                        (queries.offset =
+                                                (page - 1) *
+                                                +process.env.LIMIT);
+                        }
+
+                        const response = await db.new_category.findAndCountAll({
+                                ...queries,
+                                where: {
+                                        ...query,
+                                },
+                                include: [
+                                        {
+                                                model: db.new_category,
+                                                as: "parentCategory",
+                                        },
+                                ],
+                                distinct: true,
+                        });
+                        console.log(response.count);
+                        return response;
+                } catch (error) {
+                        console.log(error);
+                        return error;
+                }
         },
         deleteService: (id) => {
                 return new Promise(async (resolve, reject) => {
                         try {
-                                if (!id)
-                                        resolve({
-                                                message: "Delete category failed",
-                                        });
+                                if (!Array.isArray(id)) {
+                                        id = [id];
+                                }
                                 await db.new_category.destroy({
                                         where: {
-                                                id,
+                                                id: {
+                                                        [Op.in]: id,
+                                                },
                                         },
                                 });
                                 resolve({
                                         message: "Delete category successfully",
                                 });
                         } catch (error) {
-                                reject(error);
+                                reject({
+                                        message: "Delete category failed",
+                                });
                         }
                 });
         },
         updateService: async (data, id) => {
+                if (!Array.isArray(id)) {
+                        id = [id];
+                }
+                console.log(id, data);
                 await db.new_category.update(
                         {
                                 ...data,
                         },
                         {
                                 where: {
-                                        id,
+                                        id: {
+                                                [Op.in]: id,
+                                        },
                                 },
                         }
                 );
