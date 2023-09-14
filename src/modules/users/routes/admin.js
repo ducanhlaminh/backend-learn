@@ -3,7 +3,7 @@ const adminRoutes = express.Router();
 const { checkToken, checkManager } = require("../../../middlewares/checkToken");
 const adminControllers = require("../userControllers/adminControllers");
 const uploadFileServer = require("../../../uploadFile/multer");
-adminRoutes.use(checkToken);
+// adminRoutes.use(checkToken);
 
 adminRoutes.get("/articles", adminControllers.get_articles.getAllController);
 
@@ -35,7 +35,7 @@ adminRoutes.put(
 );
 
 // insert data
-adminRoutes.get("/insert", checkManager, adminControllers.insert.insertData);
+adminRoutes.get("/insert", adminControllers.insert.insertData);
 adminRoutes.get(
         "/publishAll",
         checkManager,

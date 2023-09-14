@@ -654,103 +654,48 @@ const adminServices = {
                         //                         );
                         //         } catch (error) {}
                         // }
-                        // for (let articels of data) {
-                        //         const subCate = await db.new_category.findOne({
-                        //                 where: {
-                        //                         slug: articels.slug,
-                        //                 },
-                        //                 attributes: ["slug", "id"],
-                        //                 include: [
-                        //                         {
-                        //                                 model: db.new_category,
-                        //                                 attributes: [
-                        //                                         "slug",
-                        //                                         "id",
-                        //                                 ],
-                        //                         },
-                        //                 ],
-                        //         });
-                        //         for (
-                        //                 let i = 0;
-                        //                 i < articels.article.length;
-                        //                 i++
-                        //         ) {
-                        //                 var newArticle;
-                        //                 const slug_crc = crc32(
-                        //                         articels.article[i].slug
-                        //                 );
-                        //                 try {
-                        //                         await downloadImage(
-                        //                                 articels.article[i],
-                        //                                 articels.article[i]
-                        //                                         .slug,
-                        //                                 imageDirectory
-                        //                         );
-                        //                         newArticle =
-                        //                                 await db.new_article.create(
-                        //                                         {
-                        //                                                 ...articels
-                        //                                                         .article[
-                        //                                                         i
-                        //                                                 ],
-                        //                                                 slug_crc,
-                        //                                                 avatar: slug_crc,
-                        //                                         }
-                        //                                 );
-                        //                 } catch (error) {
-                        //                         newArticle =
-                        //                                 await db.new_article.create(
-                        //                                         {
-                        //                                                 ...articels
-                        //                                                         .article[
-                        //                                                         i
-                        //                                                 ],
-                        //                                                 slug_crc,
-                        //                                         }
-                        //                                 );
-                        //                         continue;
-                        //                 }
-
-                        //                 if (i < 9) {
-                        //                         await db.new_articles_category.create(
-                        //                                 {
-                        //                                         category_id:
-                        //                                                 subCate.id,
-                        //                                         article_id: newArticle.id,
-                        //                                 }
-                        //                         );
-                        //                 } else if (
-                        //                         subCate.new_categories.length >=
-                        //                         Math.floor(i / 9)
-                        //                 ) {
-                        //                         await db.new_articles_category.create(
-                        //                                 {
-                        //                                         category_id:
-                        //                                                 subCate
-                        //                                                         .new_categories[
-                        //                                                         Math.floor(
-                        //                                                                 i /
-                        //                                                                         9
-                        //                                                         ) -
-                        //                                                                 1
-                        //                                                 ].id,
-                        //                                         article_id: newArticle.id,
-                        //                                 }
-                        //                         );
-                        //                         await db.new_articles_category.create(
-                        //                                 {
-                        //                                         category_id:
-                        //                                                 subCate.id,
-
-                        //                                         article_id: newArticle.id,
-                        //                                 }
-                        //                         );
-                        //                 }
-                        //         }
-                        // }
-                        await db.new_article.update(
-                                {
-                                        content: `<div class="title-detail" style="width: 700px; margin: 0px auto;">
+                        for (let articels of data) {
+                                const subCate = await db.new_category.findOne({
+                                        where: {
+                                                slug: articels.slug,
+                                        },
+                                        attributes: ["slug", "id"],
+                                        include: [
+                                                {
+                                                        model: db.new_category,
+                                                        attributes: [
+                                                                "slug",
+                                                                "id",
+                                                        ],
+                                                },
+                                        ],
+                                });
+                                for (
+                                        let i = 0;
+                                        i < articels.article.length;
+                                        i++
+                                ) {
+                                        var newArticle;
+                                        const slug_crc = crc32(
+                                                articels.article[i].slug
+                                        );
+                                        try {
+                                                await downloadImage(
+                                                        articels.article[i],
+                                                        articels.article[i]
+                                                                .slug,
+                                                        imageDirectory
+                                                );
+                                                newArticle =
+                                                        await db.new_article.create(
+                                                                {
+                                                                        ...articels
+                                                                                .article[
+                                                                                i
+                                                                        ],
+                                                                        slug_crc,
+                                                                        avatar: slug_crc,
+                                                                        content: `<div class="title-detail" style="width: 700px; margin: 0px auto;">
                         <div class="title-detail" style="width: 700px; margin: 0px auto;">
                         <h1 class="title-detail">Những vấn đề chờ t&ograve;a ph&aacute;n quyết trong vụ 'chuyến bay giải cứu'</h1>
                         <p class="description" style="line-height: 1.4;"><span class="location-stamp"><span style="color: rgb(126, 140, 141);">H&Agrave; NỘI</span> - </span>Chiếc cặp đựng 450.000 USD tiền chạy &aacute;n hay chỉ 4 chai rượu vang, cựu thư k&yacute; thứ trưởng Y tế c&oacute; được giảm &aacute;n so với h&igrave;nh phạt đề nghị tử h&igrave;nh... đang chờ t&ograve;a tuy&ecirc;n chiều nay.</p>
@@ -818,9 +763,60 @@ const adminServices = {
                         <p class="Normal" style="line-height: 1.4;">Bị c&aacute;o Hưng bị VKS đề nghị 19-20 năm về tội&nbsp;<em>Lừa đảo chiếm đoạt t&agrave;i sản</em>, &ocirc;ng Tuấn bị đề nghị 5-6 năm về với c&aacute;o buộc&nbsp;<em>M&ocirc;i giới hối lộ&nbsp;</em>2,6 triệu USD, b&agrave; Hằng bị đề nghị 10-11 năm về tội&nbsp;<em>Đưa hối lộ.</em></p>
                         </article>
                         </div>`,
-                                },
-                                { where: {} }
-                        );
+                                                                }
+                                                        );
+                                        } catch (error) {
+                                                newArticle =
+                                                        await db.new_article.create(
+                                                                {
+                                                                        ...articels
+                                                                                .article[
+                                                                                i
+                                                                        ],
+                                                                        slug_crc,
+                                                                }
+                                                        );
+                                                continue;
+                                        }
+
+                                        if (i < 9) {
+                                                await db.new_articles_category.create(
+                                                        {
+                                                                category_id:
+                                                                        subCate.id,
+                                                                article_id: newArticle.id,
+                                                        }
+                                                );
+                                        } else if (
+                                                subCate.new_categories.length >=
+                                                Math.floor(i / 9)
+                                        ) {
+                                                await db.new_articles_category.create(
+                                                        {
+                                                                category_id:
+                                                                        subCate
+                                                                                .new_categories[
+                                                                                Math.floor(
+                                                                                        i /
+                                                                                                9
+                                                                                ) -
+                                                                                        1
+                                                                        ].id,
+                                                                article_id: newArticle.id,
+                                                        }
+                                                );
+                                                await db.new_articles_category.create(
+                                                        {
+                                                                category_id:
+                                                                        subCate.id,
+
+                                                                article_id: newArticle.id,
+                                                        }
+                                                );
+                                        }
+                                }
+                        }
+
                         return { message: "okkkk" };
                 },
                 pushlishedAllService: async () => {
