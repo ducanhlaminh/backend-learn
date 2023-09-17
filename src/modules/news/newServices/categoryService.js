@@ -108,11 +108,12 @@ const categoryService = {
                 });
         },
         // Admin
-        getAllByAdmin: async ({ page, ...query }) => {
+        getAllByAdmin: async ({ page, name, ...query }) => {
                 try {
                         let queries = {};
-                        if (query.name) {
-                                query.name = { [Op.substring]: query.name };
+                        if (name) {
+                                console.log("name ", name);
+                                query.name = { [Op.substring]: name };
                         }
                         if (page) {
                                 (queries.limit = +process.env.LIMIT),

@@ -20,7 +20,7 @@ const adminServices = {
                 }) => {
                         let queries = {};
                         if (title) {
-                                console.log(title);
+                                console.log("title ", title);
                                 query.title = { [Op.substring]: title };
                         }
                         (queries.limit = +process.env.LIMIT),
@@ -980,7 +980,6 @@ const adminServices = {
                 }) => {
                         let queries = {};
                         if (name) {
-                                console.log(name);
                                 query.name = { [Op.substring]: name };
                         }
                         (queries.limit = +process.env.LIMIT),
@@ -990,67 +989,20 @@ const adminServices = {
                         try {
                                 let user;
                                 if (!role_id) {
-                                        user = await dbUser.User.findAll({
-                                                ...queries,
-                                                where: {
-                                                        ...query,
-                                                },
-                                                // include: [
-                                                //         {
-                                                //                 model: db.new_articles_category,
-                                                //                 include: [
-                                                //                         {
-                                                //                                 model: db.new_category,
-                                                //                                 as: "category",
-                                                //                         },
-                                                //                 ],
-                                                //         },
-                                                // ],
-                                                distinct: true,
-                                        });
+                                        user =
+                                                await dbUser.User.findAndCountAll(
+                                                        {
+                                                                ...queries,
+                                                                where: {
+                                                                        ...query,
+                                                                },
+                                                                include: {
+                                                                        model: dbUser.Role,
+                                                                },
+                                                                distinct: true,
+                                                        }
+                                                );
                                 }
-                                // else {
-                                //         let articlesId =
-                                //                 await db.new_articles_category.findAll(
-                                //                         {
-                                //                                 where: {
-                                //                                         category_id,
-                                //                                 },
-                                //                                 attributes: [
-                                //                                         "article_id",
-                                //                                 ],
-                                //                         }
-                                //                 );
-                                //         articlesId = articlesId.map(
-                                //                 (item) => item.article_id
-                                //         );
-                                //         articles =
-                                //                 await db.new_article.findAndCountAll(
-                                //                         {
-                                //                                 ...queries,
-                                //                                 where: {
-                                //                                         id: {
-                                //                                                 [Op.in]:
-                                //                                                         articlesId,
-                                //                                         },
-                                //                                         ...query,
-                                //                                 },
-                                //                                 include: [
-                                //                                         {
-                                //                                                 model: db.new_articles_category,
-                                //                                                 include: [
-                                //                                                         {
-                                //                                                                 model: db.new_category,
-                                //                                                                 as: "category",
-                                //                                                         },
-                                //                                                 ],
-                                //                                         },
-                                //                                 ],
-                                //                                 distinct: true,
-                                //                         }
-                                //                 );
-                                // }
-
                                 return user;
                         } catch (error) {
                                 console.log(error);
