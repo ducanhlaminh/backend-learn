@@ -15,6 +15,9 @@ const userServices = {
                                 "tokenOAuth",
                                 "role_id",
                         ],
+                        include: {
+                                model: db.Role,
+                        },
                 });
                 if (user?.tokenOAuth) {
                         try {

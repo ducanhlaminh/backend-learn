@@ -1,4 +1,5 @@
 const db = require("../../../config/newModels");
+const dbUser = require("../../../config/userModels");
 const { Op } = require("sequelize");
 const crc32 = require("crc/crc32");
 const fs = require("fs");
@@ -966,6 +967,96 @@ const adminServices = {
                                 };
                         } catch (error) {
                                 console.log(error);
+                        }
+                },
+        },
+        user: {
+                getAllService: async ({
+                        page = 1,
+                        role_id,
+                        order,
+                        name,
+                        ...query
+                }) => {
+                        let queries = {};
+                        if (name) {
+                                console.log(name);
+                                query.name = { [Op.substring]: name };
+                        }
+                        (queries.limit = +process.env.LIMIT),
+                                (queries.offset =
+                                        (page - 1) * +process.env.LIMIT);
+                        if (order) queries.order = JSON.parse(order);
+                        try {
+                                let user;
+                                if (!role_id) {
+                                        user = await dbUser.User.findAll({
+                                                ...queries,
+                                                where: {
+                                                        ...query,
+                                                },
+                                                // include: [
+                                                //         {
+                                                //                 model: db.new_articles_category,
+                                                //                 include: [
+                                                //                         {
+                                                //                                 model: db.new_category,
+                                                //                                 as: "category",
+                                                //                         },
+                                                //                 ],
+                                                //         },
+                                                // ],
+                                                distinct: true,
+                                        });
+                                }
+                                // else {
+                                //         let articlesId =
+                                //                 await db.new_articles_category.findAll(
+                                //                         {
+                                //                                 where: {
+                                //                                         category_id,
+                                //                                 },
+                                //                                 attributes: [
+                                //                                         "article_id",
+                                //                                 ],
+                                //                         }
+                                //                 );
+                                //         articlesId = articlesId.map(
+                                //                 (item) => item.article_id
+                                //         );
+                                //         articles =
+                                //                 await db.new_article.findAndCountAll(
+                                //                         {
+                                //                                 ...queries,
+                                //                                 where: {
+                                //                                         id: {
+                                //                                                 [Op.in]:
+                                //                                                         articlesId,
+                                //                                         },
+                                //                                         ...query,
+                                //                                 },
+                                //                                 include: [
+                                //                                         {
+                                //                                                 model: db.new_articles_category,
+                                //                                                 include: [
+                                //                                                         {
+                                //                                                                 model: db.new_category,
+                                //                                                                 as: "category",
+                                //                                                         },
+                                //                                                 ],
+                                //                                         },
+                                //                                 ],
+                                //                                 distinct: true,
+                                //                         }
+                                //                 );
+                                // }
+
+                                return user;
+                        } catch (error) {
+                                console.log(error);
+                                return {
+                                        message: "Failed to get user",
+                                };
                         }
                 },
         },

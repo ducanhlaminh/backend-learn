@@ -107,5 +107,13 @@ const adminControllers = {
                         res.status(200).json(response);
                 },
         },
+        user: {
+                getAllController: async (req, res) => {
+                        const response = await adminServices.user.getAllService(
+                                req.query
+                        );
+                        res.status(200).json(response);
+                },
+        },
 };
 module.exports = adminControllers;
