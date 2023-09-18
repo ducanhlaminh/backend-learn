@@ -23,8 +23,9 @@ authRoutes.get("/google/callback", (req, res) => {
 authRoutes.get(
         "/login-success",
         (req, res, next) => {
-                passport.authenticate("google", (err, profile) => {
-                        req.user = profile;
+                passport.authenticate("google", (err, data) => {
+                        req.user = data.user;
+                        req.profile = data.profile;
                         next();
                 })(req, res, next);
         },

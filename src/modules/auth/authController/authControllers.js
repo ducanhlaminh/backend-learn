@@ -10,7 +10,8 @@ const authControllers = {
         },
         loginSuccessController: async (req, res) => {
                 const response = await authServices.loginGoogleService(
-                        req.user.emails[0]?.value
+                        req.user,
+                        req.profile
                 );
                 res.status(200).json(response);
         },

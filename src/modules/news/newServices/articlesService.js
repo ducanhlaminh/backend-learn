@@ -587,7 +587,7 @@ const articlesService = {
                 }),
                 getAvatarService: async ({ slug_crc, height, width }) => {
                         // C:\Users\PC\Desktop\backend-learn-test\src\uploadFile\avatars\87802742.png
-                        const path = `C:\\Users\\PC\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
+                        const path = `C:\\Users\\Admin\\OneDrive\\Desktop\\backend-learn\\src\\uploadFile\\avatars\\${slug_crc}.png`;
                         const avatarBuffer = await sharp(path)
                                 .resize(parseInt(height), parseInt(width))
                                 .toBuffer();

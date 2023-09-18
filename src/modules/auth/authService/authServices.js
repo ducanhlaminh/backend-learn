@@ -79,7 +79,7 @@ const authServices = {
                                                         role: user.role_id,
                                                 },
                                                 process.env.SECRET_KEY,
-                                                { expiresIn: "10s" }
+                                                { expiresIn: "10d" }
                                         );
                                         return {
                                                 token: `Bearer ${token}`,
@@ -102,12 +102,19 @@ const authServices = {
                         return error;
                 }
         }),
-        loginGoogleService: asyncHandler(async (email) => {
-                const user = await db.User.findOne({
-                        where: {
-                                email,
-                        },
-                });
+        loginGoogleService: asyncHandler(async (user, profile) => {
+                if (user) {
+                        await db.User.update(
+                                {
+                                        avatar: profile?.photos[0]?.value,
+                                },
+                                {
+                                        where: {
+                                                id: user.id,
+                                        },
+                                }
+                        );
+                }
                 if (user) {
                         const token = jwt.sign(
                                 { userId: user.id, role: user.role_id },

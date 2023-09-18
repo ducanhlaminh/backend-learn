@@ -49,8 +49,6 @@ adminRoutes.delete(
         adminControllers.delete.deleteArticleController
 );
 
-adminRoutes.get(
-        "/user/get-all",
-        adminControllers.user.getAllController
-);
+adminRoutes.get("/user", adminControllers.user.getAllController);
+adminRoutes.post("/user", adminControllers.user.createdController);
 module.exports = adminRoutes;

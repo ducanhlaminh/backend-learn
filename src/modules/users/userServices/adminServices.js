@@ -971,16 +971,10 @@ const adminServices = {
                 },
         },
         user: {
-                getAllService: async ({
-                        page = 1,
-                        role_id,
-                        order,
-                        name,
-                        ...query
-                }) => {
+                getAllService: async ({ page = 1, order, ...query }) => {
                         let queries = {};
-                        if (name) {
-                                query.name = { [Op.substring]: name };
+                        if (query.name) {
+                                query.name = { [Op.substring]: query.name };
                         }
                         (queries.limit = +process.env.LIMIT),
                                 (queries.offset =
@@ -988,27 +982,52 @@ const adminServices = {
                         if (order) queries.order = JSON.parse(order);
                         try {
                                 let user;
-                                if (!role_id) {
-                                        user =
-                                                await dbUser.User.findAndCountAll(
-                                                        {
-                                                                ...queries,
-                                                                where: {
-                                                                        ...query,
-                                                                },
-                                                                include: {
-                                                                        model: dbUser.Role,
-                                                                },
-                                                                distinct: true,
-                                                        }
-                                                );
-                                }
+                                user = await dbUser.User.findAndCountAll({
+                                        ...queries,
+                                        where: {
+                                                ...query,
+                                        },
+                                        include: {
+                                                model: dbUser.Role,
+                                        },
+                                        distinct: true,
+                                });
+
                                 return user;
                         } catch (error) {
                                 console.log(error);
                                 return {
                                         message: "Failed to get user",
                                 };
+                        }
+                },
+                createUserService: async (data) => {
+                        try {
+                                data.role_id = parseInt(data.role_id, 10);
+                                const [user, created] =
+                                        await dbUser.User.findOrCreate({
+                                                where: {
+                                                        email: data?.email,
+                                                },
+                                                defaults: {
+                                                        email: data?.emails,
+                                                        typeLogin: 1,
+                                                        name: data?.name,
+                                                        role_id: data?.role_id,
+                                                },
+                                        });
+                                if (!created) {
+                                        return {
+                                                message: "Email này đã được sử dụng",
+                                                status: 0,
+                                        };
+                                }
+                                return {
+                                        message: "Người dùng đã được tạo thành công",
+                                        status: 1,
+                                };
+                        } catch (error) {
+                                console.log(error);
                         }
                 },
         },
