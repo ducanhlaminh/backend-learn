@@ -103,53 +103,55 @@ const adminServices = {
                 },
         },
         update: {
-                updateHotMain: async (data, id) => {
+                updateHotMain: async (data) => {
                         try {
                                 // check vi tri
-                                const checkPosition =
-                                        await db.new_articles_hot_main.findOne({
-                                                where: {
-                                                        position: data.position,
-                                                },
-                                        });
-                                if (!checkPosition) {
-                                        //  Vi tri chua duoc set
-                                        //  Xoa bai viet  do đang được set
-                                        await db.new_articles_hot_main.destroy({
-                                                where: {
-                                                        article_id: id,
-                                                },
-                                        });
-                                        // tạo mới
-                                        await db.new_articles_hot_main.create({
-                                                position: data.position,
-                                                article_id: id,
-                                        });
-                                        return {
-                                                message: "Cập nhật vị trí thành công",
-                                                status: 1,
-                                        };
-                                } else {
-                                        const article =
-                                                await db.new_articles_hot_main.findOne(
-                                                        {
-                                                                where: {
-                                                                        article_id: id,
-                                                                },
-                                                        }
-                                                );
-                                        const tempValue =
-                                                checkPosition.position;
-                                        checkPosition.position =
-                                                article.position;
-                                        article.position = tempValue;
-                                        await article.save();
-                                        await checkPosition.save();
-                                        return {
-                                                message: "Cập nhật vị trí thành công",
-                                                status: 1,
-                                        };
-                                }
+                                // const checkPosition =
+                                //         await db.new_articles_hot_main.findOne({
+                                //                 where: {
+                                //                         position: data.position,
+                                //                 },
+                                //         });
+                                // if (!checkPosition) {
+                                //         //  Vi tri chua duoc set
+                                //         //  Xoa bai viet  do đang được set
+                                //         await db.new_articles_hot_main.destroy({
+                                //                 where: {
+                                //                         article_id: id,
+                                //                 },
+                                //         });
+                                //         // tạo mới
+                                //         await db.new_articles_hot_main.create({
+                                //                 position: data.position,
+                                //                 article_id: id,
+                                //         });
+                                //         return {
+                                //                 message: "Cập nhật vị trí thành công",
+                                //                 status: 1,
+                                //         };
+                                // } else {
+                                //         const article =
+                                //                 await db.new_articles_hot_main.findOne(
+                                //                         {
+                                //                                 where: {
+                                //                                         article_id: id,
+                                //                                 },
+                                //                         }
+                                //                 );
+                                //         const tempValue =
+                                //                 checkPosition.position;
+                                //         checkPosition.position =
+                                //                 article.position;
+                                //         article.position = tempValue;
+                                //         await article.save();
+                                //         await checkPosition.save();
+                                //         return {
+                                //                 message: "Cập nhật vị trí thành công",
+                                //                 status: 1,
+                                //         };
+                                // }
+                                await db.new_articles_hot_main.destroy({});
+                                await Captain.bulkCreate(data);
                         } catch (error) {
                                 return {
                                         message: "Cập nhật vị trí không thành công",
@@ -436,11 +438,11 @@ const adminServices = {
         create: {
                 createHotMain: async (data) => {
                         const check = await db.new_articles_hot_main.findOne({
-                                where: { article_id: data.id },
+                                where: { article_id: data.article_id },
                         });
                         if (!check) {
                                 // check position invalid
-                                if (data.position < 1) {
+                                if (data) {
                                         return {
                                                 message: "Vi tri khong hop le",
                                         };
@@ -452,13 +454,19 @@ const adminServices = {
                                                         position: data.position,
                                                 },
                                         });
-                                console.log(checkPosition);
                                 if (checkPosition === null) {
+                                        const [max] =
+                                                await db.new_articles_hot_main.max(
+                                                        "position"
+                                                );
+                                        if (max > 8) {
+                                                max = null;
+                                        }
                                         const response =
                                                 await db.new_articles_hot_main.create(
                                                         {
-                                                                article_id: data.id,
-                                                                position: data.position,
+                                                                article_id: data.article_id,
+                                                                position: max,
                                                                 status: 1,
                                                         }
                                                 );
