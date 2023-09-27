@@ -8,45 +8,45 @@ const uploadFileServer = require("../../../uploadFile/multer");
 adminRoutes.get("/articles", adminControllers.get_articles.getAllController);
 
 adminRoutes.post(
-        "/articles",
-        uploadFileServer.single("avatar"),
-        adminControllers.create_articles.createArticleControllers
+    "/articles",
+    uploadFileServer.single("avatar"),
+    adminControllers.create_articles.createArticleControllers
 );
 adminRoutes.post(
-        "/hot-main",
-        adminControllers.create_articles.createHotMainController
+    "/hot-main",
+    adminControllers.create_articles.createHotMainController
 );
 adminRoutes.post(
-        "/hot-cate",
-        adminControllers.create_articles.createHotCateController
+    "/hot-cate",
+    adminControllers.create_articles.createHotCateController
 );
 adminRoutes.put(
-        "/hot-main/:id",
-        adminControllers.update_articles.updateHotMainController
+    "/hot-main",
+    adminControllers.update_articles.updateHotMainController
 );
 adminRoutes.put(
-        "/articles",
-        uploadFileServer.single("avatar"),
-        adminControllers.update_articles.publishController
+    "/articles",
+    uploadFileServer.single("avatar"),
+    adminControllers.update_articles.publishController
 );
 adminRoutes.put(
-        "/hot-cate/:id",
-        adminControllers.update_articles.updateHotCateController
+    "/hot-cate/:category_id",
+    adminControllers.update_articles.updateHotCateController
 );
 
 // insert data
 adminRoutes.get("/insert", adminControllers.insert.insertData);
 adminRoutes.get(
-        "/publishAll",
-        checkManager,
-        adminControllers.insert.publishData
+    "/publishAll",
+    checkManager,
+    adminControllers.insert.publishData
 );
 
 adminRoutes.delete("/hot-main", adminControllers.delete.deleteHotMain);
 adminRoutes.delete("/hot-cate", adminControllers.delete.deleteHotCate);
 adminRoutes.delete(
-        "/articles",
-        adminControllers.delete.deleteArticleController
+    "/articles",
+    adminControllers.delete.deleteArticleController
 );
 
 adminRoutes.get("/user", adminControllers.user.getAllController);
