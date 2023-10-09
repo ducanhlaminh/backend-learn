@@ -34,7 +34,6 @@
     "mysql2": "^3.3.3",
     "node-fetch": "^2.6.11",
     "nodemon": "^2.0.22",
-    "pace-js": "^1.2.4",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "sequelize": "^6.31.1",
