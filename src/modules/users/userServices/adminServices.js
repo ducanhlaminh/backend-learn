@@ -90,55 +90,9 @@ const adminServices = {
     update: {
         updateHotMain: async (data) => {
             try {
-                // check vi tri
-                // const checkPosition =
-                //         await db.new_articles_hot_main.findOne({
-                //                 where: {
-                //                         position: data.position,
-                //                 },
-                //         });
-                // if (!checkPosition) {
-                //         //  Vi tri chua duoc set
-                //         //  Xoa bai viet  do đang được set
-                //         await db.new_articles_hot_main.destroy({
-                //                 where: {
-                //                         article_id: id,
-                //                 },
-                //         });
-                //         // tạo mới
-                //         await db.new_articles_hot_main.create({
-                //                 position: data.position,
-                //                 article_id: id,
-                //         });
-                //         return {
-                //                 message: "Cập nhật vị trí thành công",
-                //                 status: 1,
-                //         };
-                // } else {
-                //         const article =
-                //                 await db.new_articles_hot_main.findOne(
-                //                         {
-                //                                 where: {
-                //                                         article_id: id,
-                //                                 },
-                //                         }
-                //                 );
-                //         const tempValue =
-                //                 checkPosition.position;
-                //         checkPosition.position =
-                //                 article.position;
-                //         article.position = tempValue;
-                //         await article.save();
-                //         await checkPosition.save();
-                //         return {
-                //                 message: "Cập nhật vị trí thành công",
-                //                 status: 1,
-                //         };
-                // }
                 await db.new_articles_hot_main.destroy({ where: {} });
                 await db.new_articles_hot_main.bulkCreate(data);
             } catch (error) {
-                console.log(error);
                 return {
                     message: "Cập nhật vị trí không thành công",
                     status: 0,

@@ -17,7 +17,11 @@ module.exports = (sequelize, DataTypes) => {
     }
     new_article.init(
         {
-            title: DataTypes.STRING,
+            title: {
+                type: DataTypes.STRING,
+                // allowNull: false,
+                // unique: true,
+            },
             slug: DataTypes.STRING,
             slug_crc: DataTypes.BIGINT,
             content: DataTypes.TEXT("long"),

@@ -36,11 +36,6 @@ adminRoutes.put(
 
 // insert data
 adminRoutes.get("/insert", adminControllers.insert.insertData);
-adminRoutes.get(
-    "/publishAll",
-    checkManager,
-    adminControllers.insert.publishData
-);
 
 adminRoutes.delete("/hot-main", adminControllers.delete.deleteHotMain);
 adminRoutes.delete("/hot-cate", adminControllers.delete.deleteHotCate);
