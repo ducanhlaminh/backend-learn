@@ -1,6 +1,9 @@
 const express = require("express");
 const articlesRoutes = express.Router();
 const articlesController = require("../newControllers/articlesController");
+
+// Publish routes
+
 articlesRoutes.get(
         "/hot-main",
         articlesController.get_articles.getHotControllers
@@ -34,5 +37,10 @@ articlesRoutes.get(
         "/box-category",
         articlesController.get_articles.getBoxCategoryControllers
 );
+
+// Insert data
+
+// adminRoutes.get("/insert", adminControllers.insert.insertData);
+// Admin routes
 
 module.exports = articlesRoutes;
