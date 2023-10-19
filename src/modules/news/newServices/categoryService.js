@@ -108,7 +108,6 @@ const categoryService = {
         try {
             let queries = {};
             if (name) {
-                console.log("name ", name);
                 query.name = { [Op.substring]: name };
             }
             if (page) {
@@ -129,7 +128,6 @@ const categoryService = {
                 ],
                 distinct: true,
             });
-            console.log(response.count);
             return response;
         } catch (error) {
             console.log(error);

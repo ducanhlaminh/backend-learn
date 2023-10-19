@@ -1,46 +1,93 @@
 const express = require("express");
 const articlesRoutes = express.Router();
 const articlesController = require("../newControllers/articlesController");
-
+const uploadFileServer = require("../../../uploadFile/multer");
 // Publish routes
 
 articlesRoutes.get(
-        "/hot-main",
-        articlesController.get_articles.getHotControllers
+    "/hot-main",
+    articlesController.guest.get_articles.getHotControllers
 );
 articlesRoutes.get("/avatar", articlesController.getAvatarController);
 articlesRoutes.get(
-        "/cate/:slug/:slug_crc",
-        articlesController.get_articles.getByCateControllers
+    "/cate/:slug/:slug_crc",
+    articlesController.guest.get_articles.getByCateControllers
 );
 articlesRoutes.get(
-        "/hot-cate/",
-        articlesController.get_articles.getHotCategoryController
+    "/hot-cate/",
+    articlesController.guest.get_articles.getHotCategoryController
 );
 articlesRoutes.get(
-        "/publish_at",
-        articlesController.get_articles.getByPublishAtController
+    "/publish_at",
+    articlesController.guest.get_articles.getByPublishAtController
 );
 articlesRoutes.get(
-        "/:slug/:slug_crc",
-        articlesController.get_articles.getDetailControllers
+    "/detail/:slug/:slug_crc",
+    articlesController.guest.get_articles.getDetailControllers
 );
 articlesRoutes.get(
-        "/views",
-        articlesController.get_articles.getByViewsController
+    "/views",
+    articlesController.guest.get_articles.getByViewsController
 );
 articlesRoutes.get(
-        "/title",
-        articlesController.get_articles.getByTitleControllers
+    "/title",
+    articlesController.guest.get_articles.getByTitleControllers
 );
 articlesRoutes.get(
-        "/box-category",
-        articlesController.get_articles.getBoxCategoryControllers
+    "/box-category",
+    articlesController.guest.get_articles.getBoxCategoryControllers
 );
 
 // Insert data
 
-// adminRoutes.get("/insert", adminControllers.insert.insertData);
+// articlesRoutes.get("/insert", articlesController.insert.insertData);
 // Admin routes
+
+articlesRoutes.get(
+    "/admin/articles",
+    articlesController.admin.get_articles.getAllController
+);
+
+articlesRoutes.post(
+    "/admin/articles",
+    uploadFileServer.single("avatar"),
+    articlesController.admin.create_articles.createArticleControllers
+);
+articlesRoutes.post(
+    "/admin/hot-main",
+    articlesController.admin.create_articles.createHotMainController
+);
+articlesRoutes.post(
+    "/admin/hot-cate",
+    articlesController.admin.create_articles.createHotCateController
+);
+articlesRoutes.put(
+    "/admin/hot-main",
+    articlesController.admin.update_articles.updateHotMainController
+);
+articlesRoutes.put(
+    "/admin/articles",
+    uploadFileServer.single("avatar"),
+    articlesController.admin.update_articles.publishController
+);
+articlesRoutes.put(
+    "/admin/hot-cate/:category_id",
+    articlesController.admin.update_articles.updateHotCateController
+);
+
+// insert data
+
+articlesRoutes.delete(
+    "admin/hot-main",
+    articlesController.admin.delete.deleteHotMain
+);
+articlesRoutes.delete(
+    "/admin/hot-cate",
+    articlesController.admin.delete.deleteHotCate
+);
+articlesRoutes.delete(
+    "/admin/articles",
+    articlesController.admin.delete.deleteArticleController
+);
 
 module.exports = articlesRoutes;
