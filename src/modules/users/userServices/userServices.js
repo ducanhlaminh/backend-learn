@@ -1,7 +1,7 @@
 const db = require("../../../config/userModels");
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
-
+const client = require("../../../untils/redis");
 const userServices = {
     user: {
         getUserService: async (id) => {
@@ -63,6 +63,17 @@ const userServices = {
             // } else {
             //     localStorage.clear("token");
             // }
+        },
+        updateService: async (id, data, token) => {
+            await db.User.update(data, {
+                where: {
+                    id,
+                },
+            });
+            await client.set(token, "expired");
+            const res = await client.get(token);
+
+            return res;
         },
     },
     admin: {

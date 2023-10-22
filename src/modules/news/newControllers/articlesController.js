@@ -106,9 +106,8 @@ const articlesController = {
                 //         );
             },
             updateHotMainController: async (req, res) => {
-                const response = await articlesService.update.updateHotMain(
-                    req.body
-                );
+                const response =
+                    await articlesService.admin.update.updateHotMain(req.body);
                 res.status(200).json(response);
             },
             updateHotCateController: async (req, res) => {

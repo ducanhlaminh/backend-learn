@@ -2,9 +2,9 @@ const jwt = require("jsonwebtoken");
 const fetch = require("node-fetch");
 require("dotenv").config();
 const db = require("../config/userModels");
-const passport = require("passport");
+const client = require("../untils/redis");
 
-const checkToken = (req, res, next) => {
+const checkToken = async (req, res, next) => {
     let accessToken = req?.headers?.authorization;
     if (!accessToken) {
         return res.status(400).json({
@@ -27,7 +27,15 @@ const checkToken = (req, res, next) => {
                 message: "Verify Failed !!!",
             });
         }
-
+        console.log(accessToken);
+        const result = await client.get(accessToken);
+        if (result === "expired") {
+            return res.status(401).json({
+                status: -1,
+                message: "Verify Failed !!!",
+            });
+        }
+        console.log("ok");
         req.user = user;
         next();
     });

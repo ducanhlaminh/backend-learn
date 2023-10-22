@@ -2,6 +2,7 @@ const express = require("express");
 const articlesRoutes = express.Router();
 const articlesController = require("../newControllers/articlesController");
 const uploadFileServer = require("../../../uploadFile/multer");
+const { checkToken } = require("../../../middlewares/checkToken");
 // Publish routes
 
 articlesRoutes.get(
@@ -42,7 +43,7 @@ articlesRoutes.get(
 
 // articlesRoutes.get("/insert", articlesController.insert.insertData);
 // Admin routes
-
+articlesRoutes.use(checkToken);
 articlesRoutes.get(
     "/admin/articles",
     articlesController.admin.get_articles.getAllController

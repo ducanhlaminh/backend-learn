@@ -10,6 +10,14 @@ const userControllers = {
         },
     },
     admin: {
+        updateService: async (req, res) => {
+            const response = await userServices.user.updateService(
+                req.params.id,
+                req.body,
+                req.headers.authorization
+            );
+            res.status(200).json(response);
+        },
         getAllController: async (req, res) => {
             const response = await adminServices.user.getAllService(req.query);
             res.status(200).json(response);

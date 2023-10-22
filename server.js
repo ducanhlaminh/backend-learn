@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const initWebRoutes = require("./src/routers/index");
 require("./src/config/connectDB");
+require("./src/untils/redis");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const app = express();

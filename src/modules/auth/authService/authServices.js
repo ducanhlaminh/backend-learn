@@ -132,8 +132,6 @@ const authServices = {
                     },
                 }
             );
-        }
-        if (user) {
             const token = jwt.sign(
                 { userId: user.id, role: user.role_id },
                 process.env.SECRET_KEY,
