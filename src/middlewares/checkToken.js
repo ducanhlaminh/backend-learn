@@ -27,7 +27,6 @@ const checkToken = async (req, res, next) => {
                 message: "Verify Failed !!!",
             });
         }
-        console.log(accessToken);
         const result = await client.get(accessToken);
         if (result === "expired") {
             return res.status(401).json({
@@ -35,7 +34,6 @@ const checkToken = async (req, res, next) => {
                 message: "Verify Failed !!!",
             });
         }
-        console.log("ok");
         req.user = user;
         next();
     });
