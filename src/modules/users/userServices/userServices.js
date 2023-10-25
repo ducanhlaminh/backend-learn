@@ -5,7 +5,6 @@ const client = require("../../../untils/redis");
 const userServices = {
         user: {
                 getUserService: async (id) => {
-                        console.log("123");
                         const user = await db.User.findOne({
                                 where: {
                                         id,
@@ -40,22 +39,6 @@ const userServices = {
                         } catch (error) {
                                 console.log(error);
                         }
-
-                        // if (response1.data.name) {
-                        //     // await db.User.update(
-                        //     //     {
-                        //     //         name: response1.data.name,
-                        //     //         avatar: response1.data.avatar,
-                        //     //     },
-                        //     //     {
-                        //     //         where: {
-                        //     //             id,
-                        //     //         },
-                        //     //     }
-                        //     // );
-                        // } else {
-                        //     localStorage.clear("token");
-                        // }
                 },
                 updateService: async (id, data, token) => {
                         await db.User.update(data, {

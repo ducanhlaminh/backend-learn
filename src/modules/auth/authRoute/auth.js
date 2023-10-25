@@ -1,8 +1,8 @@
-require("../../../../passport");
 const express = require("express");
 const passport = require("passport");
 const authRoutes = express.Router();
 const authController = require("../authController/authControllers");
+require("../../../../passport");
 
 authRoutes.post("/register", authController.registerController);
 authRoutes.post("/login", authController.loginController);
