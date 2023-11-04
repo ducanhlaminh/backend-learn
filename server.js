@@ -14,6 +14,6 @@ app.use(express.static("src/uploadFile/avatars"));
 initWebRoutes(app);
 
 const PORT = process.env.PORT || 8888;
-const listen = app.listen(PORT, "192.168.1.41", () => {
-    console.log("Server is running in post " + listen.address().port);
+const listen = app.listen(PORT, () => {
+        console.log("Server is running in post " + listen.address().port);
 });
