@@ -276,7 +276,8 @@ const articlesService = {
                 page = 1,
                 category_id,
                 order,
-                user,
+
+                role_id,
                 ...query
             }) => {
                 let queries = {};
@@ -285,6 +286,7 @@ const articlesService = {
                         [Op.substring]: query.title,
                     };
                 }
+
                 (queries.limit = +process.env.LIMIT),
                     (queries.offset = (page - 1) * +process.env.LIMIT);
                 if (order) queries.order = JSON.parse(order);
@@ -302,17 +304,24 @@ const articlesService = {
                             }
                         );
                         articlesId = articlesId.map((item) => item.article_id);
+                        whereCondition = {
+                            ...whereCondition,
+                            id: {
+                                [Op.in]: articlesId,
+                            },
+                        };
                     }
-                    if (user.role === 2) {
-                        whereCondition.created_user_id = user.id;
-                        console.log(whereCondition, "log");
-                    } else {
-                        if (query?.created_user_id) {
-                            whereCondition.created_user_id =
-                                query.created_user_id;
-                        }
+                    switch (role_id) {
+                        case 1: // Editor
+                            break;
+                        default:
+                            if (query?.created_user_id) {
+                                whereCondition.created_user_id =
+                                    query.created_user_id;
+                                console.log(whereCondition);
+                            }
+                            break;
                     }
-                    console.log("where", user.role);
                     articles = await db.new_article.findAndCountAll({
                         ...queries,
                         where: whereCondition,
@@ -352,88 +361,6 @@ const articlesService = {
                         message: "Failed to get articles",
                     };
                 }
-            },
-            getHotService: async ({ ...query }) => {
-                try {
-                    let hot_news;
-                    if (query.slug_crc === "1") {
-                        hot_news = await db.new_articles_hot_main.findAll({
-                            order: [["position", "ASC"]],
-                            attributes: ["article_id", "position"],
-                            include: [
-                                {
-                                    model: db.new_article,
-                                    attributes: [
-                                        "avatar",
-                                        "title",
-                                        "sapo",
-                                        "slug",
-                                        "slug_crc",
-                                        "id",
-                                    ],
-                                },
-                            ],
-                        });
-                    } else {
-                        const result = await db.new_category.findOne({
-                            where: {
-                                slug_crc: query.slug_crc,
-                            },
-                            order: [
-                                [
-                                    db.new_articles_hot_category,
-                                    "position",
-                                    "ASC",
-                                ],
-                            ],
-                            include: [
-                                {
-                                    model: db.new_articles_hot_category,
-                                    include: [
-                                        {
-                                            model: db.new_article,
-                                            where: {
-                                                status: 1,
-                                            },
-                                            require: true,
-                                        },
-                                    ],
-                                },
-                            ],
-                        });
-                        hot_news = result.new_articles_hot_categories;
-                    }
-
-                    return {
-                        hot_news,
-                    };
-                } catch (error) {
-                    return error;
-                }
-            },
-            getHotCategoryService: async (slug_crc) => {
-                const res = await db.new_category.findOne({
-                    where: {
-                        slug_crc,
-                    },
-                    order: [[db.new_articles_hot_category, "position", "ASC"]],
-                    include: [
-                        {
-                            model: db.new_articles_hot_category,
-                            include: [
-                                {
-                                    model: db.new_article,
-                                    where: {
-                                        status: 1,
-                                    },
-                                    require: true,
-                                },
-                            ],
-                        },
-                    ],
-                });
-
-                return res;
             },
         },
         update: {
@@ -1311,26 +1238,48 @@ const articlesService = {
         },
         create: {
             createHotMain: async (data) => {
-                if (!data.category_id) {
-                    await db.new_articles_hot_main.destroy({
-                        where: {},
-                    });
-                    await db.new_articles_hot_main.bulkCreate(data.articles);
+                const check = await db.new_articles_hot_main.findOne({
+                    where: {
+                        article_id: data.article_id,
+                    },
+                });
+                if (!check) {
+                    // check position invalid
+                    if (data) {
+                        return {
+                            message: "Vi tri khong hop le",
+                        };
+                    }
+                    // Check tại vị trí đó còn trống không
+                    const checkPosition =
+                        await db.new_articles_hot_main.findOne({
+                            where: {
+                                position: data.position,
+                            },
+                        });
+                    if (checkPosition === null) {
+                        const [max] = await db.new_articles_hot_main.max(
+                            "position"
+                        );
+                        if (max > 8) {
+                            max = null;
+                        }
+                        const response = await db.new_articles_hot_main.create({
+                            article_id: data.article_id,
+                            position: max,
+                            status: 1,
+                        });
+                        return response;
+                    } else {
+                        return {
+                            message: "Set vị trí nổi bật không thành công",
+                        };
+                    }
                 } else {
-                    await db.new_articles_hot_category.destroy({
-                        where: { category_id: data.category_id },
-                    });
-                    data.articles.map((item) => {
-                        item.category_id = data.category_id;
-                    });
-                    await db.new_articles_hot_category.bulkCreate(
-                        data.articles
-                    );
+                    return {
+                        message: "Bài viết đã được xét bài viết vị trí",
+                    };
                 }
-                return {
-                    message: "Thành công",
-                    status: 1,
-                };
             },
             createHotCate: async (data) => {
                 const checkPosition =
@@ -1366,7 +1315,7 @@ const articlesService = {
                     };
                 }
             },
-            createArticleService: async (file, data, user) => {
+            createArticleService: async (file, data) => {
                 const slug_crc = crc32(data.slug);
                 const ext = file.originalname.split(".").pop();
                 const newFilePath = `src/uploadFile/avatars/${
@@ -1403,10 +1352,6 @@ const articlesService = {
                                 sapo: data.sapo,
                                 title: data.title,
                                 status: 0,
-                                avatar: slug_crc,
-                                views: 0,
-                                publishAt: data?.publishAt,
-                                created_user_id: user.userId,
                             },
                         });
                     const category = await db.new_category.findOne({
