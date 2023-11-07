@@ -12,7 +12,6 @@ passport.use(
         },
         async function (accessToken, refreshToken, profile, cb) {
             try {
-                console.log(profile);
                 const [user, created] = await db.User.findOrCreate({
                     where: {
                         email: profile?.emails[0]?.value,

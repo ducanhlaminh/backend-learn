@@ -42,10 +42,14 @@ articlesRoutes.get(
 // Insert data
 
 // Admin routes
-// articlesRoutes.use(checkToken);
+articlesRoutes.use(checkToken);
 articlesRoutes.get(
     "/admin/articles",
     articlesController.admin.get_articles.getAllController
+);
+articlesRoutes.get(
+    "/admin/hot-news",
+    articlesController.admin.get_articles.getHotControllers
 );
 
 articlesRoutes.post(
@@ -54,15 +58,12 @@ articlesRoutes.post(
     articlesController.admin.create_articles.createArticleControllers
 );
 articlesRoutes.post(
-    "/admin/hot-main",
+    "/admin/hot-news",
     articlesController.admin.create_articles.createHotMainController
 );
-articlesRoutes.post(
-    "/admin/hot-cate",
-    articlesController.admin.create_articles.createHotCateController
-);
+
 articlesRoutes.put(
-    "/admin/hot-main",
+    "/admin/hot-news",
     articlesController.admin.update_articles.updateHotMainController
 );
 articlesRoutes.put(
