@@ -6,7 +6,7 @@ const fs = require("fs");
 require("dotenv").config();
 const sharp = require("sharp");
 const axios = require("axios");
-
+const asyncHandler = require("express-async-handler");
 const articlesService = {
     guest: {
         get: {
@@ -232,7 +232,63 @@ const articlesService = {
                     console.log(error);
                 }
             },
-            getByPublishAt: async ({ page = 1, slug_crc }) => {},
+            getByPublishAt: asyncHandler(async ({ page = 1, slug_crc }) => {
+                let list_article_new;
+                let queries = {};
+                (queries.limit = +process.env.LIMIT),
+                    (queries.offset = (page - 1) * +process.env.LIMIT);
+                if (!slug_crc) {
+                    list_article_new = await db.new_article.findAndCountAll({
+                        ...queries,
+                        where: { status: 1 },
+                        distinct: true,
+                        include: [
+                            {
+                                model: db.new_articles_category,
+                                include: [
+                                    {
+                                        as: "category",
+                                        model: db.new_category,
+                                    },
+                                ],
+                            },
+                        ],
+                        order: [["publishAt", "DESC"]],
+                    });
+                } else {
+                    const idCate = await db.new_category.findOne({
+                        where: [{ slug_crc }],
+                        attributes: [
+                            "id",
+                            "slug",
+                            "slug_crc",
+                            "parent_id",
+                            "name",
+                        ],
+                    });
+                    if (idCate) {
+                        list_article_new =
+                            await db.new_articles_category.findAll({
+                                ...queries,
+                                distinct: true,
+                                where: {
+                                    category_id: idCate.id,
+                                },
+                                include: [
+                                    {
+                                        model: db.new_article,
+                                        require: true,
+                                        where: {
+                                            status: 1,
+                                        },
+                                    },
+                                ],
+                                order: [[db.new_article, "publishAt", "DESC"]],
+                            });
+                    }
+                }
+                return list_article_new;
+            }),
             getAvatarService: async ({ slug_crc, height, width }) => {
                 try {
                     const path = `${process.env.PATH_UPLOAD_AVATAR}${slug_crc}.png`;
@@ -246,6 +302,92 @@ const articlesService = {
                 }
                 // C:\Users\PC\Desktop\backend-learn-test\src\uploadFile\avatars\87802742.png
             },
+            getHotBoxSubCategoryService: asyncHandler(async (slug_crc) => {
+                let res;
+                if (!slug_crc) {
+                    res = await db.new_category.findAll({
+                        where: {
+                            parent_id: null,
+                        },
+                        attributes: ["name", "slug", "slug_crc", "id"],
+                        include: {
+                            model: db.new_articles_hot_category,
+                            include: {
+                                model: db.new_article,
+                            },
+                        },
+                    });
+                } else {
+                    const parent = await db.new_category.findOne({
+                        where: { slug_crc },
+                    });
+                    res = await db.new_category.findAll({
+                        where: {
+                            parent_id: parent.id,
+                        },
+                        attributes: ["name", "slug", "slug_crc", "id"],
+                        include: [
+                            {
+                                model: db.new_articles_hot_category,
+                                attributes: ["article_id", "position"],
+                                order: [["position", "ASC"]],
+                                include: [
+                                    {
+                                        model: db.new_article,
+                                        attributes: [
+                                            "avatar",
+                                            "slug",
+                                            "slug_crc",
+                                            "title",
+                                            "sapo",
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    });
+                }
+                res.map((item) => {
+                    item.new_articles_hot_categories.map((article) => {
+                        if (
+                            fs.existsSync(
+                                `src/uploadFile/avatars/${
+                                    article.new_article.avatar + ".png"
+                                }`
+                            )
+                        ) {
+                            const imageUrl = `http://localhost:4000/${article.new_article.avatar}.png`;
+                            article.new_article.avatar = imageUrl;
+                        } else {
+                        }
+                    });
+                });
+                return res;
+            }),
+            getHotCategoryService: asyncHandler(async (slug_crc) => {
+                const res = await db.new_category.findOne({
+                    where: {
+                        slug_crc,
+                    },
+                    order: [[db.new_articles_hot_category, "position", "ASC"]],
+                    include: [
+                        {
+                            model: db.new_articles_hot_category,
+                            include: [
+                                {
+                                    model: db.new_article,
+                                    where: {
+                                        status: 1,
+                                    },
+                                    require: true,
+                                },
+                            ],
+                        },
+                    ],
+                });
+
+                return res;
+            }),
         },
     },
     admin: {
@@ -330,6 +472,63 @@ const articlesService = {
                     return {
                         message: "Failed to get articles",
                     };
+                }
+            },
+
+            getHotService: async (data) => {
+                try {
+                    let hot_news;
+                    if (data.slug_crc === 1) {
+                        hot_news = await db.new_articles_hot_main.findAll({
+                            order: [["position", "ASC"]],
+                            attributes: ["article_id", "position"],
+                            include: [
+                                {
+                                    model: db.new_article,
+                                    attributes: [
+                                        "avatar",
+                                        "title",
+                                        "sapo",
+                                        "slug",
+                                        "slug_crc",
+                                        "id",
+                                    ],
+                                },
+                            ],
+                        });
+                    } else {
+                        const res = await db.new_category.findOne({
+                            where: {
+                                slug_crc: data.slug_crc,
+                            },
+                            order: [
+                                [
+                                    db.new_articles_hot_category,
+                                    "position",
+                                    "ASC",
+                                ],
+                            ],
+                            include: [
+                                {
+                                    model: db.new_articles_hot_category,
+                                    include: [
+                                        {
+                                            model: db.new_article,
+                                            where: {
+                                                status: 1,
+                                            },
+                                            require: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        });
+                        hot_news = res.new_articles_hot_categories;
+                    }
+
+                    return hot_news;
+                } catch (error) {
+                    return error;
                 }
             },
         },
@@ -593,80 +792,37 @@ const articlesService = {
             },
         },
         create: {
-            createHotMain: async (data) => {
-                const check = await db.new_articles_hot_main.findOne({
-                    where: {
-                        article_id: data.article_id,
-                    },
-                });
-                if (!check) {
-                    // check position invalid
-                    if (data) {
+            createHotService: async (data) => {
+                try {
+                    if (!data.category_id) {
+                        await db.new_articles_hot_main.destroy({
+                            where: {},
+                        });
+                        await db.new_articles_hot_main.bulkCreate(data);
                         return {
-                            message: "Vi tri khong hop le",
+                            message: "Cập nhật vị trí thành công",
+                            status: 0,
                         };
-                    }
-                    // Check tại vị trí đó còn trống không
-                    const checkPosition =
-                        await db.new_articles_hot_main.findOne({
-                            where: {
-                                position: data.position,
-                            },
-                        });
-                    if (checkPosition === null) {
-                        const [max] = await db.new_articles_hot_main.max(
-                            "position"
-                        );
-                        if (max > 8) {
-                            max = null;
-                        }
-                        const response = await db.new_articles_hot_main.create({
-                            article_id: data.article_id,
-                            position: max,
-                            status: 1,
-                        });
-                        return response;
                     } else {
+                        await db.new_articles_hot_category.destroy({
+                            where: { category_id: data.category_id },
+                        });
+                        data.articles.map((item) => {
+                            item.category_id = data.category_id;
+                        });
+                        console.log(data.articles);
+                        await db.new_articles_hot_category.bulkCreate(
+                            data.articles
+                        );
                         return {
-                            message: "Set vị trí nổi bật không thành công",
+                            message: "Cập nhật vị trí thành công",
+                            status: 0,
                         };
                     }
-                } else {
+                } catch (error) {
+                    console.log(error.message);
                     return {
-                        message: "Bài viết đã được xét bài viết vị trí",
-                    };
-                }
-            },
-            createHotCate: async (data) => {
-                const checkPosition =
-                    await db.new_articles_hot_category.findOne({
-                        where: {
-                            category_id: data.category_id,
-                            position: data.position,
-                        },
-                    });
-                const checkArticle = await db.new_articles_hot_category.findOne(
-                    {
-                        where: {
-                            category_id: data.category_id,
-                            article_id: data.article_id,
-                        },
-                    }
-                );
-                if (!checkPosition && !checkArticle) {
-                    await db.new_articles_hot_category.create({
-                        ...data,
-                    });
-                    return {
-                        message: "Tạo thành công",
-                        status: 1,
-                    };
-                } else {
-                    return {
-                        message: "Tạo không thành công",
-                        detail: !checkPosition
-                            ? "Vị trí này đã được set "
-                            : "Bài viết này đã được set",
+                        message: "Cập nhật vị trí không thành công",
                         status: 0,
                     };
                 }

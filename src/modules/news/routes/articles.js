@@ -47,16 +47,20 @@ articlesRoutes.get(
     "/admin/articles",
     articlesController.admin.get_articles.getAllController
 );
-
+articlesRoutes.get(
+    "/admin/hot-news",
+    articlesController.admin.get_articles.getHotController
+);
+articlesRoutes.post(
+    "/admin/hot-news",
+    articlesController.admin.create_articles.createHotController
+);
 articlesRoutes.post(
     "/admin/articles",
     uploadFileServer.single("avatar"),
     articlesController.admin.create_articles.createArticleControllers
 );
-articlesRoutes.post(
-    "/admin/hot-main",
-    articlesController.admin.create_articles.createHotMainController
-);
+
 articlesRoutes.post(
     "/admin/hot-cate",
     articlesController.admin.create_articles.createHotCateController
