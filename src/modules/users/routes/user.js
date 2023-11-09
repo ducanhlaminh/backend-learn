@@ -8,7 +8,7 @@ userRouters.use(checkToken);
 userRouters.get("/get-data", userControllers.user.getUser);
 // private
 
-userRouters.get("/user", userControllers.admin.getAllController);
-userRouters.post("/user", userControllers.admin.createdController);
+userRouters.get("/admin", userControllers.admin.getAllController);
+userRouters.post("/admin", userControllers.admin.createdController);
 
 module.exports = userRouters;
