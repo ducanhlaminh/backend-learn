@@ -166,7 +166,7 @@ const articlesController = {
             publishController: async (req, res) => {
                 if (req.query.id) {
                     var response =
-                        await articlesService.update.publishArticlesSer(
+                        await articlesService.admin.update.publishArticlesSer(
                             req.query.id,
                             req.body.data
                         );
@@ -221,7 +221,7 @@ const articlesController = {
         delete: {
             deleteArticleController: async (req, res) => {
                 const response =
-                    await articlesService.delete.deleteArticleService(
+                    await articlesService.admin.delete.deleteArticleService(
                         req.query.id
                     );
                 return res.status(200).json(response);
