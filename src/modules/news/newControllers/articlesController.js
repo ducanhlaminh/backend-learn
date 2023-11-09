@@ -166,7 +166,7 @@ const articlesController = {
             publishController: async (req, res) => {
                 if (req.query.id) {
                     var response =
-                        await articlesService.admin.update.publishArticlesSer(
+                        await articlesService.update.publishArticlesSer(
                             req.query.id,
                             req.body.data
                         );
@@ -197,10 +197,9 @@ const articlesController = {
             createArticleControllers: async (req, res) => {
                 const file = req.file;
                 const response =
-                    await articlesService.admin.create.createArticleService(
+                    await articlesService.create.createArticleService(
                         file,
-                        req.body,
-                        req.user
+                        req.body
                     );
                 res.status(200).json(response);
             },
@@ -222,7 +221,7 @@ const articlesController = {
         delete: {
             deleteArticleController: async (req, res) => {
                 const response =
-                    await articlesService.admin.delete.deleteArticleService(
+                    await articlesService.delete.deleteArticleService(
                         req.query.id
                     );
                 return res.status(200).json(response);

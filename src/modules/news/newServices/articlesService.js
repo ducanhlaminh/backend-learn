@@ -7,7 +7,6 @@ require("dotenv").config();
 const sharp = require("sharp");
 const axios = require("axios");
 const asyncHandler = require("express-async-handler");
-
 const articlesService = {
     guest: {
         get: {
@@ -470,6 +469,7 @@ const articlesService = {
                         [Op.substring]: query.title,
                     };
                 }
+
                 (queries.limit = +process.env.LIMIT),
                     (queries.offset = (page - 1) * +process.env.LIMIT);
                 if (order) queries.order = JSON.parse(order);

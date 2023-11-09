@@ -42,7 +42,7 @@ articlesRoutes.get(
 // Insert data
 
 // Admin routes
-articlesRoutes.use(checkToken);
+// articlesRoutes.use(checkToken);
 articlesRoutes.get(
     "/admin/articles",
     articlesController.admin.get_articles.getAllController
