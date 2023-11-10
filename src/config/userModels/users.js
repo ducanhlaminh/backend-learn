@@ -10,12 +10,12 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            User.hasMany(db.new_article, {
-                foreignKey: "created_user_id",
-            });
-            db.new_article.belongsTo(User, {
-                foreignKey: "created_user_id",
-            });
+            // User.hasMany(db.new_article, {
+            //     foreignKey: "created_user_id",
+            // });
+            // db.new_article.belongsTo(User, {
+            //     foreignKey: "created_user_id",
+            // });
         }
     }
     User.init(

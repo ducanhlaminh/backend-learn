@@ -22,9 +22,21 @@ const userControllers = {
             const response = await userServices.admin.getAllService(req.query);
             res.status(200).json(response);
         },
+        getDetailController: async (req, res) => {
+            const response = await userServices.admin.getDetailSerive(
+                req.params?.id
+            );
+            res.status(200).json(response);
+        },
         createdController: async (req, res) => {
             const response = await userServices.admin.createUserService(
                 req.body
+            );
+            res.status(200).json(response);
+        },
+        getDeleteController: async (req, res) => {
+            const response = await userServices.admin.getDeleteSerive(
+                req.query.id
             );
             res.status(200).json(response);
         },

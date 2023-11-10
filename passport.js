@@ -12,19 +12,11 @@ passport.use(
         },
         async function (accessToken, refreshToken, profile, cb) {
             try {
-                console.log(profile);
-                const [user, created] = await db.User.findOrCreate({
+                const user = await db.User.findOne({
                     where: {
                         email: profile?.emails[0]?.value,
                     },
-                    defaults: {
-                        email: profile?.emails[0]?.value,
-                        typeLogin: 1,
-                        name: profile.displayName,
-                        password: "admin123",
-                    },
                 });
-
                 return cb(null, { user, profile });
             } catch (error) {
                 console.log(error);

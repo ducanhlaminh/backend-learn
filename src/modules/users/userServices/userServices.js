@@ -3,6 +3,7 @@ const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const client = require("../../../untils/redis");
 const dbUser = require("../../../config/userModels");
+const { Op } = require("sequelize");
 const userServices = {
     user: {
         getUserService: async (id) => {
@@ -10,7 +11,14 @@ const userServices = {
                 where: {
                     id,
                 },
-                attributes: ["name", "email", "avatar", "role_id", "id"],
+                attributes: [
+                    "name",
+                    "email",
+                    "avatar",
+                    "role_id",
+                    "id",
+                    "userName",
+                ],
                 include: {
                     model: db.Role,
                 },
@@ -62,6 +70,9 @@ const userServices = {
                     ...queries,
                     where: {
                         ...query,
+                        [Op.not]: {
+                            name: null,
+                        },
                     },
                     include: {
                         model: dbUser.Role,
@@ -77,6 +88,25 @@ const userServices = {
                 };
             }
         },
+        getDetailSerive: async (id) => {
+            try {
+                const user = await dbUser.User.findOne({
+                    where: {
+                        id,
+                    },
+                });
+                if (user) {
+                    return { user, status: 1 };
+                } else {
+                }
+                return {
+                    message: "Not found user",
+                    status: 0,
+                };
+            } catch (error) {
+                console.log(error);
+            }
+        },
         createUserService: async (data) => {
             try {
                 data.role_id = parseInt(data.role_id, 10);
@@ -86,8 +116,6 @@ const userServices = {
                     },
                     defaults: {
                         email: data?.emails,
-                        typeLogin: 1,
-                        name: data?.name,
                         role_id: data?.role_id,
                     },
                 });
@@ -101,6 +129,18 @@ const userServices = {
                     message: "Người dùng đã được tạo thành công",
                     status: 1,
                 };
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        getDeleteSerive: async (id) => {
+            try {
+                await dbUser.User.destroy({
+                    where: {
+                        id,
+                    },
+                });
+                return { message: "Xóa người dùng thành công", status: 1 };
             } catch (error) {
                 console.log(error);
             }
