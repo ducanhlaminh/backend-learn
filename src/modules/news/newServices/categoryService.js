@@ -141,6 +141,29 @@ const categoryService = {
                 if (!Array.isArray(id)) {
                     id = [id];
                 }
+                const cate = await db.new_articles_category.findAll({
+                    where: {
+                        category_id: {
+                            [Op.in]: id,
+                        },
+                    },
+                });
+                let articles = [];
+                cate.map((item) => {
+                    articles.push(item.article_id);
+                });
+                await db.new_article.update(
+                    { status: 0 },
+                    {
+                        where: {
+                            id: {
+                                [Op.in]: articles,
+                            },
+                        },
+                    }
+                );
+
+                console.log(cate, id);
                 await db.new_category.destroy({
                     where: {
                         id: {
@@ -148,6 +171,7 @@ const categoryService = {
                         },
                     },
                 });
+
                 resolve({
                     message: "Delete category successfully",
                 });

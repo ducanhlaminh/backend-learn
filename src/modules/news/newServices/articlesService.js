@@ -118,13 +118,11 @@ const articlesService = {
                 }
             }),
             getByTitleService: async ({ title, category_id, page }) => {
-                console.log(title, category_id, page);
                 try {
                     let queries = {};
                     (queries.limit = +process.env.LIMIT),
                         (queries.offset = (page - 1) * +process.env.LIMIT);
                     if (category_id) {
-                        console.log(title);
                         const articles = await db.new_articles_category.findAll(
                             {
                                 where: {
@@ -559,9 +557,7 @@ const articlesService = {
                                 },
                             ],
                         });
-                        console.log(hot_news);
                     } else {
-                        console.log(2);
                         const res = await db.new_category.findOne({
                             where: {
                                 slug_crc: data.slug_crc,
@@ -579,9 +575,6 @@ const articlesService = {
                                     include: [
                                         {
                                             model: db.new_article,
-                                            where: {
-                                                status: 1,
-                                            },
                                             require: true,
                                         },
                                     ],
@@ -672,25 +665,14 @@ const articlesService = {
                     const now = new Date();
                     let infor = null;
                     if (data.status === 0 || !data.status) {
-                        await db.new_articles_hot_category.destroy({
-                            where: {
-                                article_id,
-                            },
-                        });
-                        await db.new_articles_hot_main.destroy({
-                            where: {
-                                article_id,
-                            },
-                        });
                         infor = {
                             ...data,
-                            status: 0,
+                            publishAt: now,
                         };
                     } else {
                         infor = {
                             ...data,
                             publishAt: now,
-                            status: 1,
                         };
                     }
                     if (file) {
@@ -724,16 +706,7 @@ const articlesService = {
                                 article_id,
                             },
                         });
-                        await db.new_articles_hot_main.destroy({
-                            where: {
-                                article_id,
-                            },
-                        });
-                        await db.new_articles_category.destroy({
-                            where: {
-                                article_id,
-                            },
-                        });
+
                         if (!hotMain && !hotCate) {
                             await db.new_articles_category.destroy({
                                 where: {
@@ -799,31 +772,6 @@ const articlesService = {
                         },
                         attributes: ["avatar"],
                     });
-                    const hotCate = await db.new_articles_hot_category.findOne({
-                        where: {
-                            article_id: id,
-                        },
-                    });
-                    const hotMain = await db.new_articles_hot_main.findAll({
-                        where: {
-                            article_id: id,
-                        },
-                    });
-
-                    if (hotMain) {
-                        await db.new_articles_hot_main.destroy({
-                            where: {
-                                article_id: id,
-                            },
-                        });
-                    }
-                    if (hotCate) {
-                        await db.new_articles_hot_category.destroy({
-                            where: {
-                                article_id: id,
-                            },
-                        });
-                    }
                     if (data.category_id) {
                         await db.new_articles_category.destroy({
                             where: {
