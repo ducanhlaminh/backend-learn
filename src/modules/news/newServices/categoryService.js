@@ -135,52 +135,58 @@ const categoryService = {
             return error;
         }
     },
-    deleteService: (id) => {
-        return new Promise(async (resolve, reject) => {
-            try {
-                if (!Array.isArray(id)) {
-                    id = [id];
-                }
-                const cate = await db.new_articles_category.findAll({
-                    where: {
-                        category_id: {
-                            [Op.in]: id,
-                        },
+    deleteService: async (id) => {
+        try {
+            if (!Array.isArray(id)) {
+                id = [id];
+            }
+            const cate = await db.new_articles_category.findAll({
+                where: {
+                    category_id: {
+                        [Op.in]: id,
                     },
-                });
-                let articles = [];
-                cate.map((item) => {
-                    articles.push(item.article_id);
-                });
-                await db.new_article.update(
-                    { status: 0 },
-                    {
-                        where: {
-                            id: {
-                                [Op.in]: articles,
-                            },
-                        },
-                    }
-                );
-
-                console.log(cate, id);
-                await db.new_category.destroy({
+                },
+            });
+            let articles = [];
+            cate.map((item) => {
+                articles.push(item.article_id);
+            });
+            await db.new_article.update(
+                { status: 0 },
+                {
                     where: {
                         id: {
-                            [Op.in]: id,
+                            [Op.in]: articles,
                         },
                     },
-                });
+                }
+            );
 
-                resolve({
-                    message: "Delete category successfully",
-                });
-            } catch (error) {
-                reject({
-                    message: "Delete category failed",
-                });
-            }
-        });
+            console.log(cate);
+
+            await db.new_articles_category.destroy({
+                where: {
+                    category_id: {
+                        [Op.in]: id,
+                    },
+                },
+            });
+            await db.new_category.destroy({
+                where: {
+                    id: {
+                        [Op.in]: id,
+                    },
+                },
+            });
+            return {
+                message: "Delete category successfully",
+            };
+        } catch (error) {
+            console.log(error);
+            return {
+                message: "Delete category failed",
+            };
+        }
     },
     updateService: async (data, id) => {
         if (!Array.isArray(id)) {

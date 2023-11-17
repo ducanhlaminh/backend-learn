@@ -7,17 +7,43 @@ require("dotenv").config();
 const sharp = require("sharp");
 const axios = require("axios");
 const asyncHandler = require("express-async-handler");
+const { articels } = require("../../../untils/dataDemo");
 const articlesService = {
     guest: {
         get: {
             getHotService: async (req, res) => {
                 try {
+                    const res = await db.new_category.findAll({
+                        where: {
+                            status: 0,
+                        },
+                        include: [
+                            {
+                                model: db.new_articles_category,
+                                as: "articles",
+                                attributes: ["article_id"],
+                            },
+                        ],
+                    });
+                    let articles = [];
+                    res.map((cate) => {
+                        cate?.articles.map((item) => {
+                            articles.push(item.article_id);
+                        });
+                    });
+
                     const hot_main = await db.new_articles_hot_main.findAll({
                         order: [["position", "ASC"]],
                         attributes: ["article_id", "position"],
+
                         include: [
                             {
                                 model: db.new_article,
+                                where: {
+                                    status: 1,
+                                    id: { [Op.notIn]: articles },
+                                },
+                                require: true,
                                 attributes: [
                                     "avatar",
                                     "title",
@@ -29,41 +55,44 @@ const articlesService = {
                             },
                         ],
                     });
-
-                    // hot_main.map((item) => {
-                    //         if (
-                    //                 fs.existsSync(
-                    //                         `src/uploadFile/avatars/${
-                    //                                 item.new_article
-                    //                                         .avatar +
-                    //                                 ".png"
-                    //                         }`
-                    //                 )
-                    //         ) {
-                    //                 // Tạo URL từ đường dẫn tới hình ảnh
-                    //                 const imageUrl = `http://localhost:4000/${item.new_article.avatar}.png`;
-                    //                 item.new_article.avatar =
-                    //                         imageUrl;
-                    //         } else {
-                    //         }
-                    // });
                     return {
                         hot_main,
+                        articles,
                     };
                 } catch (error) {
                     return error;
                 }
             },
             getDetailService: asyncHandler(async (slug, slug_crc) => {
-                const checkslugsrc = await db.new_article.findOne({
+                const res = await db.new_category.findAll({
+                    where: {
+                        status: 0,
+                    },
+                    include: [
+                        {
+                            model: db.new_articles_category,
+                            as: "articles",
+                            attributes: ["article_id"],
+                        },
+                    ],
+                });
+                let articles = [];
+                res.map((cate) => {
+                    cate?.articles.map((item) => {
+                        articles.push(item.article_id);
+                    });
+                });
+
+                const check = await db.new_article.findOne({
                     where: [
                         {
                             slug_crc,
+                            id: { [Op.notIn]: articles },
                         },
                     ],
                 });
 
-                if (checkslugsrc !== null) {
+                if (check !== null) {
                     const article = await db.new_article.findOne({
                         where: [
                             {
@@ -119,6 +148,25 @@ const articlesService = {
             }),
             getByTitleService: async ({ title, category_id, page }) => {
                 try {
+                    const res = await db.new_category.findAll({
+                        where: {
+                            status: 0,
+                        },
+                        include: [
+                            {
+                                model: db.new_articles_category,
+                                as: "articles",
+                                attributes: ["article_id"],
+                            },
+                        ],
+                    });
+                    let articlesBlock = [];
+                    res.map((cate) => {
+                        cate?.articles.map((item) => {
+                            articlesBlock.push(item.article_id);
+                        });
+                    });
+                    console.log(articlesBlock);
                     let queries = {};
                     (queries.limit = +process.env.LIMIT),
                         (queries.offset = (page - 1) * +process.env.LIMIT);
@@ -135,6 +183,7 @@ const articlesService = {
                                         title: {
                                             [Op.like]: `%${title}%`,
                                         },
+                                        id: { [Op.notIn]: articlesBlock },
                                         status: 1,
                                     },
                                 },
@@ -148,26 +197,12 @@ const articlesService = {
                                 title: {
                                     [Op.like]: `%${title}%`,
                                 },
+                                id: { [Op.notIn]: articlesBlock },
                                 status: 1,
                             },
                             ...queries,
                             order: [["publishAt", "DESC"]],
                         });
-                        // articles.rows.map((item) => {
-                        //         if (
-                        //                 fs.existsSync(
-                        //                         `src/uploadFile/avatars/${
-                        //                                 item.avatar +
-                        //                                 ".png"
-                        //                         }`
-                        //                 )
-                        //         ) {
-                        //                 // Tạo URL từ đường dẫn tới hình ảnh
-                        //                 const imageUrl = `http://localhost:4000/${item.avatar}.png`;
-                        //                 item.avatar = imageUrl;
-                        //         } else {
-                        //         }
-                        // });
                         return {
                             data: articles,
                             status: 0,
@@ -180,6 +215,24 @@ const articlesService = {
             getByMostView: async (slug_crc) => {
                 var list_article_most_views;
                 try {
+                    const res = await db.new_category.findAll({
+                        where: {
+                            status: 0,
+                        },
+                        include: [
+                            {
+                                model: db.new_articles_category,
+                                as: "articles",
+                                attributes: ["article_id"],
+                            },
+                        ],
+                    });
+                    let articlesBlock = [];
+                    res.map((cate) => {
+                        cate?.articles.map((item) => {
+                            articlesBlock.push(item.article_id);
+                        });
+                    });
                     if (slug_crc) {
                         const idCate = await db.new_category.findOne({
                             where: [
@@ -195,6 +248,7 @@ const articlesService = {
                                 "name",
                             ],
                         });
+
                         if (idCate) {
                             list_article_most_views =
                                 await db.new_articles_category.findAll({
@@ -216,6 +270,9 @@ const articlesService = {
                                             require: true,
                                             where: {
                                                 status: 1,
+                                                id: {
+                                                    [Op.notIn]: articlesBlock,
+                                                },
                                             },
                                         },
                                         {
@@ -251,6 +308,7 @@ const articlesService = {
                         list_article_most_views = await db.new_article.findAll({
                             where: [
                                 {
+                                    id: { [Op.notIn]: articlesBlock },
                                     status: 1,
                                 },
                             ],
@@ -296,12 +354,32 @@ const articlesService = {
             getByPublishAt: asyncHandler(async ({ page = 1, slug_crc }) => {
                 let list_article_new;
                 let queries = {};
+
                 (queries.limit = +process.env.LIMIT),
                     (queries.offset = (page - 1) * +process.env.LIMIT);
                 if (!slug_crc) {
+                    const res = await db.new_category.findAll({
+                        where: {
+                            status: 0,
+                        },
+                        include: [
+                            {
+                                model: db.new_articles_category,
+                                as: "articles",
+                                attributes: ["article_id"],
+                            },
+                        ],
+                    });
+                    let articlesBlock = [];
+                    res.map((cate) => {
+                        cate?.articles.map((item) => {
+                            articlesBlock.push(item.article_id);
+                        });
+                    });
+
                     list_article_new = await db.new_article.findAndCountAll({
                         ...queries,
-                        where: { status: 1 },
+                        where: { status: 1, id: { [Op.notIn]: articlesBlock } },
                         distinct: true,
                         include: [
                             {
@@ -317,6 +395,40 @@ const articlesService = {
                         order: [["publishAt", "DESC"]],
                     });
                 } else {
+                    const res = await db.new_category.findAll({
+                        where: {
+                            status: 0,
+                        },
+                        include: [
+                            {
+                                model: db.new_articles_category,
+                                as: "articles",
+                                attributes: ["article_id"],
+                            },
+                        ],
+                    });
+                    const res1 = await db.new_category.findAll({
+                        where: {
+                            slug_crc,
+                        },
+                        include: [
+                            {
+                                model: db.new_articles_hot_category,
+                                attributes: ["article_id"],
+                            },
+                        ],
+                    });
+                    let articlesBlock = [];
+                    res.map((cate) => {
+                        cate?.articles.map((item) => {
+                            articlesBlock.push(item.article_id);
+                        });
+                    });
+                    res1.map((cate) => {
+                        cate?.new_articles_hot_categories.map((item) => {
+                            articlesBlock.push(item.article_id);
+                        });
+                    });
                     const idCate = await db.new_category.findOne({
                         where: [{ slug_crc }],
                         attributes: [
@@ -341,6 +453,7 @@ const articlesService = {
                                         require: true,
                                         where: {
                                             status: 1,
+                                            id: { [Op.notIn]: articlesBlock },
                                         },
                                     },
                                 ],
@@ -426,28 +539,58 @@ const articlesService = {
                 return res;
             }),
             getHotCategoryService: asyncHandler(async (slug_crc) => {
-                const res = await db.new_category.findOne({
-                    where: {
-                        slug_crc,
-                    },
-                    order: [[db.new_articles_hot_category, "position", "ASC"]],
-                    include: [
-                        {
-                            model: db.new_articles_hot_category,
-                            include: [
-                                {
-                                    model: db.new_article,
-                                    where: {
-                                        status: 1,
-                                    },
-                                    require: true,
-                                },
-                            ],
-                        },
-                    ],
+                const check = await db.new_category.findOne({
+                    where: { slug_crc, status: 1 },
                 });
+                if (check) {
+                    const res = await db.new_category.findAll({
+                        where: {
+                            status: 0,
+                        },
+                        include: [
+                            {
+                                model: db.new_articles_category,
+                                as: "articles",
+                                attributes: ["article_id"],
+                            },
+                        ],
+                    });
+                    let articlesBlock = [];
+                    res.map((cate) => {
+                        cate?.articles.map((item) => {
+                            articlesBlock.push(item.article_id);
+                        });
+                    });
+                    const articles = await db.new_category.findOne({
+                        where: {
+                            slug_crc,
+                        },
+                        order: [
+                            [db.new_articles_hot_category, "position", "ASC"],
+                        ],
+                        include: [
+                            {
+                                model: db.new_articles_hot_category,
+                                include: [
+                                    {
+                                        model: db.new_article,
+                                        where: {
+                                            status: 1,
+                                            id: { [Op.notIn]: articlesBlock },
+                                        },
+                                        require: true,
+                                    },
+                                ],
+                            },
+                        ],
+                    });
 
-                return res;
+                    return articles;
+                } else {
+                    return {
+                        status: 0,
+                    };
+                }
             }),
         },
     },
