@@ -197,9 +197,10 @@ const articlesController = {
             createArticleControllers: async (req, res) => {
                 const file = req.file;
                 const response =
-                    await articlesService.create.createArticleService(
+                    await articlesService.admin.create.createArticleService(
                         file,
-                        req.body
+                        req.body,
+                        req.user
                     );
                 res.status(200).json(response);
             },

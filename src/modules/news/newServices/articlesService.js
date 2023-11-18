@@ -986,7 +986,7 @@ const articlesService = {
                 }
             },
             createArticleService: async (file, data, user) => {
-                console.log(data);
+                console.log(user);
                 const slug_crc = crc32(data.slug);
                 const ext = file.originalname.split(".").pop();
                 const newFilePath = `src/uploadFile/avatars/${
