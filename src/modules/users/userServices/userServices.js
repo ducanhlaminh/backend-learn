@@ -1,7 +1,7 @@
 const db = require("../../../config/userModels");
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
-const client = require("../../../untils/redis");
+const redis = require("../../../untils/redis");
 const dbUser = require("../../../config/userModels");
 const { Op } = require("sequelize");
 const userServices = {
@@ -44,15 +44,20 @@ const userServices = {
             }
         },
         updateService: async (id, data, token) => {
-            await db.User.update(data, {
+            const respon = await db.User.update(data, {
                 where: {
                     id,
                 },
             });
-            await client.set(token, "expired");
-            const res = await client.get(token);
+            jwt.verify(token, process.env.SECRET_KEY, async (err, user) => {
+                if (user?.userId === id) {
+                    await redis.set(`blacklist_token_${token}`, "1");
+                } else {
+                    await redis.set(`blacklist_id_${id}`, "1");
+                }
+            });
 
-            return res;
+            return respon;
         },
     },
     admin: {
@@ -70,9 +75,6 @@ const userServices = {
                     ...queries,
                     where: {
                         ...query,
-                        [Op.not]: {
-                            name: null,
-                        },
                     },
                     include: {
                         model: dbUser.Role,
@@ -135,7 +137,15 @@ const userServices = {
         },
         getDeleteSerive: async (id) => {
             try {
-                await dbUser.User.destroy({
+                // await db.new_article.update(
+                //     { status: 0, created_user_id: null },
+                //     {
+                //         where: {
+                //             created_user_id: id,
+                //         },
+                //     }
+                // );
+                await db.User.destroy({
                     where: {
                         id,
                     },
@@ -144,6 +154,15 @@ const userServices = {
             } catch (error) {
                 console.log(error);
             }
+        },
+        updateService: async (id, data) => {
+            const respon = await db.User.update(data, {
+                where: {
+                    id,
+                },
+            });
+            await redis.set(`blacklist_id_${id}`, "1");
+            return respon;
         },
     },
 };

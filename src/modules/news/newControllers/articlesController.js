@@ -168,7 +168,8 @@ const articlesController = {
                     var response =
                         await articlesService.admin.update.publishArticlesSer(
                             req.query.id,
-                            req.body.data
+                            req.body.data,
+                            req.user.userId
                         );
                     res.status(200).json(response);
                 }

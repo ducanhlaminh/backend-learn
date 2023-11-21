@@ -605,17 +605,19 @@ const articlesService = {
                 ...query
             }) => {
                 let queries = {};
-                if (query.title) {
+                if (query.title && query.title !== "") {
                     query.title = {
                         [Op.substring]: query.title,
                     };
+                } else {
+                    delete query.title;
                 }
 
                 (queries.limit = +process.env.LIMIT),
                     (queries.offset = (page - 1) * +process.env.LIMIT);
                 if (order) queries.order = JSON.parse(order);
                 let whereCondition = { ...query };
-
+                console.log(whereCondition);
                 try {
                     let articles;
                     if (category_id) {
@@ -902,10 +904,26 @@ const articlesService = {
                     console.log(error);
                 }
             },
-            publishArticlesSer: async (id, data) => {
+            publishArticlesSer: async (id, data, userId) => {
                 try {
                     if (!Array.isArray(id)) {
                         id = [id]; // Chuyển đổi thành mảng nếu là số
+                    }
+                    const article = await db.new_article.findOne({
+                        where: { id },
+                    });
+                    if (!article.created_user_id) {
+                        await db.new_article.update(
+                            { created_user_id: userId },
+                            {
+                                where: {
+                                    id: {
+                                        [Op.in]: id,
+                                    },
+                                },
+                                attributes: ["avatar"],
+                            }
+                        );
                     }
                     await db.new_article.update(data, {
                         where: {

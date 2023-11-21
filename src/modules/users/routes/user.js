@@ -3,8 +3,8 @@ const userRouters = express.Router();
 const userControllers = require("../userControllers/userControllers");
 
 const { checkToken } = require("../../../middlewares/checkToken");
-userRouters.put("/:id", userControllers.admin.updateService);
 userRouters.use(checkToken);
+userRouters.put("/:id", userControllers.admin.updateService);
 userRouters.get("/get-data", userControllers.user.getUser);
 // private
 

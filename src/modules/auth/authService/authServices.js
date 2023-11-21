@@ -52,7 +52,7 @@ const authServices = {
                         text: "Hello world?", // plain text body
                         html: "<div><b>Tài khoản này đã được đăng ký thành công</b></div><span>Vui lòng truy cập vào link sau đây để đăng nhập vào hệ thống </span>", // html body
                     });
-
+                    console.log(info);
                     return {
                         message: " Đăng ký thành công",
                         status: 1,
