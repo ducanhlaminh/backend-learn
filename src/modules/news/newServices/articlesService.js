@@ -602,6 +602,7 @@ const articlesService = {
                 order,
                 user_id,
                 role_id,
+                limit,
                 ...query
             }) => {
                 let queries = {};
@@ -613,7 +614,7 @@ const articlesService = {
                     delete query.title;
                 }
 
-                (queries.limit = +process.env.LIMIT),
+                (queries.limit = +limit),
                     (queries.offset = (page - 1) * +process.env.LIMIT);
                 if (order) queries.order = JSON.parse(order);
                 let whereCondition = { ...query };
