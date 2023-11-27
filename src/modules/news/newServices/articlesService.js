@@ -674,8 +674,14 @@ const articlesService = {
                     delete query.title;
                 }
 
-                (queries.limit = +limit),
-                    (queries.offset = (page - 1) * +process.env.LIMIT);
+                if (limit) {
+                    queries.limit = +limit;
+                    queries.offset = (page - 1) * +limit;
+                } else {
+                    queries.limit = +process.env.LIMIT;
+                    queries.offset = (page - 1) * +process.env.LIMIT;
+                }
+
                 if (order) queries.order = JSON.parse(order);
                 let whereCondition = { ...query };
                 try {
