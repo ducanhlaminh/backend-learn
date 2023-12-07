@@ -734,6 +734,11 @@ const articlesService = {
 
                         if (order) queries.order = JSON.parse(order);
                         let whereCondition = { ...query };
+                        if (query.publishAt) {
+                              whereCondition.publishAt = {
+                                    [Op.between]: query.publishAt,
+                              };
+                        }
                         try {
                               let articles;
                               if (category_id) {
