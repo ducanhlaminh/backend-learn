@@ -7,15 +7,12 @@ const categoryService = {
         const query = `SELECT CRC32('${data.slug}') AS crcValue;`;
         const result = await db.sequelize.query(query);
 
-        const response = await db.new_category.create(
-            {
-                ...data,
-                slug_crc: result[0][0].crcValue,
-                status: 0,
-                position: null,
-            },
-            t
-        );
+        const response = await db.new_category.create({
+            ...data,
+            slug_crc: result[0][0].crcValue,
+            status: 0,
+            position: null,
+        });
         return { message: "Tạo chuyên mục mới thành công" };
     },
     getSubCateService: (slug_crc) => {
