@@ -11,6 +11,11 @@
     "type": "git",
     "url": "git+https://github.com/ducanhlaminh/backend-test.git"
   },
+  "nodemonConfig": {
+    "ignore": [
+      "*.json"
+    ]
+  },
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -32,6 +37,7 @@
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.3.3",
     "node-fetch": "^2.6.11",
+    "node-rsa": "^1.1.1",
     "nodemailer": "^6.9.6",
     "nodemon": "^2.0.22",
     "passport": "^0.6.0",

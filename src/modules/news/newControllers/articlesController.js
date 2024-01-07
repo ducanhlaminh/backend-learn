@@ -1,8 +1,56 @@
 const articlesService = require("../newServices/articlesService");
 const asyncHandler = require("express-async-handler");
 const { cates, articels } = require("../../../untils/dataDemo");
+const forge = require("node-forge");
+const { crc32 } = require("crc");
 const articlesController = {
+    decryptRequest: (e) => {
+        const { k: n, d: t } = e;
+        const i = forge.pki.privateKeyFromPem(process.env.PRK);
+        const r = forge.util.decodeUtf8(i.decrypt(forge.util.decode64(n)));
+        const s = Buffer.from(t, "base64");
+        const o = s.slice(0, 16);
+        const u = s.slice(16);
+        const c = forge.cipher.createDecipher(
+            "AES-CTR",
+            Buffer.from(r, "base64").toString("binary")
+        );
+        return (
+            c.start({
+                iv: o.toString("binary"),
+            }),
+            c.update(forge.util.createBuffer(u)),
+            c.finish(),
+            forge.util.decodeUtf8(c.output.data)
+        );
+    },
     guest: {
+        testView: async (req, res) => {
+            const ipAddress = req.connection.remoteAddress;
+            const { k: n, d: t } = req.body;
+            const i = forge.pki.privateKeyFromPem(process.env.PRK);
+            const r = i.decrypt(forge.util.decode64(n));
+            const s = Buffer.from(t, "base64");
+            const o = s.slice(0, 16);
+            const u = s.slice(16);
+            const c = forge.cipher.createDecipher(
+                "AES-CTR",
+                Buffer.from(r, "base64").toString("binary")
+            );
+            const result =
+                (c.start({
+                    iv: o.toString("binary"),
+                }),
+                c.update(forge.util.createBuffer(u)),
+                c.finish(),
+                forge.util.decodeUtf8(c.output.data));
+            const response = await articlesService.guest.post.saveDataIntoFile(
+                JSON.parse(result),
+                crc32(t),
+                ipAddress
+            );
+            res.status(200).json(response);
+        },
         get_articles: {
             getHotCategoryController: asyncHandler(async (req, res) => {
                 let hotArticlesCate =
@@ -242,6 +290,15 @@ const articlesController = {
                         req.query
                     );
                 return res.status(200).json(response);
+            },
+        },
+        check: {
+            checkTitleController: async (req, res) => {
+                const response =
+                    await articlesService.admin.check.checkTitleService(
+                        req.query
+                    );
+                res.status(200).json(response);
             },
         },
         insert: async (req, res) => {

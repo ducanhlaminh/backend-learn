@@ -5,8 +5,8 @@ const crc32 = require("crc/crc32");
 const fs = require("fs");
 require("dotenv").config();
 const sharp = require("sharp");
-const axios = require("axios");
 const asyncHandler = require("express-async-handler");
+
 const articlesService = {
     guest: {
         get: {
@@ -487,7 +487,7 @@ const articlesService = {
                         .toBuffer();
                     return avatarBuffer;
                 } catch (error) {
-                    console.log(error);
+                    // console.log(error);
                 }
                 // C:\Users\PC\Desktop\backend-learn-test\src\uploadFile\avatars\87802742.png
             },
@@ -609,6 +609,65 @@ const articlesService = {
                     };
                 }
             }),
+        },
+        post: {
+            saveDataIntoFile: async (data, id, ipAddress) => {
+                const date = new Date().toISOString().slice(0, 10);
+                const filePath = `src/daily-report/${date}.json`;
+                fs.access(filePath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                        // Nếu có lỗi (tập tin không tồn tại), tạo mới tập tin với mảng rỗng
+                        const newData = [{ ...data, id, ipAddress }];
+                        fs.writeFile(
+                            filePath,
+                            JSON.stringify(newData, null, 2),
+                            "utf8",
+                            (err) => {
+                                if (err) {
+                                    console.error(
+                                        "Có lỗi khi tạo mới tập tin:",
+                                        err
+                                    );
+                                } else {
+                                    console.log(
+                                        `Tập tin mới đã được tạo cho ngày.`
+                                    );
+                                }
+                            }
+                        );
+                    } else {
+                        // Nếu không có lỗi (tập tin tồn tại), tiếp tục xử lý yêu cầu
+                        // Tiếp tục xử lý yêu cầu...
+                        fs.readFile(filePath, "utf8", (err, content) => {
+                            if (err) {
+                                console.error("Có lỗi khi đọc tập tin:", err);
+                            } else {
+                                // Parse nội dung từ JSON thành đối tượng JavaScript
+                                const array = JSON.parse(content);
+                                array.push({ ...data, id });
+                                fs.writeFile(
+                                    filePath,
+                                    JSON.stringify(array, null, 2),
+                                    "utf8",
+                                    (err) => {
+                                        if (err) {
+                                            console.error(
+                                                "Có lỗi khi tạo mới tập tin:",
+                                                err
+                                            );
+                                        } else {
+                                            console.log(
+                                                `Tập tin mới đã được tạo cho ngày.`
+                                            );
+                                        }
+                                    }
+                                );
+                            }
+                        });
+                    }
+                });
+                return data;
+            },
         },
     },
     admin: {
@@ -1555,6 +1614,25 @@ const articlesService = {
                     };
                 } catch (error) {
                     console.log(error);
+                }
+            },
+        },
+        check: {
+            checkTitleService: async ({ title }) => {
+                try {
+                    const result = await db.new_article.findOne({
+                        where: { title },
+                    });
+                    if (result) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        message: "Failed to get articles",
+                    };
                 }
             },
         },

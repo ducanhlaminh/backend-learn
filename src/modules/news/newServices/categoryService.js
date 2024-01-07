@@ -36,7 +36,6 @@ const categoryService = {
 
     getAll: () => {
         return new Promise(async (resolve, reject) => {
-            console.log(1);
             try {
                 const response = await db.new_category.findAndCountAll({
                     where: {
