@@ -2,7 +2,10 @@ const express = require("express");
 const articlesRoutes = express.Router();
 const articlesController = require("../newControllers/articlesController");
 const uploadFileServer = require("../../../uploadFile/multer");
-const { checkToken } = require("../../../middlewares/checkToken");
+const {
+      checkToken,
+      decryptRequest,
+} = require("../../../middlewares/checkToken");
 // Publish routes
 
 articlesRoutes.get(
@@ -43,7 +46,7 @@ articlesRoutes.post("/save-data", articlesController.guest.testView);
 // Insert data
 
 // Admin routes
-articlesRoutes.use(checkToken);
+articlesRoutes.use(decryptRequest);
 articlesRoutes.get(
     "/admin/articles",
     articlesController.admin.get_articles.getAllController

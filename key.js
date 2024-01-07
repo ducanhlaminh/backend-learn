@@ -9,4 +9,3 @@ console.log("Private Key:");
 console.log(privateKey);
 console.log("-----------------------------------------------------");
 console.log("Public Key:");
-console.log(forge.util.encode64(publicKey));
