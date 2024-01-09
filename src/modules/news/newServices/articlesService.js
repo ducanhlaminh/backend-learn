@@ -611,15 +611,24 @@ const articlesService = {
             }),
         },
         post: {
-            saveDataIntoFile: async (data, id, ipAddress) => {
-                const date = new Date().toISOString().slice(0, 10);
-                const filePath = `src/daily-report/${date}.json`;
-                fs.access(filePath, fs.constants.F_OK, (err) => {
+            saveDataIntoFile: async (data, ipAddress) => {
+                const currentDate = new Date();
+                const year = currentDate.getFullYear();
+                const month = (currentDate.getMonth() + 1)
+                    .toString()
+                    .padStart(2, "0"); // Thêm 0 phía trước nếu tháng < 10
+                const day = currentDate.getDate().toString().padStart(2, "0"); // Thêm 0 phía trước nếu ngày < 10
+                const hours = currentDate
+                    .getHours()
+                    .toString()
+                    .padStart(2, "0");
+                const fileName = `src/daily-report/${year}-${month}-${day}_${hours}.json`;
+                fs.access(fileName, fs.constants.F_OK, (err) => {
                     if (err) {
                         // Nếu có lỗi (tập tin không tồn tại), tạo mới tập tin với mảng rỗng
-                        const newData = [{ ...data, id, ipAddress }];
+                        const newData = [{ ...data, ipAddress }];
                         fs.writeFile(
-                            filePath,
+                            fileName,
                             JSON.stringify(newData, null, 2),
                             "utf8",
                             (err) => {
@@ -638,7 +647,7 @@ const articlesService = {
                     } else {
                         // Nếu không có lỗi (tập tin tồn tại), tiếp tục xử lý yêu cầu
                         // Tiếp tục xử lý yêu cầu...
-                        fs.readFile(filePath, "utf8", (err, content) => {
+                        fs.readFile(fileName, "utf8", (err, content) => {
                             if (err) {
                                 console.error("Có lỗi khi đọc tập tin:", err);
                             } else {
@@ -646,7 +655,7 @@ const articlesService = {
                                 const array = JSON.parse(content);
                                 array.push({ ...data, id });
                                 fs.writeFile(
-                                    filePath,
+                                    fileName,
                                     JSON.stringify(array, null, 2),
                                     "utf8",
                                     (err) => {

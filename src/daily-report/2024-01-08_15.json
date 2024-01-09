@@ -1,0 +1,81 @@
+[
+  {
+    "movemouse": [
+      "691230",
+      "692227",
+      "692225",
+      "693223",
+      "695222"
+    ],
+    "checkpoints": [
+      {
+        "sector": "top",
+        "time": 8000
+      },
+      {
+        "sector": "center",
+        "time": 8000
+      },
+      {
+        "sector": "footer",
+        "time": 7000
+      }
+    ],
+    "slug": "nha-phan-phoi-uy-quyen-apple-boc-hoi-gan-mot-nua-loi-nhuan",
+    "slug_crc": "2022149332",
+    "id": 1521928961,
+    "ipAddress": "::1"
+  },
+  {
+    "slug": "nha-phan-phoi-uy-quyen-apple-boc-hoi-gan-mot-nua-loi-nhuan",
+    "slug_crc": "2022149332",
+    "movemouse": [
+      "383218",
+      "385217",
+      "386217",
+      "388216",
+      "390216"
+    ],
+    "checkpoints": [
+      {
+        "sector": "top",
+        "time": 7000
+      },
+      {
+        "sector": "center",
+        "time": 8000
+      },
+      {
+        "sector": "footer",
+        "time": 5000
+      }
+    ],
+    "id": 2437167937
+  },
+  {
+    "slug": "thu-mon-mac-sai-lam-ngo-ngan-khien-doi-nha-bi-loai-o-u20-world-cup-post1435803",
+    "slug_crc": "3448865085",
+    "movemouse": [
+      "917331",
+      "917330",
+      "916330",
+      "915330",
+      "913330"
+    ],
+    "checkpoints": [
+      {
+        "sector": "top",
+        "time": 15000
+      },
+      {
+        "sector": "center",
+        "time": 6000
+      },
+      {
+        "sector": "footer",
+        "time": 0
+      }
+    ],
+    "id": 68888473
+  }
+]

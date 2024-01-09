@@ -27,26 +27,9 @@ const articlesController = {
     guest: {
         testView: async (req, res) => {
             const ipAddress = req.connection.remoteAddress;
-            const { k: n, d: t } = req.body;
-            const i = forge.pki.privateKeyFromPem(process.env.PRK);
-            const r = i.decrypt(forge.util.decode64(n));
-            const s = Buffer.from(t, "base64");
-            const o = s.slice(0, 16);
-            const u = s.slice(16);
-            const c = forge.cipher.createDecipher(
-                "AES-CTR",
-                Buffer.from(r, "base64").toString("binary")
-            );
-            const result =
-                (c.start({
-                    iv: o.toString("binary"),
-                }),
-                c.update(forge.util.createBuffer(u)),
-                c.finish(),
-                forge.util.decodeUtf8(c.output.data));
+
             const response = await articlesService.guest.post.saveDataIntoFile(
-                JSON.parse(result),
-                crc32(t),
+                req.body,
                 ipAddress
             );
             res.status(200).json(response);

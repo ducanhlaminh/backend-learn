@@ -1,0 +1,28 @@
+[
+  {
+    "slug": "tai-sao-nuoc-bien-chet-toan-muoi-nhung-lai-co-vi-dang",
+    "slug_crc": "2605068545",
+    "movemouse": [
+      "788203",
+      "792206",
+      "795207",
+      "796210",
+      "801215"
+    ],
+    "checkpoints": [
+      {
+        "sector": "top",
+        "time": 3000
+      },
+      {
+        "sector": "center",
+        "time": 0
+      },
+      {
+        "sector": "footer",
+        "time": 0
+      }
+    ],
+    "ipAddress": "::1"
+  }
+]
